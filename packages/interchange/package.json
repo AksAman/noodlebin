@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "The nodevault 1 clipboard payload: types, envelope parser, validator, canonical serializer.",
+  "description": "The nodevault.tree clipboard payload: types, parser, validator, canonical serializer.",
   "exports": {
     ".": "./src/index.ts"
   },

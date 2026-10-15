@@ -1,0 +1,23 @@
+version = 1
+revision = 3
+requires-python = ">=3.11"
+
+[[package]]
+name = "blender-nodevault"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "fake-bpy-module-5-1" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "fake-bpy-module-5-1", specifier = ">=20260730" }]
+
+[[package]]
+name = "fake-bpy-module-5-1"
+version = "20260730"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/9d/f6/c3c203b9382dec8cfa2dddf742d581ed969d7ce113556e8c8db8ce842d99/fake_bpy_module_5_1-20260730.tar.gz", hash = "sha256:a096129716f9fd82d80c86cc42215c9f2872b6b3d3f216f6a5530608cc3b670d", size = 906183, upload-time = "2026-07-30T04:10:25.908Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ef/40/271294000c56f81676341d488db124e6ab254104bad29a836f5697b73442/fake_bpy_module_5_1-20260730-py3-none-any.whl", hash = "sha256:fdbc8c6fcbe75ce49455012fc45c1e4328a206320224c75c1a653be94aba7038", size = 1048003, upload-time = "2026-07-30T04:10:24.438Z" },
+]

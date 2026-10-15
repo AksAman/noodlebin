@@ -1,6 +1,6 @@
 # PID — Paste in Blender
 
-Primary. A `nodevault 1` clipboard becomes nodes in the open node editor. The payload shape is the interchange PID. Cross-version catalog rules are the catalog PID. The keymap is the add-on PID.
+Primary. A `nodevault.tree` JSON clipboard becomes nodes in the open node editor. The payload shape is the interchange PID. Cross-version catalog rules are the catalog PID. The keymap is the add-on PID.
 
 ## Who can run it
 
@@ -60,7 +60,7 @@ Use the catalog PID's skip rules. The paste still finishes. The report lists wha
 
 ## Blender's own paste
 
-Ctrl/Cmd+V stays `bpy.ops.node.clipboard_paste`. That reads the on-disk copy buffer from the last native copy in any Blender on this machine. NodeVault Paste does not call it for a `nodevault 1` clipboard, because the browser round trip has only the JSON. The JSON procedure above is what runs.
+Ctrl/Cmd+V stays `bpy.ops.node.clipboard_paste`. That reads the on-disk copy buffer from the last native copy in any Blender on this machine. NodeVault Paste does not call it for a `nodevault.tree` clipboard, because the browser round trip has only the JSON. The JSON procedure above is what runs.
 
 When vault sync has stored the copy-buffer `.blend` for that same Blender version, a later paste-from-link may write that file to the copy-buffer path and call `bpy.ops.node.clipboard_paste`. That path is specified in the sharing PID. It is not required for the core loop.
 

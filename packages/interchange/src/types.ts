@@ -1,12 +1,11 @@
 /**
- * Types for the `nodevault 1` clipboard payload.
+ * Types for the `nodevault.tree` clipboard payload.
  * Source of truth: docs/pid/05-interchange-format.md.
  *
  * These describe the known fields. The canonical serializer preserves any
  * unknown keys at runtime; they are simply not typed here.
  */
 
-export const MAGIC = "nodevault 1" as const;
 export const FORMAT = "nodevault.tree" as const;
 export const FORMAT_VERSION = 1 as const;
 

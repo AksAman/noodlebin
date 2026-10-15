@@ -78,7 +78,7 @@ The tab shows:
 - After a paste that skipped anything, the skip list from the paste PID. The list clears on the next copy and on the next paste.
 - A Save button.
 
-Save runs the copy procedure and writes the envelope to a path the user picks. The default file name is `nodes.nodevault.json`. The browser page accepts that file as a drop.
+Save runs the copy procedure and writes the canonical JSON to a path the user picks. The default file name is `nodes.nodevault.json`. The browser page accepts that file as a drop.
 
 ## Operators
 
@@ -92,7 +92,7 @@ Save runs the copy procedure and writes the envelope to a path the user picks. T
 
 ## Clipboard
 
-NodeVault reads and writes `context.window_manager.clipboard` for the `nodevault 1` envelope. That needs the `clipboard` permission.
+NodeVault reads and writes `context.window_manager.clipboard` for the `nodevault.tree` JSON text. That needs the `clipboard` permission.
 
 `bpy.ops.node.clipboard_copy()` is called first, as the copy PID describes, so Blender's on-disk copy buffer matches the selection. NodeVault does not read the system clipboard to discover what Ctrl/Cmd+C stored. Ctrl/Cmd+C does not store the node tree there.
 

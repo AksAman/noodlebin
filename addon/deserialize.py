@@ -1,6 +1,6 @@
-"""Read side of the ``nodevault 1`` interchange format.
+"""Read side of the ``nodevault.tree`` interchange format.
 
-Envelope parsing and validation. Owned by ``docs/pid/05-interchange-format.md``.
+Text parsing and validation. Owned by ``docs/pid/05-interchange-format.md``.
 Used by Paste (``paste_nodes.py``). No ``bpy`` and no UI imports.
 
 Error codes match ``packages/interchange/src/errors.ts`` so both ends of the
@@ -12,14 +12,13 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from .serialize import FORMAT, FORMAT_VERSION, MAGIC, TREE_TYPES
+from .serialize import FORMAT, FORMAT_VERSION, TREE_TYPES
 
-_MAGIC_PREFIX = "nodevault "
+_NOT_A_TREE = "Clipboard is not a NodeVault node tree."
 
 ERROR_CODES = frozenset(
     {
         "not_nodevault",
-        "bad_magic",
         "bad_json",
         "bad_format",
         "bad_format_version",
@@ -39,7 +38,7 @@ ERROR_CODES = frozenset(
 
 
 class NodeVaultError(ValueError):
-    """A named envelope or validation failure."""
+    """A named parse or validation failure."""
 
     def __init__(self, code: str, message: str, path: str | None = None):
         assert code in ERROR_CODES, code
@@ -48,62 +47,51 @@ class NodeVaultError(ValueError):
         self.path = path
 
 
-# --- envelope ---------------------------------------------------------------
+# --- text -------------------------------------------------------------------
 
 
-def split_envelope(text: str) -> tuple[bool, str | None, str]:
-    """Return ``(has_magic, magic_line, json_text)`` without parsing the JSON.
+def _normalize(text: str) -> str:
+    """Strip surrounding whitespace and byte order marks.
 
-    A ``\\r\\n`` after the magic line is tolerated. Leading whitespace before
-    the magic is not.
+    JavaScript's ``String.prototype.trim`` treats U+FEFF as whitespace; this
+    matches it so both parsers accept the same texts.
     """
-    if not text.startswith(_MAGIC_PREFIX):
-        return False, None, text
-    newline = text.find("\n")
-    if newline == -1:
-        return True, text.rstrip("\r"), ""
-    return True, text[:newline].rstrip("\r"), text[newline + 1 :]
+    while True:
+        stripped = text.strip().strip("\ufeff")
+        if stripped == text:
+            return text
+        text = stripped
 
 
 def looks_like_nodevault(text: str) -> bool:
-    """Cheap pre-check before a full parse."""
-    if text.startswith(_MAGIC_PREFIX):
-        return True
-    stripped = text.lstrip()
-    return stripped.startswith("{") and FORMAT in stripped
+    """Cheap pre-check before a full parse: a JSON object that mentions the format."""
+    body = _normalize(text)
+    return body.startswith("{") and FORMAT in body
 
 
 def parse_clipboard_text(text: str) -> dict:
-    """Parse clipboard text into a validated payload dict. Raises ``NodeVaultError``.
+    """Parse clipboard or file text into a validated payload dict. Raises ``NodeVaultError``.
 
-    Bare JSON with ``format`` equal to ``nodevault.tree`` is accepted without the
-    magic line. Any other magic version is rejected.
+    The text is one JSON object with no prefix. Text that does not look like a
+    NodeVault object is ``not_nodevault`` and is never parsed. Text that looks
+    like one but fails to parse is ``bad_json``.
     """
-    has_magic, magic, json_text = split_envelope(text)
+    body = _normalize(text)
 
-    if has_magic and magic != MAGIC:
-        raise NodeVaultError(
-            "bad_magic",
-            f'Unsupported NodeVault format line "{magic}". This build reads "{MAGIC}".',
-        )
+    if not looks_like_nodevault(body):
+        raise NodeVaultError("not_nodevault", _NOT_A_TREE)
 
     try:
-        value = json.loads(json_text)
+        value = json.loads(body)
     except ValueError as err:
-        if has_magic:
-            raise NodeVaultError(
-                "bad_json", f'The text after "{MAGIC}" is not valid JSON: {err}'
-            ) from err
         raise NodeVaultError(
-            "not_nodevault", "Clipboard is not a NodeVault node tree."
+            "bad_json",
+            f"The clipboard looks like a NodeVault node tree but is not valid JSON: {err}",
         ) from err
 
-    if not has_magic:
-        fmt = value.get("format") if isinstance(value, dict) else None
-        if fmt != FORMAT:
-            raise NodeVaultError(
-                "not_nodevault", "Clipboard is not a NodeVault node tree."
-            )
+    fmt = value.get("format") if isinstance(value, dict) else None
+    if fmt != FORMAT:
+        raise NodeVaultError("not_nodevault", _NOT_A_TREE)
 
     validate_payload(value)
     return value

@@ -3,16 +3,14 @@
  *
  * Before the browser puts a payload back on the clipboard it re-serializes the
  * parsed object with keys in the order the interchange PID gives, 2-space
- * indent, and a trailing newline, then prepends the magic line. Unknown keys
- * are kept and emitted after the known keys in their original order. Key order
- * inside `properties` and `widgets` is whatever Blender reported at copy time
- * and is left untouched. Numbers stay numbers.
+ * indent, and a trailing newline. Nothing is prepended; the text is plain
+ * JSON. Unknown keys are kept and emitted after the known keys in their
+ * original order. Key order inside `properties` and `widgets` is whatever
+ * Blender reported at copy time and is left untouched. Numbers stay numbers.
  *
  * addon/serialize.py implements the same rules and must produce identical
  * bytes for the same object.
  */
-
-import { MAGIC } from "./types";
 
 export const PAYLOAD_KEYS = [
   "format",
@@ -223,12 +221,10 @@ export function canonicalize<T>(payload: T): T {
   }) as T;
 }
 
-/** Canonical JSON text: ordered keys, 2-space indent, trailing newline. No magic line. */
+/**
+ * Canonical JSON text: ordered keys, 2-space indent, trailing newline.
+ * This is the clipboard text and the `.nodevault.json` file content.
+ */
 export function canonicalJson(payload: unknown): string {
   return JSON.stringify(canonicalize(payload), null, 2) + "\n";
-}
-
-/** The full clipboard text: `nodevault 1`, newline, canonical JSON, trailing newline. */
-export function canonicalText(payload: unknown): string {
-  return `${MAGIC}\n${canonicalJson(payload)}`;
 }

@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "test": "bun test",
-    "test:py": "python3 -m unittest discover -s addon/tests -t . -v",
+    "test:py": "python3 -m unittest discover -s addon/tests -t . -v && python3 -m unittest discover -s scripts/tests -t . -v",
     "typecheck": "bun run --filter '*' typecheck"
   },
   "devDependencies": {

@@ -3,15 +3,12 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import {
-  MAGIC,
   NodeVaultError,
   canonicalJson,
-  canonicalText,
   canonicalize,
   looksLikeNodeVault,
   parseNodeVaultText,
   safeParseNodeVaultText,
-  splitEnvelope,
   validatePayload,
 } from "../src/index";
 import type { NodeVaultPayload } from "../src/index";
@@ -27,9 +24,9 @@ function fixture(): NodeVaultPayload {
   return parseNodeVaultText(FIXTURE_TEXT);
 }
 
-/** Parse a mutated payload object through the full envelope path. */
+/** Parse a mutated payload object through the full text path. */
 function parseObject(obj: unknown): NodeVaultPayload {
-  return parseNodeVaultText(`${MAGIC}\n${JSON.stringify(obj)}`);
+  return parseNodeVaultText(JSON.stringify(obj));
 }
 
 function expectError(
@@ -50,34 +47,30 @@ function expectError(
   return error;
 }
 
-describe("envelope", () => {
-  test("splits the magic line from the JSON", () => {
-    const env = splitEnvelope("nodevault 1\n{}");
-    expect(env).toEqual({ hasMagic: true, magic: "nodevault 1", json: "{}" });
+describe("text", () => {
+  test("the fixture is plain JSON that JSON.parse accepts on its own", () => {
+    expect(() => JSON.parse(FIXTURE_TEXT)).not.toThrow();
   });
 
-  test("tolerates CRLF after the magic line", () => {
+  test("tolerates CRLF line endings", () => {
     const text = FIXTURE_TEXT.replace(/\n/g, "\r\n");
     expect(parseNodeVaultText(text).origin.node_count).toBe(2);
+  });
+
+  test("tolerates surrounding whitespace and a BOM", () => {
+    expect(parseNodeVaultText(`\n\n  ${FIXTURE_TEXT}  \n`).trees.length).toBe(1);
+    expect(parseNodeVaultText(`\uFEFF${FIXTURE_TEXT}`).trees.length).toBe(1);
   });
 
   test("accepts a missing trailing newline", () => {
     expect(parseNodeVaultText(FIXTURE_TEXT.trimEnd()).trees.length).toBe(1);
   });
 
-  test("accepts bare JSON whose format is nodevault.tree", () => {
-    const json = splitEnvelope(FIXTURE_TEXT).json;
-    const payload = parseNodeVaultText(json);
-    expect(payload.tree_type).toBe("ShaderNodeTree");
-  });
-
-  test("rejects another magic version until a migration exists", () => {
-    const text = FIXTURE_TEXT.replace(/^nodevault 1/, "nodevault 2");
-    expectError(() => parseNodeVaultText(text), "bad_magic", '"nodevault 2"');
-  });
-
-  test("rejects a magic line with leading whitespace as not-nodevault JSON", () => {
-    expectError(() => parseNodeVaultText(" nodevault 1\n{}"), "not_nodevault");
+  test("a legacy magic line is not accepted", () => {
+    expectError(
+      () => parseNodeVaultText(`nodevault 1\n${FIXTURE_TEXT}`),
+      "not_nodevault",
+    );
   });
 
   test("rejects ordinary text", () => {
@@ -96,11 +89,11 @@ describe("envelope", () => {
     expectError(() => parseNodeVaultText("[1, 2, 3]"), "not_nodevault");
   });
 
-  test("names broken JSON after a valid magic line", () => {
-    expectError(
-      () => parseNodeVaultText("nodevault 1\n{ not json"),
-      "bad_json",
-    );
+  test("names broken JSON when the text was clearly meant to be a node tree", () => {
+    const truncated = FIXTURE_TEXT.slice(0, FIXTURE_TEXT.length / 2);
+    expectError(() => parseNodeVaultText(truncated), "bad_json", "not valid JSON");
+    // Broken JSON that never mentions the format is just not a node tree.
+    expectError(() => parseNodeVaultText("{ not json"), "not_nodevault");
   });
 
   test("safeParse returns the error instead of throwing", () => {
@@ -113,7 +106,7 @@ describe("envelope", () => {
 
   test("looksLikeNodeVault is a cheap pre-check", () => {
     expect(looksLikeNodeVault(FIXTURE_TEXT)).toBe(true);
-    expect(looksLikeNodeVault(splitEnvelope(FIXTURE_TEXT).json)).toBe(true);
+    expect(looksLikeNodeVault(`  \uFEFF${FIXTURE_TEXT}`)).toBe(true);
     expect(looksLikeNodeVault("some text")).toBe(false);
     expect(looksLikeNodeVault('{"a": 1}')).toBe(false);
   });
@@ -135,7 +128,10 @@ describe("validation", () => {
   test("rejects a wrong format string", () => {
     const p = fixture() as unknown as Record<string, unknown>;
     p["format"] = "nodevault.other";
-    expectError(() => parseObject(p), "bad_format");
+    // At the text boundary a foreign format is simply not a node tree.
+    expectError(() => parseObject(p), "not_nodevault");
+    // The validator itself names the field.
+    expectError(() => validatePayload(p), "bad_format", "nodevault.other");
   });
 
   test("rejects format_version 99 with a version error", () => {
@@ -260,7 +256,7 @@ describe("validation", () => {
   });
 
   test("validatePayload works on an already-parsed object", () => {
-    const value: unknown = JSON.parse(splitEnvelope(FIXTURE_TEXT).json);
+    const value: unknown = JSON.parse(FIXTURE_TEXT);
     validatePayload(value);
     expect(value.tree_type).toBe("ShaderNodeTree");
   });
@@ -268,14 +264,14 @@ describe("validation", () => {
 
 describe("canonical serialization", () => {
   test("the fixture is already canonical: parse then serialize returns the same bytes", () => {
-    expect(canonicalText(fixture())).toBe(FIXTURE_TEXT);
+    expect(canonicalJson(fixture())).toBe(FIXTURE_TEXT);
   });
 
-  test("canonicalJson has no magic line and ends with a newline", () => {
+  test("canonicalJson is a bare object with a trailing newline", () => {
     const json = canonicalJson(fixture());
     expect(json.startsWith("{\n")).toBe(true);
     expect(json.endsWith("}\n")).toBe(true);
-    expect(canonicalText(fixture())).toBe(`${MAGIC}\n${json}`);
+    expect(JSON.parse(json)).toEqual(fixture());
   });
 
   test("scrambled key order is restored", () => {
@@ -291,7 +287,7 @@ describe("canonical serialization", () => {
       }),
     );
     expect(JSON.stringify(scrambled)).not.toBe(JSON.stringify(fixture()));
-    expect(canonicalText(scrambled)).toBe(FIXTURE_TEXT);
+    expect(canonicalJson(scrambled)).toBe(FIXTURE_TEXT);
   });
 
   test("unknown keys survive and come after the known keys", () => {
@@ -306,7 +302,7 @@ describe("canonical serialization", () => {
     ]![0] as Record<string, unknown>;
     socket["x_socket_extra"] = true;
 
-    const text = canonicalText(p);
+    const text = canonicalJson(p);
     const reparsed = parseNodeVaultText(text) as unknown as Record<
       string,
       unknown
@@ -397,14 +393,14 @@ describe("canonical serialization", () => {
     expect(out).not.toBe(original);
     expect(out).toEqual(original);
     // Round trip through text and back: values equal, key order ignored by toEqual.
-    expect(parseNodeVaultText(canonicalText(original))).toEqual(original);
+    expect(parseNodeVaultText(canonicalJson(original))).toEqual(original);
   });
 
   test("numbers stay numbers", () => {
     const p = fixture();
     p.trees[0]!.nodes[0]!.sockets.inputs[0]!.default_value = 0.000001;
     p.trees[0]!.nodes[0]!.width = 1e21;
-    const text = canonicalText(p);
+    const text = canonicalJson(p);
     expect(text).toContain('"default_value": 0.000001');
     expect(text).toContain('"width": 1e+21');
     const back = parseNodeVaultText(text);

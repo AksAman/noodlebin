@@ -25,8 +25,8 @@ Nothing is sent to a server when the user pastes. The payload stays in memory. R
 Listen for the `paste` event on the document while this route is mounted.
 
 1. Read `event.clipboardData.getData("text/plain")`.
-2. If the text starts with `nodevault 1` followed by a newline, parse the rest as JSON.
-3. If the text is JSON and `format` is `nodevault.tree`, accept it even without the magic line. The page still canonicalizes to the magic line on the way back out.
+2. If the trimmed text starts with `{` and contains `nodevault.tree`, parse it as JSON and validate it with the interchange PID's rules.
+3. If that text fails to parse, show the broken-JSON error from the parser rather than the not-a-node-tree message.
 4. Any other clipboard text, while the paste target or the canvas is focused, shows "Clipboard is not a NodeVault node tree." A paste whose event target is an input or textarea is left to the browser.
 
 Dropping a `.nodevault.json` or `.json` file on the page uses the same parser.

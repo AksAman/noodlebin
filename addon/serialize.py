@@ -1,6 +1,6 @@
-"""Write side of the ``nodevault 1`` interchange format.
+"""Write side of the ``nodevault.tree`` interchange format.
 
-Canonical JSON and the clipboard envelope. Owned by
+Canonical JSON, which is the clipboard text and the file content. Owned by
 ``docs/pid/05-interchange-format.md``. Used by Copy (``copy_nodes.py``) and
 Save. No ``bpy`` and no UI imports, so it runs under plain ``python3`` and
 under ``blender --background --python``.
@@ -17,7 +17,6 @@ import math
 from decimal import Decimal
 from typing import Any, Callable, Mapping, Sequence
 
-MAGIC = "nodevault 1"
 FORMAT = "nodevault.tree"
 FORMAT_VERSION = 1
 TREE_TYPES = ("ShaderNodeTree", "GeometryNodeTree", "CompositorNodeTree")
@@ -340,10 +339,8 @@ def dumps_pretty(value: Any) -> str:
 
 
 def canonical_json(payload: Any) -> str:
-    """Canonical JSON text: ordered keys, 2-space indent, trailing newline. No magic line."""
+    """Canonical JSON text: ordered keys, 2-space indent, trailing newline.
+
+    This is the clipboard text and the ``.nodevault.json`` file content.
+    """
     return dumps_pretty(canonicalize(payload)) + "\n"
-
-
-def canonical_text(payload: Any) -> str:
-    """The full clipboard text: ``nodevault 1``, newline, canonical JSON, trailing newline."""
-    return f"{MAGIC}\n{canonical_json(payload)}"

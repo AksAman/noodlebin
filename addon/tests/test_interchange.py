@@ -14,13 +14,10 @@ from addon import deserialize, serialize
 from addon.deserialize import (
     NodeVaultError,
     parse_clipboard_text,
-    split_envelope,
     validate_payload,
 )
 from addon.serialize import (
-    MAGIC,
     canonical_json,
-    canonical_text,
     canonicalize,
     format_number,
 )
@@ -39,7 +36,7 @@ def fixture() -> dict:
 
 
 def parse_object(obj) -> dict:
-    return parse_clipboard_text(f"{MAGIC}\n{json.dumps(obj)}")
+    return parse_clipboard_text(json.dumps(obj))
 
 
 class ErrorAssertions(unittest.TestCase):
@@ -54,31 +51,24 @@ class ErrorAssertions(unittest.TestCase):
         return ctx.exception
 
 
-class EnvelopeTests(ErrorAssertions):
-    def test_split(self):
-        self.assertEqual(split_envelope("nodevault 1\n{}"), (True, "nodevault 1", "{}"))
-        self.assertEqual(split_envelope("{}"), (False, None, "{}"))
+class TextTests(ErrorAssertions):
+    def test_fixture_is_plain_json(self):
+        json.loads(FIXTURE_TEXT)  # must not raise
 
     def test_crlf_tolerated(self):
         text = FIXTURE_TEXT.replace("\n", "\r\n")
         self.assertEqual(parse_clipboard_text(text)["origin"]["node_count"], 2)
 
+    def test_whitespace_and_bom_tolerated(self):
+        self.assertEqual(len(parse_clipboard_text(f"\n\n  {FIXTURE_TEXT}  \n")["trees"]), 1)
+        self.assertEqual(len(parse_clipboard_text(f"\ufeff{FIXTURE_TEXT}")["trees"]), 1)
+
     def test_missing_trailing_newline(self):
         self.assertEqual(len(parse_clipboard_text(FIXTURE_TEXT.rstrip())["trees"]), 1)
 
-    def test_bare_json_accepted(self):
-        _, _, json_text = split_envelope(FIXTURE_TEXT)
-        self.assertEqual(parse_clipboard_text(json_text)["tree_type"], "ShaderNodeTree")
-
-    def test_other_magic_rejected(self):
-        text = FIXTURE_TEXT.replace("nodevault 1", "nodevault 2", 1)
+    def test_legacy_magic_line_not_accepted(self):
         self.assert_error(
-            lambda: parse_clipboard_text(text), "bad_magic", '"nodevault 2"'
-        )
-
-    def test_leading_whitespace_before_magic_is_not_nodevault(self):
-        self.assert_error(
-            lambda: parse_clipboard_text(" nodevault 1\n{}"), "not_nodevault"
+            lambda: parse_clipboard_text(f"nodevault 1\n{FIXTURE_TEXT}"), "not_nodevault"
         )
 
     def test_plain_text(self):
@@ -95,16 +85,15 @@ class EnvelopeTests(ErrorAssertions):
         )
         self.assert_error(lambda: parse_clipboard_text("[1, 2, 3]"), "not_nodevault")
 
-    def test_bad_json_after_magic(self):
-        self.assert_error(
-            lambda: parse_clipboard_text("nodevault 1\n{ not json"), "bad_json"
-        )
+    def test_bad_json_when_clearly_meant_as_a_tree(self):
+        truncated = FIXTURE_TEXT[: len(FIXTURE_TEXT) // 2]
+        self.assert_error(lambda: parse_clipboard_text(truncated), "bad_json", "not valid JSON")
+        # Broken JSON that never mentions the format is just not a node tree.
+        self.assert_error(lambda: parse_clipboard_text("{ not json"), "not_nodevault")
 
     def test_looks_like(self):
         self.assertTrue(deserialize.looks_like_nodevault(FIXTURE_TEXT))
-        self.assertTrue(
-            deserialize.looks_like_nodevault(split_envelope(FIXTURE_TEXT)[2])
-        )
+        self.assertTrue(deserialize.looks_like_nodevault(f"  \ufeff{FIXTURE_TEXT}"))
         self.assertFalse(deserialize.looks_like_nodevault("some text"))
         self.assertFalse(deserialize.looks_like_nodevault('{"a": 1}'))
 
@@ -122,7 +111,10 @@ class ValidationTests(ErrorAssertions):
     def test_bad_format(self):
         p = fixture()
         p["format"] = "nodevault.other"
-        self.assert_error(lambda: parse_object(p), "bad_format")
+        # At the text boundary a foreign format is simply not a node tree.
+        self.assert_error(lambda: parse_object(p), "not_nodevault")
+        # The validator itself names the field.
+        self.assert_error(lambda: validate_payload(p), "bad_format", "nodevault.other")
 
     def test_format_version_99(self):
         p = fixture()
@@ -239,7 +231,7 @@ class ValidationTests(ErrorAssertions):
         self.assert_error(lambda: parse_object(p), "malformed", "$.origin")
 
     def test_validate_parsed_object(self):
-        value = json.loads(split_envelope(FIXTURE_TEXT)[2])
+        value = json.loads(FIXTURE_TEXT)
         validate_payload(value)
         self.assertTrue(deserialize.is_valid_payload(value))
         self.assertFalse(deserialize.is_valid_payload({}))
@@ -247,13 +239,13 @@ class ValidationTests(ErrorAssertions):
 
 class CanonicalTests(unittest.TestCase):
     def test_fixture_round_trips_byte_for_byte(self):
-        self.assertEqual(canonical_text(fixture()), FIXTURE_TEXT)
+        self.assertEqual(canonical_json(fixture()), FIXTURE_TEXT)
 
     def test_canonical_json_shape(self):
         text = canonical_json(fixture())
         self.assertTrue(text.startswith("{\n"))
         self.assertTrue(text.endswith("}\n"))
-        self.assertEqual(canonical_text(fixture()), f"{MAGIC}\n{text}")
+        self.assertEqual(json.loads(text), fixture())
 
     def test_scrambled_key_order_restored(self):
         def reverse_keys(value):
@@ -265,7 +257,7 @@ class CanonicalTests(unittest.TestCase):
 
         scrambled = reverse_keys(fixture())
         self.assertNotEqual(json.dumps(scrambled), json.dumps(fixture()))
-        self.assertEqual(canonical_text(scrambled), FIXTURE_TEXT)
+        self.assertEqual(canonical_json(scrambled), FIXTURE_TEXT)
 
     def test_unknown_keys_preserved_after_known(self):
         p = fixture()
@@ -274,7 +266,7 @@ class CanonicalTests(unittest.TestCase):
         node["x_node_extra"] = "kept"
         node["sockets"]["inputs"][0]["x_socket_extra"] = True
 
-        reparsed = parse_clipboard_text(canonical_text(p))
+        reparsed = parse_clipboard_text(canonical_json(p))
         self.assertEqual(reparsed["x_future_field"], {"nested": [1, 2, 3]})
 
         out = canonicalize(p)
@@ -339,7 +331,7 @@ class CanonicalTests(unittest.TestCase):
         self.assertEqual(json.dumps(original), before)
         self.assertIsNot(out, original)
         self.assertEqual(out, original)
-        self.assertEqual(parse_clipboard_text(canonical_text(original)), original)
+        self.assertEqual(parse_clipboard_text(canonical_json(original)), original)
 
     def test_numbers_match_javascript(self):
         # (python value, JSON.stringify output)

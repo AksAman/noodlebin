@@ -1,6 +1,6 @@
 # PID — Copy from Blender
 
-Primary. This is the first half of the core loop: a selection in a node editor becomes a `nodevault 1` clipboard payload. The payload shape is owned by the interchange PID. The keymap and panel are owned by the add-on PID.
+Primary. This is the first half of the core loop: a selection in a node editor becomes a `nodevault.tree` JSON clipboard payload. The payload shape is owned by the interchange PID. The keymap and panel are owned by the add-on PID.
 
 ## Who can run it
 
@@ -26,7 +26,7 @@ NodeVault does not replace that operator. NodeVault Copy adds the text payload t
 
 1. Select the nodes they want to share. Frames, reroutes, groups, and zone ends are selected the same way as any other node.
 2. Run NodeVault: Copy from the node editor's NodeVault menu, the N-panel, or Ctrl/Cmd+Shift+C.
-3. The system clipboard holds the `nodevault 1` payload. A report says how many nodes were copied and the tree type.
+3. The system clipboard holds the `nodevault.tree` JSON payload. A report says how many nodes were copied and the tree type.
 
 Native Ctrl/Cmd+C is unchanged and still only refreshes Blender's copy buffer.
 
@@ -55,7 +55,7 @@ A wire to a node that is still outside the set after these rules is omitted from
 9. Write widgets for color ramps, curve mappings, and images as specified in the interchange PID.
 10. Write links whose both ends are in the node set.
 11. For each included group, append a tree. Group interface items come from `node_tree.interface.items_tree` in order. Use `in_out` on each socket. Do not read `node_tree.inputs` or `node_tree.outputs`. Those collections are the pre-4.0 API and are absent on current Blender.
-12. Serialize with the canonical key order from the interchange PID, prefix `nodevault 1\n`, and assign `context.window_manager.clipboard`.
+12. Serialize with the canonical key order from the interchange PID and assign the JSON text to `context.window_manager.clipboard`. Nothing is prefixed.
 
 Group tree ids are `group:` plus the data-block name. A group data-block used twice is stored once and referenced twice via `group_tree_id`.
 

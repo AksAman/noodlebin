@@ -20,7 +20,7 @@ Copy inside the frame is off unless the query `copy=1` is present. When it is on
 
 For a payload the host already has, with no post:
 
-The host page includes `embed.js` from the NodeVault origin and calls `NodeVault.mount` with a CSS selector and a `source` string. `source` is the clipboard envelope (`nodevault 1` plus a newline plus JSON) or an already parsed tree object.
+The host page includes `embed.js` from the NodeVault origin and calls `NodeVault.mount` with a CSS selector and a `source` string. `source` is the clipboard text (the `nodevault.tree` JSON) or an already parsed tree object.
 
 `mount` validates with the same rules as the paste page and mounts `packages/node-view` into the element.
 
@@ -28,7 +28,7 @@ The host page includes `embed.js` from the NodeVault origin and calls `NodeVault
 
 | Option | Default | Meaning |
 | --- | --- | --- |
-| `source` | required | Envelope text or parsed tree. |
+| `source` | required | JSON text or parsed tree. |
 | `catalogVersion` | taken from the payload | Tests override this. Production callers leave it unset. |
 | `showCopy` | false | Draws the Copy button when true. |
 | `height` | 480 | CSS pixels. |

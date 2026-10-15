@@ -17,10 +17,9 @@ Copy does not export a screenshot. It does not export the inner group the user h
 ## Procedure
 
 1. Run the canonical serializer from the interchange PID on the in-memory object.
-2. Prefix `nodevault 1\n`.
-3. Write that string with `navigator.clipboard.writeText`.
-4. If that rejects because the document is unfocused, retry once on the next click of the Copy button, which is a user gesture. If the write still fails, show a readonly text area with the payload selected and the sentence "Copy this text, then paste it in Blender."
-5. On success the button label becomes "Copied" for two seconds, then returns to "Copy".
+2. Write that string with `navigator.clipboard.writeText`. Nothing is prefixed.
+3. If that rejects because the document is unfocused, retry once on the next click of the Copy button, which is a user gesture. If the write still fails, show a readonly text area with the payload selected and the sentence "Copy this text, then paste it in Blender."
+4. On success the button label becomes "Copied" for two seconds, then returns to "Copy".
 
 The canonical form may differ in whitespace from the text the user originally pasted. It must not differ in data. The test parses the original and the copy, walks every value, and asserts equality. Key order is ignored for that comparison and enforced for the serialized output.
 

@@ -1,10 +1,9 @@
 /**
- * Named errors. Every failed envelope or validation check raises one of these
+ * Named errors. Every failed parse or validation check raises one of these
  * codes. The Python side (addon/deserialize.py) uses the same code strings.
  */
 export type NodeVaultErrorCode =
   | "not_nodevault"
-  | "bad_magic"
   | "bad_json"
   | "bad_format"
   | "bad_format_version"

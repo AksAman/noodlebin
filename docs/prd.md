@@ -114,8 +114,8 @@ Blender add-on                         Browser
 ┌─────────────────────┐               ┌──────────────────────────┐
 │ Copy selection      │  clipboard    │ Paste target             │
 │        │            │ ───────────▶  │        │                 │
-│        ▼            │  nodevault 1    │        ▼                 │
-│ nodevault.tree JSON   │  + JSON       │ Graph visualizer         │
+│        ▼            │  JSON text    │        ▼                 │
+│ nodevault.tree JSON │               │ Graph visualizer         │
 │                     │ ◀───────────  │        │                 │
 │ Paste into editor   │  same payload │ Copy button              │
 └─────────────────────┘               └──────────────────────────┘
@@ -131,11 +131,11 @@ The add-on talks to the system clipboard. The browser talks to the system clipbo
 
 These are settled. Feature PIDs implement them.
 
-- The clipboard is the interchange. The first line is the ASCII magic `nodevault 1`. The remainder is UTF-8 JSON, `format` equal to `nodevault.tree`, `format_version` equal to `1`.
+- The clipboard is the interchange. It holds one UTF-8 JSON object and nothing else, so the same bytes are a valid `.json` file. The object identifies itself: `format` equal to `nodevault.tree`, `format_version` equal to `1`. There is no magic line.
 - The payload is self-sufficient for a same-version round trip. Paste in Blender creates each node fresh and applies the stored sockets, properties, and widgets. It does not need the catalog for that.
 - The catalog is the drawing registry and the cross-version guide. The browser joins the payload to the catalog for that `blender_version` to get header colors, socket colors, category, and the full socket list of a node at its default mode. Properties that change the socket layout are always stored on the instance.
 - Supported editors are shader (`ShaderNodeTree`), geometry nodes (`GeometryNodeTree`), and compositor (`CompositorNodeTree`).
-- Blender's own node Ctrl/Cmd+C and Ctrl/Cmd+V stay untouched. As of the 5.2 manual, that copy writes a partial `.blend` to Blender's on-disk copy buffer and another Blender on the same machine can paste it. It does not put text on the system clipboard, so a browser still cannot draw it. NodeVault's shortcut writes `nodevault 1` text to the system clipboard, which is the only payload the browser reads. Details are in the copy-from-Blender PID.
+- Blender's own node Ctrl/Cmd+C and Ctrl/Cmd+V stay untouched. As of the 5.2 manual, that copy writes a partial `.blend` to Blender's on-disk copy buffer and another Blender on the same machine can paste it. It does not put text on the system clipboard, so a browser still cannot draw it. NodeVault's shortcut writes `nodevault.tree` JSON text to the system clipboard, which is the only payload the browser reads. Details are in the copy-from-Blender PID.
 - The add-on is a current extension: `blender_manifest.toml`, no `bl_info`, relative imports, preferences keyed by `__package__`. Built with `blender --command extension build`. The add-on PID has the manifest.
 - The browser graph is read-only in the core product. Copy returns the payload that was pasted, byte for byte after a canonical parse-and-serialize that preserves every field. The page does not invent a second dialect.
 - Browser layout uses each node's absolute Blender position with Y flipped. Blender paste uses parent-relative positions and drops the graph so its center sits on the node cursor.

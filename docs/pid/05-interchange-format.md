@@ -2,18 +2,19 @@
 
 Primary. This document owns the clipboard payload. Copy, paste, the graph visualizer, sharing, and embedding all read and write this format and no other.
 
-## Envelope
+## Text
 
-The system clipboard holds UTF-8 text:
+The system clipboard holds one UTF-8 JSON object and nothing else:
 
 ```text
-nodevault 1
 { ...json... }
 ```
 
-Line 1 is exactly `nodevault 1` (the format version), with no spaces before it and a single newline after it. The rest of the clipboard is one JSON object. Parsers accept a missing trailing newline. Parsers reject a different magic, including `nodevault 2`, until a migration exists.
+There is no magic line or other prefix. The object identifies itself through `format` and `format_version`. Parsers tolerate surrounding whitespace, `\r\n` line endings, and a leading UTF-8 byte order mark, and accept a missing trailing newline. Parsers reject a `format_version` other than `1`, including `2`, until a migration exists.
 
-A file saved from the browser uses the extension `.nodevault.json` and contains the same text, magic line included.
+A file saved from the browser uses the extension `.nodevault.json` and contains the same text. Because the text is plain JSON, any JSON validator or editor accepts it as is.
+
+Recognition: a parser first checks that the text, after trimming, starts with `{` and contains `nodevault.tree`. Other clipboard text is not a node tree and is not parsed. Text that passes that check but fails to parse is reported as broken JSON, so a user who pasted a truncated payload hears that rather than "not a node tree".
 
 The JSON object:
 
@@ -370,13 +371,13 @@ A real copy stores every socket on those nodes, not only Scale, Fac, and Roughne
 
 ## Canonical JSON
 
-Before the browser puts the payload back on the clipboard, it parses the JSON and serializes it with object keys in the order given in this PID, 2-space indent, and a trailing newline after the JSON. The magic line is prepended. Key order inside `properties` and `widgets` follows the order Blender reported at copy time, which the payload already has, and the canonical serializer preserves that order. Numbers stay numbers. This makes the copy-back stable without dropping fields the schema has never heard of: unknown keys are preserved and emitted after the known keys.
+Before the browser puts the payload back on the clipboard, it parses the JSON and serializes it with object keys in the order given in this PID, 2-space indent, and a trailing newline after the JSON. Nothing is prepended. Key order inside `properties` and `widgets` follows the order Blender reported at copy time, which the payload already has, and the canonical serializer preserves that order. Numbers stay numbers. This makes the copy-back stable without dropping fields the schema has never heard of: unknown keys are preserved and emitted after the known keys.
 
 ## Validation
 
 A payload is acceptable when:
 
-- The magic and `format_version` match.
+- `format` is `nodevault.tree` and `format_version` is `1`.
 - `tree_type` is one of the three supported strings.
 - Exactly one tree has `is_root` true and `id` `root`.
 - Every `parent_id`, `group_tree_id`, `zone_pair_id`, and link endpoint refers to an id that exists in the same tree (groups: `group_tree_id` refers to another tree in `trees`).
