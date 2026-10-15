@@ -1,6 +1,7 @@
 node_modules/
 dist/
 coverage/
+addon/catalog/
 .DS_Store
 __pycache__/
 *.pyc

@@ -18,4 +18,5 @@ paths_exclude_pattern = [
   "/.git/",
   "/*.zip",
   "tests/",
+  ".vscode/",
 ]
