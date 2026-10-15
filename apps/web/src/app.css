@@ -1,0 +1,158 @@
+:root {
+  --body-background-color: #171717;
+  --font-color: #c7c7c7;
+  --border-radius: 0.25rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  background: var(--body-background-color);
+  color: var(--font-color);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 32px;
+  background-size: 40px 40px;
+  background-image: radial-gradient(circle, #4e4e4e 1.5px, #171717 2px);
+}
+
+.empty-copy {
+  font-size: 1.25rem;
+  max-width: 28rem;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.empty-error {
+  color: #e8a0a0;
+  max-width: 36rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.file-btn {
+  background: #303030;
+  color: var(--font-color);
+  border: 1px solid #555;
+  border-radius: var(--border-radius);
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.file-btn input {
+  display: none;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #202020;
+  border-bottom: 1px solid #333;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.topbar-meta {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.notice {
+  background: #3a3218;
+  border: 1px solid #6a5a20;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.notice button {
+  margin-left: 8px;
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.topbar-actions button {
+  background: #303030;
+  color: var(--font-color);
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.canvas-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.fallback {
+  position: absolute;
+  inset: 48px 12%;
+  z-index: 8;
+  background: #1e1e1e;
+  border: 1px solid #555;
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fallback textarea {
+  flex: 1;
+  background: #111;
+  color: #ddd;
+  border: 1px solid #444;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+}
+
+.inline-error {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  background: #3a1818;
+  border: 1px solid #744;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  max-width: 40rem;
+}

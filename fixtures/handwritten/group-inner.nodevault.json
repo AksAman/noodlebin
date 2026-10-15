@@ -1,0 +1,69 @@
+{
+  "format": "nodevault.tree",
+  "format_version": 1,
+  "blender_version": [5, 1, 0],
+  "blender_version_string": "5.1.0",
+  "tree_type": "ShaderNodeTree",
+  "copied_at": "2026-10-15T18:00:00Z",
+  "origin": { "selection_center": [0, 0], "node_count": 1 },
+  "trees": [
+    {
+      "id": "root",
+      "name": "Shader",
+      "is_root": true,
+      "interface": [],
+      "nodes": [
+        {
+          "id": "n1",
+          "bl_idname": "ShaderNodeGroup",
+          "name": "Group",
+          "label": "",
+          "location": [0, 0],
+          "location_absolute": [0, 0],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {},
+          "widgets": {},
+          "sockets": { "inputs": [], "outputs": [] },
+          "group_tree_id": "group:Inner",
+          "zone_pair_id": null
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "group:Inner",
+      "name": "Inner",
+      "is_root": false,
+      "interface": [],
+      "nodes": [
+        {
+          "id": "n1",
+          "bl_idname": "ShaderNodeRGB",
+          "name": "RGB",
+          "label": "",
+          "location": [0, 0],
+          "location_absolute": [40, 10],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {},
+          "widgets": {},
+          "sockets": { "inputs": [], "outputs": [] },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        }
+      ],
+      "links": []
+    }
+  ]
+}

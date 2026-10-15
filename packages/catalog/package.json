@@ -5,7 +5,8 @@
   "type": "module",
   "description": "Load a NodeVault catalog by Blender version and join it to a payload node.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./load": "./src/load.ts"
   },
   "scripts": {
     "test": "bun test",

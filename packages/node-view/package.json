@@ -1,0 +1,26 @@
+{
+  "name": "@nodevault/node-view",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Read-only node graph for a nodevault.tree plus a catalog.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@nodevault/catalog": "workspace:*",
+    "@nodevault/interchange": "workspace:*",
+    "@xyflow/react": "^12.8.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5"
+  }
+}

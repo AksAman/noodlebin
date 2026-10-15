@@ -1,0 +1,443 @@
+.nv-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #c7c7c7;
+  font-size: 11px;
+}
+
+.nv-root .react-flow {
+  width: 100%;
+  height: 100%;
+}
+
+.nv-a11y {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.nv-crumbs {
+  position: absolute;
+  z-index: 5;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  gap: 6px;
+}
+
+.nv-crumb {
+  background: #303030;
+  color: #c7c7c7;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.nv-root .react-flow__node {
+  overflow: visible !important;
+}
+
+.nv-card {
+  background: #303030;
+  border-radius: 4px;
+  box-shadow: 0 0 8px 0.1px rgba(0, 0, 0, 0.6);
+  border: 1px solid transparent;
+  overflow: visible;
+}
+
+.nv-card:hover {
+  border-color: #aaa;
+  box-shadow: 0 0 8px 0.1px #000;
+}
+
+.nv-header {
+  height: 24px;
+  border-radius: 4px 4px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px 0 6px;
+  font-size: 12px;
+  position: relative;
+  color: #c7c7c7;
+}
+
+.nv-caret {
+  font-size: 9px;
+  opacity: 0.85;
+  line-height: 1;
+}
+
+.nv-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nv-mute-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 1px solid #c7c7c7;
+}
+
+.nv-body {
+  position: relative;
+  padding: 4px 6px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nv-has-outs .nv-body {
+  padding-right: 58px;
+}
+
+.nv-has-ramp .nv-outs {
+  top: 52px;
+}
+
+.nv-ins {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nv-outs {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.nv-outs .nv-handle {
+  pointer-events: auto;
+}
+
+.nv-prop,
+.nv-sock {
+  position: relative;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.nv-prop-enum {
+  gap: 6px;
+}
+
+.nv-prop-name {
+  flex: 0 0 auto;
+  max-width: 42%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.9;
+}
+
+.nv-sock-in {
+  padding-left: 2px;
+}
+
+.nv-sock-out {
+  padding-right: 2px;
+  justify-content: flex-end;
+  min-height: 24px;
+}
+
+.nv-sock-name {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 6px;
+}
+
+.nv-sock-valued {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.nv-sock-valued .nv-sock-name {
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  max-width: 55%;
+}
+
+.nv-sock-valued .nv-bar,
+.nv-sock-valued .nv-swatch-wide,
+.nv-sock-valued .nv-vec {
+  width: 100%;
+}
+
+.nv-sock-vector {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1.5px;
+  min-height: 0;
+  padding-top: 2px;
+}
+
+.nv-vec-title {
+  font-size: 10px;
+  opacity: 0.75;
+  padding-left: 6px;
+}
+
+.nv-handle {
+  width: 9px !important;
+  height: 9px !important;
+  border: 2px solid #171717 !important;
+  top: 12px !important;
+}
+
+.nv-sock-in .nv-handle {
+  left: -8px !important;
+}
+
+.nv-sock-out .nv-handle {
+  right: -8px !important;
+  left: auto !important;
+}
+
+.react-flow__minimap {
+  background: #252525 !important;
+  width: 108px !important;
+  height: 72px !important;
+}
+
+.react-flow__minimap-mask {
+  fill: rgba(0, 0, 0, 0.45) !important;
+}
+
+.react-flow__minimap-node {
+  fill: #555 !important;
+  stroke: none !important;
+}
+
+.nv-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  border: 1px solid #111;
+  flex-shrink: 0;
+}
+
+.nv-swatch-wide {
+  width: 100%;
+  height: 24px;
+  border-radius: 4px;
+}
+
+.nv-bar {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 24px;
+  background: #545454;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.nv-bar-fill {
+  height: 100%;
+  background: #4772b3;
+}
+
+.nv-bar-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 8px 0 72px;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.nv-dropdown {
+  flex: 1;
+  width: 100%;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  background: #303030;
+  border: 1px solid #444;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.nv-dropdown::after {
+  content: "▾";
+  font-size: 9px;
+  opacity: 0.7;
+}
+
+.nv-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+}
+
+.nv-check-box {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: #545454;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+.nv-check-on .nv-check-box {
+  background: #4772b3;
+}
+
+.nv-vec {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5px;
+  width: 100%;
+}
+
+.nv-vec-axis {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  position: relative;
+}
+
+.nv-vec-letter {
+  position: absolute;
+  left: 8px;
+  z-index: 1;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.nv-vec-x .nv-bar {
+  background: #6a3a3a;
+}
+.nv-vec-y .nv-bar {
+  background: #3a6a3a;
+}
+.nv-vec-z .nv-bar {
+  background: #3a3a6a;
+}
+
+.nv-ramp {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 2px 0 6px;
+}
+
+.nv-ramp-toolbar {
+  display: flex;
+  gap: 4px;
+}
+
+.nv-ramp-bar {
+  position: relative;
+  height: 18px;
+  border-radius: 2px;
+  border: 1px solid #111;
+  margin-bottom: 8px;
+}
+
+.nv-ramp-stop {
+  position: absolute;
+  bottom: -7px;
+  width: 8px;
+  height: 10px;
+  margin-left: -4px;
+  border: 1px solid #111;
+  box-shadow: 0 0 0 1px #c7c7c7;
+}
+
+.nv-caption {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.nv-frame {
+  background: rgba(48, 48, 48, 0.35);
+  border: 1px solid #666;
+  border-radius: 4px;
+}
+
+.nv-frame-label {
+  padding: 6px 10px;
+  color: #c7c7c7;
+}
+
+.nv-reroute {
+  width: 16px;
+  height: 16px;
+  position: relative;
+}
+
+.nv-reroute-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid #171717;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.nv-handle-reroute {
+  top: 8px !important;
+}
+
+.nv-zone {
+  width: 100%;
+  height: 100%;
+  background: rgba(125, 125, 58, 0.18);
+  border: 1px dashed rgba(180, 180, 80, 0.5);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.nv-zone-label {
+  font-size: 11px;
+  padding: 6px 8px;
+  opacity: 0.85;
+}
+
+.react-flow__edge-path {
+  stroke-width: 2.5;
+}
+
+.react-flow__attribution {
+  display: none;
+}

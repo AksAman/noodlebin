@@ -10,7 +10,6 @@ import {
   UNRESOLVED_SOCKET_COLOR,
   headerColor,
   indexCatalogs,
-  loadCatalogDirectory,
   lookupNode,
   parseCatalogJson,
   resolveCatalog,
@@ -18,6 +17,7 @@ import {
   widgetId,
   type Catalog,
 } from "../src/index"
+import { loadCatalogDirectory } from "../src/load"
 
 const SHIPPED = join(import.meta.dir, "../../../catalog/versions")
 
