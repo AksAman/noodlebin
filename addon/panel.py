@@ -42,7 +42,9 @@ class NODEVAULT_MT_menu(Menu):
     def draw(self, context):
         layout = self.layout
         layout.operator("nodevault.copy_nodes")
+        layout.operator("nodevault.copy_all_nodes")
         layout.operator("nodevault.paste_nodes")
+        layout.operator("nodevault.paste_replace_nodes")
         layout.separator()
         layout.operator("nodevault.save_nodes")
 
@@ -87,7 +89,9 @@ class NODEVAULT_PT_panel(Panel):
             count = sum(1 for n in space.node_tree.nodes if n.select)
             layout.label(text=f"{count} selected")
         layout.operator("nodevault.copy_nodes")
+        layout.operator("nodevault.copy_all_nodes")
         layout.operator("nodevault.paste_nodes")
+        layout.operator("nodevault.paste_replace_nodes")
         layout.operator("nodevault.save_nodes")
         layout.operator("nodevault.reload")
 

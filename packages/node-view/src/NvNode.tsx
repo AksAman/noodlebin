@@ -183,13 +183,25 @@ export function NvNode({ data }: NodeProps<Node<NvNodeData>>) {
 
   const props = (rec?.properties ?? []).filter(showProperty)
   const fill = headerFill(node, catalog, kind)
-  const hasOuts = outputs.length > 0
-  const outsAsBody = inputs.length === 0
+  const outsOnly = inputs.length === 0
   const hasRamp = Boolean(node.widgets.color_ramp)
+  const propertyRows = props.map((prop) => (
+    <PropertyRow key={prop.identifier} prop={prop} value={node.properties[prop.identifier]} />
+  ))
+  const outputRows = outputs.map((s) => (
+    <SocketRow
+      key={s.identifier}
+      socket={s}
+      side="out"
+      linked={false}
+      catalog={catalog}
+      nodeIdname={node.bl_idname}
+    />
+  ))
 
   return (
     <article
-      className={`nv-card${node.mute ? " nv-muted" : ""}${hasOuts && !outsAsBody ? " nv-has-outs" : ""}${hasRamp ? " nv-has-ramp" : ""}`}
+      className={`nv-card${node.mute ? " nv-muted" : ""}${hasRamp ? " nv-has-ramp" : ""}`}
       title={title}
       style={{
         width: Math.max(node.widgets.color_ramp ? 280 : 140, node.width),
@@ -204,24 +216,9 @@ export function NvNode({ data }: NodeProps<Node<NvNodeData>>) {
         {node.mute ? <span className="nv-mute-line" /> : null}
       </header>
       <div className="nv-body">
-        {props.map((prop) => (
-          <PropertyRow key={prop.identifier} prop={prop} value={node.properties[prop.identifier]} />
-        ))}
+        {!outsOnly && outputRows.length > 0 ? <div className="nv-out-stack">{outputRows}</div> : null}
+        {!outsOnly ? propertyRows : null}
         {kind === "group" ? <div className="nv-caption">{groupTree?.name ?? node.name}</div> : null}
-        {hasRamp ? (
-          <div className="nv-ramp-outs">
-            {outputs.map((s) => (
-              <SocketRow
-                key={s.identifier}
-                socket={s}
-                side="out"
-                linked={false}
-                catalog={catalog}
-                nodeIdname={node.bl_idname}
-              />
-            ))}
-          </div>
-        ) : null}
         {node.widgets.color_ramp ? <ColorRampBar widget={node.widgets.color_ramp} /> : null}
         {node.widgets.mapping ? <CurveSparklines widget={node.widgets.mapping} /> : null}
         {node.widgets.image ? <ImageCaption widget={node.widgets.image} /> : null}
@@ -237,33 +234,9 @@ export function NvNode({ data }: NodeProps<Node<NvNodeData>>) {
               hideValue={hasRamp}
             />
           ))}
-          {outsAsBody
-            ? outputs.map((s) => (
-                <SocketRow
-                  key={s.identifier}
-                  socket={s}
-                  side="out"
-                  linked={false}
-                  catalog={catalog}
-                  nodeIdname={node.bl_idname}
-                />
-              ))
-            : null}
+          {outsOnly ? outputRows : null}
         </div>
-        {hasOuts && !outsAsBody && !hasRamp ? (
-          <div className="nv-outs">
-            {outputs.map((s) => (
-              <SocketRow
-                key={s.identifier}
-                socket={s}
-                side="out"
-                linked={false}
-                catalog={catalog}
-                nodeIdname={node.bl_idname}
-              />
-            ))}
-          </div>
-        ) : null}
+        {outsOnly ? propertyRows : null}
       </div>
     </article>
   )

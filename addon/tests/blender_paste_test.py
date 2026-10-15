@@ -171,6 +171,46 @@ def test_frame_parent_roundtrip():
     return "frame parent after paste"
 
 
+def test_paste_replace_clears_existing():
+    text = (FIXTURES / "three-stop-ramp.nodevault.json").read_text(encoding="utf-8")
+    payload = parse_clipboard_text(text)
+    dst = shader_tree()
+    leftover = dst.nodes.new("ShaderNodeRGB")
+    leftover.label = "keep-if-append"
+    leftover.location = (400, 100)
+    append = paste_payload(dst, payload, cursor=(0, 0), editor_tree_type="ShaderNodeTree")
+    assert append.nodes == 1
+    assert any(n.bl_idname == "ShaderNodeRGB" for n in dst.nodes)
+    result = paste_payload(
+        dst, payload, cursor=(99, 99), editor_tree_type="ShaderNodeTree", replace=True
+    )
+    assert result.nodes == 1
+    ids = {n.bl_idname for n in dst.nodes}
+    assert ids == {"ShaderNodeValToRGB"}
+    node = dst.nodes[0]
+    assert _close(node.location[0], 0)
+    assert _close(node.location[1], 0)
+    return "replace clears tree and keeps stored locations"
+
+
+def test_tree_type_mismatch_does_not_replace():
+    src = shader_tree()
+    a = src.nodes.new("ShaderNodeRGB")
+    a.select = True
+    payload = capture_nodes(src, [a], tree_type="ShaderNodeTree")
+    dst = geo_tree()
+    before = len(dst.nodes)
+    try:
+        paste_payload(
+            dst, payload, cursor=(0, 0), editor_tree_type="GeometryNodeTree", replace=True
+        )
+        raise AssertionError("expected TreeTypeMismatch")
+    except TreeTypeMismatch:
+        pass
+    assert len(dst.nodes) == before
+    return "replace mismatch leaves tree"
+
+
 def test_register_paste_operator():
     from addon import register, unregister
 
@@ -179,6 +219,8 @@ def test_register_paste_operator():
     op = bpy.types.NODEVAULT_OT_paste_nodes
     assert "UNDO" in op.bl_options
     assert hasattr(bpy.types, "NODEVAULT_OT_reload")
+    assert hasattr(bpy.types, "NODEVAULT_OT_copy_all_nodes")
+    assert hasattr(bpy.types, "NODEVAULT_OT_paste_replace_nodes")
     unregister()
     return "paste operator registered with UNDO"
 
@@ -190,6 +232,8 @@ TESTS = [
     test_existing_group_untouched,
     test_unknown_bl_idname_skips,
     test_frame_parent_roundtrip,
+    test_paste_replace_clears_existing,
+    test_tree_type_mismatch_does_not_replace,
     test_register_paste_operator,
 ]
 

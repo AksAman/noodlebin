@@ -52,6 +52,14 @@ def register():
             addon_keymaps.append((km, kmi))
             kmi = km.keymap_items.new("nodevault.paste_nodes", "V", "PRESS", **keys)
             addon_keymaps.append((km, kmi))
+        for keys in (
+            {"ctrl": True, "shift": True, "alt": True, "oskey": False},
+            {"ctrl": False, "shift": True, "alt": True, "oskey": True},
+        ):
+            kmi = km.keymap_items.new("nodevault.copy_all_nodes", "C", "PRESS", **keys)
+            addon_keymaps.append((km, kmi))
+            kmi = km.keymap_items.new("nodevault.paste_replace_nodes", "V", "PRESS", **keys)
+            addon_keymaps.append((km, kmi))
 
 
 def unregister():

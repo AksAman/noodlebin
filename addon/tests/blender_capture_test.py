@@ -61,6 +61,21 @@ def test_two_linked_shader():
     return "shader two-node link"
 
 
+def test_copy_all_includes_unselected():
+    tree = shader_tree()
+    a = tree.nodes.new("ShaderNodeTexNoise")
+    b = tree.nodes.new("ShaderNodeBsdfPrincipled")
+    c = tree.nodes.new("ShaderNodeRGB")
+    tree.links.new(a.outputs.get("Fac") or a.outputs[0], b.inputs.get("Roughness"))
+    a.select = True
+    b.select = False
+    c.select = False
+    payload = capture_nodes(tree, list(tree.nodes), tree_type="ShaderNodeTree")
+    assert len(payload["trees"][0]["nodes"]) == 3
+    assert len(payload["trees"][0]["links"]) == 1
+    return "copy all includes unselected"
+
+
 def test_unselected_link_dropped():
     tree = shader_tree()
     a = tree.nodes.new("ShaderNodeTexNoise")
@@ -182,6 +197,7 @@ def test_register():
 
 TESTS = [
     test_two_linked_shader,
+    test_copy_all_includes_unselected,
     test_unselected_link_dropped,
     test_frame_parent,
     test_ramp_three_stops,

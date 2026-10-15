@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import type { CSSProperties, ReactNode } from "react"
 import type { CatalogProperty } from "@nodevault/catalog"
 import type {
   ColorRampWidget,
@@ -24,10 +24,9 @@ const PROP_LABEL: Record<string, string | null> = {
 
 const AXIS = ["X", "Y", "Z", "W"] as const
 
+/** Blender number buttons in the node editor always show three decimal places. */
 export function formatNumber(value: number): string {
-  if (Number.isInteger(value)) return String(value)
-  const s = value.toFixed(3)
-  return s.replace(/\.?0+$/, "")
+  return value.toFixed(3)
 }
 
 export function isRgba(value: JsonValue | undefined): value is number[] {
@@ -198,7 +197,7 @@ export function ColorRampBar({ widget }: { widget: ColorRampWidget }) {
           <span
             key={`${s.position}-${i}`}
             className={`nv-ramp-stop${i === 0 ? " nv-ramp-stop-active" : ""}`}
-            style={{ left: `${s.position * 100}%`, ["--nv-stop" as string]: cssColor(s.color) }}
+            style={{ left: `${s.position * 100}%`, "--nv-stop": cssColor(s.color) } as CSSProperties}
           />
         ))}
       </div>

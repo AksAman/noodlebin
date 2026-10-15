@@ -438,6 +438,7 @@ def paste_payload(
     *,
     cursor: tuple[float, float] | Any,
     editor_tree_type: str | None = None,
+    replace: bool = False,
 ) -> PasteResult:
     """Create nodes in ``tree`` from a validated payload. Mutates ``last_skips``."""
     copied_type = payload.get("tree_type")
@@ -445,10 +446,14 @@ def paste_payload(
         raise TreeTypeMismatch(str(copied_type), editor_tree_type)
     clear_skips()
 
-    origin = payload.get("origin") or {}
-    center = origin.get("selection_center") or [0, 0]
-    cx, cy = float(cursor[0]), float(cursor[1])
-    shift = (cx - float(center[0]), cy - float(center[1]))
+    if replace:
+        tree.nodes.clear()
+        shift = (0.0, 0.0)
+    else:
+        origin = payload.get("origin") or {}
+        center = origin.get("selection_center") or [0, 0]
+        cx, cy = float(cursor[0]), float(cursor[1])
+        shift = (cx - float(center[0]), cy - float(center[1]))
 
     trees = list(payload.get("trees") or [])
     root = next((t for t in trees if t.get("is_root")), trees[0] if trees else None)

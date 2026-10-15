@@ -121,7 +121,7 @@ def _sort_key(node: Any) -> tuple[float, float, str]:
     return (y, x, node.name)
 
 
-def poll_copy(context: Any) -> tuple[bool, str]:
+def poll_copy(context: Any, *, all_nodes: bool = False) -> tuple[bool, str]:
     """Return (ok, status). Status names the missing condition when not ok."""
     space = getattr(context, "space_data", None)
     if space is None or getattr(space, "type", None) != "NODE_EDITOR":
@@ -134,6 +134,10 @@ def poll_copy(context: Any) -> tuple[bool, str]:
         return False, "unsupported editor"
     if hasattr(tree, "is_editable") and not tree.is_editable:
         return False, "no node tree"
+    if all_nodes:
+        if not tree.nodes:
+            return False, "nothing to copy"
+        return True, ""
     selected = [n for n in tree.nodes if n.select]
     if not selected:
         return False, "nothing selected"
