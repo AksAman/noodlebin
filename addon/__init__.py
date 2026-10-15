@@ -2,16 +2,38 @@
 
 Plain python3 tests import serialize/deserialize as submodules without calling
 register(), so they do not need bpy.
+
+Disable/enable (or the N-panel Reload) re-executes submodules. A symlink
+alone does not, because Python keeps the old module objects in sys.modules.
 """
 
 from __future__ import annotations
 
 addon_keymaps = []
 
+_SUBMODULES = (
+    "serialize",
+    "deserialize",
+    "capture",
+    "rebuild",
+    "copy_nodes",
+    "paste_nodes",
+    "panel",
+)
+
+
+def reload_modules():
+    import importlib
+
+    for name in _SUBMODULES:
+        mod = importlib.import_module(f".{name}", __package__)
+        importlib.reload(mod)
+
 
 def register():
     import bpy
 
+    reload_modules()
     from . import copy_nodes, panel, paste_nodes
 
     for cls in (*copy_nodes.classes, *paste_nodes.classes, *panel.classes):
@@ -38,7 +60,10 @@ def unregister():
     from . import copy_nodes, panel, paste_nodes
 
     for km, kmi in addon_keymaps:
-        km.keymap_items.remove(kmi)
+        try:
+            km.keymap_items.remove(kmi)
+        except Exception:
+            pass
     addon_keymaps.clear()
 
     try:
@@ -46,4 +71,7 @@ def unregister():
     except Exception:
         pass
     for cls in reversed((*panel.classes, *paste_nodes.classes, *copy_nodes.classes)):
-        bpy.utils.unregister_class(cls)
+        try:
+            bpy.utils.unregister_class(cls)
+        except Exception:
+            pass

@@ -4,7 +4,10 @@ import {
   MiniMap,
   ReactFlow,
   ReactFlowProvider,
+  applyNodeChanges,
   useReactFlow,
+  type Node,
+  type NodeChange,
 } from "@xyflow/react";
 import type { Catalog } from "@nodevault/catalog";
 import type { NodeVaultTree } from "@nodevault/interchange";
@@ -18,11 +21,13 @@ import {
 } from "react";
 import { cssThemeColor } from "./color";
 import { treeToFlow } from "./graph";
+import { NvEdge } from "./NvEdge";
 import { NvNode } from "./NvNode";
 import type { NvNodeData } from "./types";
 
 const nodeTypes = { nv: NvNode };
-const nodeClassName = (node) => node.type;
+const edgeTypes = { default: NvEdge };
+const nodeClassName = (node: Node) => node.type ?? "";
 
 export type NodeViewProps = {
   tree: NodeVaultTree;
@@ -43,7 +48,7 @@ function NodeViewInner({
   blenderVersion = "",
   showMinimap = true,
 }: NodeViewProps) {
-  const allTrees = trees ?? [tree];
+  const allTrees = useMemo(() => trees ?? [tree], [trees, tree]);
   const [stack, setStack] = useState<NodeVaultTree[]>([tree]);
   const current = stack[stack.length - 1] ?? tree;
   const { fitView } = useReactFlow();
@@ -53,10 +58,25 @@ function NodeViewInner({
     setStack([tree]);
   }, [tree]);
 
-  const { nodes, edges } = useMemo(
+  const built = useMemo(
     () => treeToFlow(current, catalog, blenderVersion, allTrees),
     [current, catalog, blenderVersion, allTrees],
   );
+  const [nodes, setNodes] = useState(built.nodes);
+  const [flow, setFlow] = useState(built);
+  if (flow !== built) {
+    setFlow(built);
+    setNodes(built.nodes);
+  }
+
+  const onNodesChange = useCallback((changes: NodeChange<Node<NvNodeData>>[]) => {
+    setNodes((currentNodes) =>
+      applyNodeChanges(
+        changes.filter((change) => change.type !== "remove"),
+        currentNodes,
+      ),
+    );
+  }, []);
 
   useEffect(() => {
     const id = requestAnimationFrame(() => {
@@ -137,16 +157,25 @@ function NodeViewInner({
       </ol>
       <ReactFlow
         nodes={nodes}
-        edges={edges}
+        edges={built.edges}
         nodeTypes={nodeTypes}
-        nodesDraggable={false}
+        edgeTypes={edgeTypes}
+        onNodesChange={onNodesChange}
+        nodesDraggable
         nodesConnectable={false}
-        elementsSelectable={false}
+        elementsSelectable
+        edgesReconnectable={false}
+        elevateNodesOnSelect={false}
+        deleteKeyCode={null}
+        multiSelectionKeyCode={null}
+        selectionKeyCode={null}
+        selectionOnDrag={false}
         panOnDrag
         zoomOnScroll
         zoomOnPinch
         minZoom={0.15}
         maxZoom={2}
+        colorMode="dark"
         proOptions={{ hideAttribution: true }}
         defaultEdgeOptions={{ type: "default" }}
         onNodeDoubleClick={onNodeDoubleClick}

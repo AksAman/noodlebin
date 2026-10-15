@@ -89,7 +89,7 @@ export function Dropdown({ children }: { children: ReactNode }) {
 export function Checkbox({ on, label }: { on: boolean; label: string }) {
   return (
     <div className={`nv-check${on ? " nv-check-on" : ""}`}>
-      <span className="nv-check-box">{on ? "✓" : ""}</span>
+      <span className="nv-check-box" />
       <span>{label}</span>
     </div>
   )
@@ -179,9 +179,17 @@ export function ColorRampBar({ widget }: { widget: ColorRampWidget }) {
         : `linear-gradient(to right, ${stops
             .map((s) => `${cssColor(s.color)} ${s.position * 100}%`)
             .join(", ")})`
+  const active = stops[0]
   return (
     <div className="nv-ramp">
       <div className="nv-ramp-toolbar">
+        <span className="nv-ramp-btn" aria-hidden>
+          +
+        </span>
+        <span className="nv-ramp-btn" aria-hidden>
+          −
+        </span>
+        <span className="nv-ramp-btn nv-ramp-menu" aria-hidden />
         <Dropdown>{widget.color_mode}</Dropdown>
         <Dropdown>{prettyEnum(widget.interpolation)}</Dropdown>
       </div>
@@ -189,11 +197,23 @@ export function ColorRampBar({ widget }: { widget: ColorRampWidget }) {
         {stops.map((s, i) => (
           <span
             key={`${s.position}-${i}`}
-            className="nv-ramp-stop"
-            style={{ left: `${s.position * 100}%`, background: cssColor(s.color) }}
+            className={`nv-ramp-stop${i === 0 ? " nv-ramp-stop-active" : ""}`}
+            style={{ left: `${s.position * 100}%`, ["--nv-stop" as string]: cssColor(s.color) }}
           />
         ))}
       </div>
+      {active ? (
+        <>
+          <div className="nv-ramp-pos">
+            <span className="nv-ramp-index">1</span>
+            <div className="nv-bar">
+              <span className="nv-ramp-pos-name">Pos</span>
+              <span className="nv-bar-label">{active.position.toFixed(3)}</span>
+            </div>
+          </div>
+          <ColorSwatch color={active.color} wide />
+        </>
+      ) : null}
     </div>
   )
 }

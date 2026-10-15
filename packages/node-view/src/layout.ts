@@ -41,7 +41,10 @@ export function estimatedHeight(node: NodeVaultNode, catalog: Catalog | null): n
   const rec = lookupNode(catalog, node.bl_idname)
   const propCount = rec?.properties.filter((p) => p.identifier !== "warning_propagation").length ?? 0
   let extra = 0
-  if (node.widgets.color_ramp) extra += 56
+  if (node.widgets.color_ramp) {
+    extra += 108
+    extra += Math.min(vis.inputs.length, vis.outputs.length) * ROW_H
+  }
   if (node.widgets.mapping) extra += 52 * node.widgets.mapping.curves.length
   if (node.widgets.image) extra += 20
   if (kind === "group") extra += 20

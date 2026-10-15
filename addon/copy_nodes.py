@@ -24,6 +24,9 @@ class NODEVAULT_OT_copy_nodes(Operator):
         return ok
 
     def execute(self, context):
+        from .rebuild import clear_skips
+
+        clear_skips()
         space = context.space_data
         tree = space.node_tree
         selected = [n for n in tree.nodes if n.select]

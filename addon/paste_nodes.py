@@ -1,10 +1,29 @@
-"""Paste operator stub. Rebuild algorithm is docs/pid/04-paste-in-blender.md."""
+"""Paste operator. Rebuild algorithm is rebuild.py / docs/pid/04-paste-in-blender.md."""
 
 from __future__ import annotations
 
 from bpy.types import Operator
 
+from .deserialize import NodeVaultError, parse_clipboard_text
+from .rebuild import TreeTypeMismatch, paste_payload
 from .serialize import TREE_TYPES
+
+
+def _report_result(op: Operator, result) -> set[str]:
+    skips = result.skips
+    skipped_nodes = sum(1 for s in skips if s.reason == "unknown type")
+    skipped_links = sum(1 for s in skips if s.reason == "unknown socket")
+    msg = f"Pasted {result.nodes} nodes and {result.links} links."
+    if skips:
+        if skipped_nodes or skipped_links:
+            msg += f" Skipped {skipped_nodes} nodes and {skipped_links} links."
+        else:
+            msg += f" Skipped {len(skips)}."
+    if result.nodes == 0:
+        op.report({"WARNING"} if skips else {"ERROR"}, msg if skips else "Nothing pasted.")
+        return {"CANCELLED"}
+    op.report({"WARNING"} if skips else {"INFO"}, msg)
+    return {"FINISHED"}
 
 
 class NODEVAULT_OT_paste_nodes(Operator):
@@ -32,8 +51,32 @@ class NODEVAULT_OT_paste_nodes(Operator):
         return True
 
     def execute(self, context):
-        self.report({"ERROR"}, "Paste is not in this build")
-        return {"CANCELLED"}
+        text = context.window_manager.clipboard or ""
+        try:
+            payload = parse_clipboard_text(text)
+        except NodeVaultError as exc:
+            self.report({"ERROR"}, str(exc))
+            return {"CANCELLED"}
+
+        space = context.space_data
+        tree = space.node_tree
+        created_before = {n.as_pointer() for n in tree.nodes}
+        try:
+            result = paste_payload(
+                tree,
+                payload,
+                cursor=space.cursor_location,
+                editor_tree_type=space.tree_type,
+            )
+        except TreeTypeMismatch as exc:
+            self.report({"ERROR"}, str(exc))
+            return {"CANCELLED"}
+        except Exception as exc:
+            self.report({"ERROR"}, str(exc).split("\n")[0][:200])
+            created = any(n.as_pointer() not in created_before for n in tree.nodes)
+            return {"FINISHED"} if created else {"CANCELLED"}
+
+        return _report_result(self, result)
 
 
 classes = (NODEVAULT_OT_paste_nodes,)

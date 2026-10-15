@@ -65,9 +65,14 @@ function zoneBoxes(tree: NodeVaultTree, catalog: Catalog | null): Node<NvNodeDat
         kind: "zone-bg",
         zoneLabel: zoneCaption(node.bl_idname),
       },
-      style: { width: maxX - minX + pad * 2, height: maxY - minY + pad * 2 },
+      style: {
+        width: maxX - minX + pad * 2,
+        height: maxY - minY + pad * 2,
+        pointerEvents: "none",
+      },
       selectable: false,
       draggable: false,
+      deletable: false,
       zIndex: 0,
     })
   }
@@ -104,8 +109,9 @@ export function treeToFlow(
         kind,
         ...(groupTree ? { groupTree } : {}),
       },
-      selectable: false,
-      draggable: false,
+      selectable: true,
+      draggable: true,
+      deletable: false,
       zIndex: kind === "frame" ? 1 : 2,
       style:
         kind === "frame"
@@ -127,10 +133,12 @@ export function treeToFlow(
       sourceHandle: handleId("out", link.from_socket.identifier),
       targetHandle: handleId("in", link.to_socket.identifier),
       selectable: false,
+      deletable: false,
+      reconnectable: false,
       type: "default",
       style: link.is_muted
-        ? { stroke: color, strokeWidth: 2.5, opacity: 0.5, strokeDasharray: "6 4" }
-        : { stroke: color, strokeWidth: 2.5, opacity: 1 },
+        ? { stroke: color, strokeWidth: 2, opacity: 0.5, strokeDasharray: "6 4" }
+        : { stroke: color, strokeWidth: 2, opacity: 1 },
     }
   })
 

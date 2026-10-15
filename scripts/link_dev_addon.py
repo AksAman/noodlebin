@@ -60,8 +60,8 @@ def main() -> int:
     if not ns.unlink:
         print(
             "\nIn each Blender: Edit → Preferences → Extensions, enable NodeVault.\n"
-            "After Python edits: disable then enable NodeVault, or restart Blender.\n"
-            "UI-only tweaks sometimes show on the next panel redraw."
+            "After Python edits: NodeVault N-panel → Reload Add-on (or disable/enable).\n"
+            "A running session that loaded an older register() still needs one restart."
         )
     return status
 

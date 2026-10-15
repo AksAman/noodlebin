@@ -39,6 +39,7 @@ describe("treeToFlow", () => {
     expect(edges[0]?.sourceHandle).toBe("out:Fac")
     expect(edges[0]?.targetHandle).toBe("in:Roughness")
     expect(cards.find((n) => n.id === "n1")?.position).toEqual({ x: -300, y: -0 })
+    expect(cards.every((n) => n.draggable && n.selectable && n.deletable === false)).toBe(true)
     expect(nodeTitle(root.nodes[0]!, null)).toBe("Noise Texture")
   })
 
@@ -63,6 +64,8 @@ describe("treeToFlow", () => {
     expect(child?.zIndex).toBe(2)
     expect(frame?.position).toEqual({ x: -40, y: -80 })
     expect(child?.position).toEqual({ x: -20, y: -40 })
+    expect(frame?.draggable).toBe(true)
+    expect(child?.draggable).toBe(true)
   })
 
   test("group node points at the inner tree", () => {

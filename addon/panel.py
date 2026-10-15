@@ -5,9 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import bpy
-from bpy.types import Menu, Panel
+from bpy.types import Menu, Operator, Panel
 
 from .capture import load_affects_map
+from .rebuild import last_skips
 
 
 def _addon_version() -> str:
@@ -50,6 +51,27 @@ def draw_header_menu(self, context):
     self.layout.menu("NODEVAULT_MT_menu")
 
 
+def _reload_after_operator():
+    import importlib
+
+    root = importlib.import_module(__package__)
+    root.unregister()
+    root.register()
+    return None
+
+
+class NODEVAULT_OT_reload(Operator):
+    bl_idname = "nodevault.reload"
+    bl_label = "Reload Add-on"
+    bl_description = "Re-read NodeVault Python from disk"
+    bl_options = {"INTERNAL"}
+
+    def execute(self, context):
+        # Unregistering this operator while execute() is running crashes Blender.
+        bpy.app.timers.register(_reload_after_operator, first_interval=0.01)
+        return {"FINISHED"}
+
+
 class NODEVAULT_PT_panel(Panel):
     bl_label = "NodeVault"
     bl_idname = "NODEVAULT_PT_panel"
@@ -67,6 +89,13 @@ class NODEVAULT_PT_panel(Panel):
         layout.operator("nodevault.copy_nodes")
         layout.operator("nodevault.paste_nodes")
         layout.operator("nodevault.save_nodes")
+        layout.operator("nodevault.reload")
+
+        if last_skips:
+            box = layout.box()
+            box.label(text="Last paste skips")
+            for skip in last_skips:
+                box.label(text=f"{skip.target}: {skip.reason}")
 
         version = _addon_version()
         blender = bpy.app.version_string
@@ -78,4 +107,4 @@ class NODEVAULT_PT_panel(Panel):
             )
 
 
-classes = (NODEVAULT_MT_menu, NODEVAULT_PT_panel)
+classes = (NODEVAULT_MT_menu, NODEVAULT_OT_reload, NODEVAULT_PT_panel)
