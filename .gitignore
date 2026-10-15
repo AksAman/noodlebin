@@ -3,6 +3,7 @@ dist/
 coverage/
 **/.vite/
 **/.next/
+**/.data/
 addon/catalog/
 .DS_Store
 __pycache__/

@@ -1,21 +1,24 @@
 import { CoverGrid } from "@/components/CoverGrid"
-import { posts, postsByAuthor } from "@/lib/posts"
+import { filterPosts } from "@/lib/posts"
+import { allPublicPosts } from "@/lib/store"
+import { cn, gallery, shell } from "@/lib/ui"
 
-export function generateStaticParams() {
-  const slugs = [...new Set(posts.map((p) => p.author_slug))]
-  return slugs.map((slug) => ({ slug }))
-}
+export const dynamic = "force-dynamic"
 
 export default async function AuthorRoute({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const list = postsByAuthor(slug)
+  const list = filterPosts(await allPublicPosts(), { author: slug })
 
   return (
-    <div className="app page">
-      <div className="gallery">
-        <header className="gallery-head">
-          <h1>@{slug}</h1>
-          {list[0] ? <p>{list[0].author_name}</p> : <p>No posts for this author.</p>}
+    <div className={cn(shell, "h-auto min-h-full")}>
+      <div className={gallery}>
+        <header>
+          <h1 className="mb-2 text-2xl text-[#eee]">@{slug}</h1>
+          {list[0] ? (
+            <p className="mb-4 max-w-xl leading-snug">{list[0].author_name}</p>
+          ) : (
+            <p className="mb-4 max-w-xl leading-snug">No posts for this author.</p>
+          )}
         </header>
         <CoverGrid posts={list} showAuthor={false} />
       </div>

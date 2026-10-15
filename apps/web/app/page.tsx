@@ -1,6 +1,10 @@
 import { CoverGrid } from "@/components/CoverGrid"
-import { postsFiltered } from "@/lib/posts"
+import { filterPosts } from "@/lib/posts"
+import { allPublicPosts } from "@/lib/store"
+import { cn, gallery, shell } from "@/lib/ui"
 import Link from "next/link"
+
+export const dynamic = "force-dynamic"
 
 const FILTERS = [
   { id: "", label: "All" },
@@ -15,24 +19,31 @@ export default async function HomePage({
   searchParams: Promise<{ tree?: string }>
 }) {
   const { tree = "" } = await searchParams
-  const list = postsFiltered(tree || null)
+  const list = filterPosts(await allPublicPosts(), { tree_type: tree || null })
 
   return (
-    <div className="app page">
-      <div className="gallery">
-        <header className="gallery-head">
-          <h1>Graphs</h1>
-          <p>Open a post, copy the JSON, paste it in Blender. Local paste still lives at Paste.</p>
-          <div className="filters">
+    <div className={cn(shell, "h-auto min-h-full")}>
+      <div className={gallery}>
+        <header>
+          <h1 className="mb-2 text-2xl text-[#eee]">Graphs</h1>
+          <p className="mb-4 max-w-xl leading-snug">Open a graph, copy it, paste it in Blender. To publish one, paste it first.</p>
+          <div className="flex flex-wrap gap-2">
             {FILTERS.map((f) => (
-              <Link key={f.id} className={tree === f.id ? "on" : ""} href={f.id ? `/?tree=${f.id}` : "/"}>
+              <Link
+                key={f.id}
+                className={cn(
+                  "rounded border border-[#555] bg-[#303030] px-3 py-1.5 text-[13px] text-nv-fg no-underline",
+                  tree === f.id && "border-[#888] text-white",
+                )}
+                href={f.id ? `/?tree=${f.id}` : "/"}
+              >
                 {f.label}
               </Link>
             ))}
           </div>
         </header>
         <CoverGrid posts={list} />
-        {list.length === 0 ? <p className="empty-copy">No posts in this filter.</p> : null}
+        {list.length === 0 ? <p className="max-w-md text-center text-xl leading-snug">No posts in this filter.</p> : null}
       </div>
     </div>
   )
