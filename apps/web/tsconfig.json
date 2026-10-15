@@ -1,8 +1,54 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "react-jsx",
-    "types": ["vite/client", "bun"]
+    "baseUrl": ".",
+    "jsx": "preserve",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "incremental": true,
+    "paths": {
+      "@/fixtures/*": [
+        "../../fixtures/*"
+      ],
+      "@/catalog-data/*": [
+        "../../catalog/*"
+      ],
+      "@/node-view/styles.css": [
+        "../../packages/node-view/src/styles.css"
+      ],
+      "@/node-view": [
+        "../../packages/node-view/src/index.ts"
+      ],
+      "@/catalog/load": [
+        "../../packages/catalog/src/load.ts"
+      ],
+      "@/catalog": [
+        "../../packages/catalog/src/index.ts"
+      ],
+      "@/interchange": [
+        "../../packages/interchange/src/index.ts"
+      ],
+      "@/*": [
+        "./*"
+      ]
+    },
+    "types": [
+      "bun",
+      "node"
+    ],
+    "allowJs": true,
+    "esModuleInterop": true
   },
-  "include": ["src", "test", "vite.config.ts"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

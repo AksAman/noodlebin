@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test"
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
-import { loadCatalogDirectory } from "@nodevault/catalog/load"
-import { parseNodeVaultText } from "@nodevault/interchange"
-import { ingestText, serializeCopy } from "../src/ingest"
+import { loadCatalogDirectory } from "@/catalog/load"
+import { parseNodeVaultText } from "@/interchange"
+import { ingestText, serializeCopy } from "@/lib/ingest"
 
 const root = join(import.meta.dir, "../../..")
 const fixturePath = join(root, "fixtures/handwritten/worked-example-shader.nodevault.json")

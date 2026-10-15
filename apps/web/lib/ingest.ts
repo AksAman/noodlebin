@@ -1,11 +1,11 @@
+import { resolveCatalog, type CatalogIndex, type CatalogResolution } from "@/catalog"
 import {
   canonicalJson,
   parseNodeVaultText,
   safeParseNodeVaultText,
   type NodeVaultError,
   type NodeVaultPayload,
-} from "@nodevault/interchange"
-import { resolveCatalog, type CatalogIndex, type CatalogResolution } from "@nodevault/catalog"
+} from "@/interchange"
 
 export type IngestOk = {
   ok: true

@@ -1,9 +1,11 @@
-import { NodeView } from "@nodevault/node-view"
-import type { CatalogResolution } from "@nodevault/catalog"
-import type { NodeVaultPayload } from "@nodevault/interchange"
+"use client"
+
+import { NodeView } from "@/node-view"
+import { shippedCatalogs } from "@/lib/catalogs"
+import { ingestText, serializeCopy, treeTypeLabel } from "@/lib/ingest"
+import type { CatalogResolution } from "@/catalog"
+import type { NodeVaultPayload } from "@/interchange"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { shippedCatalogs } from "./catalogs"
-import { ingestText, serializeCopy, treeTypeLabel } from "./ingest"
 
 function isTextField(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false

@@ -31,6 +31,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun test
       - run: bun run typecheck
+      - run: bun run --filter @nodevault/web build
       - run: python3 -m unittest discover -s addon/tests -t .
 
   blender:

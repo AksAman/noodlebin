@@ -9,8 +9,7 @@
 }
 
 html,
-body,
-#root {
+body {
   margin: 0;
   height: 100%;
   background: var(--body-background-color);
@@ -19,10 +18,169 @@ body,
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-.app {
-  height: 100%;
+body {
   display: flex;
   flex-direction: column;
+}
+
+.app {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.page {
+  min-height: 100%;
+  height: auto;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: #141414;
+  border-bottom: 1px solid #333;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.site-mark {
+  font-weight: 650;
+  color: #eee;
+  text-decoration: none;
+  margin-right: 8px;
+}
+
+.site-nav a {
+  color: #aaa;
+  text-decoration: none;
+}
+
+.site-nav a.active {
+  color: #eee;
+}
+
+.gallery {
+  padding: 24px 20px 48px;
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.gallery-head h1 {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+  color: #eee;
+}
+
+.gallery-head p {
+  margin: 0 0 16px;
+  max-width: 36rem;
+  line-height: 1.4;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filters a {
+  background: #303030;
+  color: var(--font-color);
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.filters a.on {
+  border-color: #888;
+  color: #fff;
+}
+
+.cover-grid {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.cover-card {
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+  background: #202020;
+  border: 1px solid #333;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.cover-art,
+.cover-hero {
+  background: #2a2a2a;
+  min-height: 120px;
+}
+
+.cover-hero {
+  min-height: 180px;
+  flex-shrink: 0;
+}
+
+.tree-ShaderNodeTree {
+  background: linear-gradient(135deg, #4a3820, #1e1a14);
+}
+
+.tree-GeometryNodeTree {
+  background: linear-gradient(135deg, #204a38, #141e1a);
+}
+
+.tree-CompositorNodeTree {
+  background: linear-gradient(135deg, #20304a, #14181e);
+}
+
+.cover-meta {
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.cover-meta span {
+  color: #888;
+  font-size: 12px;
+}
+
+.post-meta {
+  padding: 16px 20px;
+  border-bottom: 1px solid #333;
+}
+
+.post-meta h1 {
+  margin: 0 0 8px;
+  font-size: 1.4rem;
+  color: #eee;
+}
+
+.post-meta p {
+  margin: 0 0 8px;
+}
+
+.post-meta a {
+  color: #ccc;
+}
+
+.post-graph {
+  min-height: 70vh;
+  height: 70vh;
 }
 
 .empty {

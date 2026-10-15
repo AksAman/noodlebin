@@ -2,6 +2,7 @@ node_modules/
 dist/
 coverage/
 **/.vite/
+**/.next/
 addon/catalog/
 .DS_Store
 __pycache__/
