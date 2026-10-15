@@ -1,0 +1,17 @@
+{
+  "name": "@nodevault/catalog",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Load a NodeVault catalog by Blender version and join it to a payload node.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@nodevault/interchange": "workspace:*"
+  }
+}
