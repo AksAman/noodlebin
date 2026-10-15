@@ -1,6 +1,6 @@
 # PID — Copy from the browser
 
-Primary. The graph on screen goes back to the clipboard as a Nodebin payload Blender can paste. This is the reverse direction of paste-in-the-browser.
+Primary. The graph on screen goes back to the clipboard as a NodeVault payload Blender can paste. This is the reverse direction of paste-in-the-browser.
 
 ## When it is available
 
@@ -17,7 +17,7 @@ Copy does not export a screenshot. It does not export the inner group the user h
 ## Procedure
 
 1. Run the canonical serializer from the interchange PID on the in-memory object.
-2. Prefix `nodebin 1\n`.
+2. Prefix `nodevault 1\n`.
 3. Write that string with `navigator.clipboard.writeText`.
 4. If that rejects because the document is unfocused, retry once on the next click of the Copy button, which is a user gesture. If the write still fails, show a readonly text area with the payload selected and the sentence "Copy this text, then paste it in Blender."
 5. On success the button label becomes "Copied" for two seconds, then returns to "Copy".

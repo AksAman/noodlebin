@@ -10,13 +10,13 @@ A Blender extension, the format in the Blender 5.2 manual. Legacy add-ons (`bl_i
 
 ```toml
 schema_version = "1.0.0"
-id = "nodebin"
+id = "nodevault"
 version = "0.1.0"
-name = "Nodebin"
+name = "NodeVault"
 tagline = "Copy nodes to the browser and paste them back"
 maintainer = "Aman"
 type = "add-on"
-blender_version_min = "5.2.0"
+blender_version_min = "5.0.0"
 license = ["SPDX:GPL-3.0-or-later"]
 
 [permissions]
@@ -28,7 +28,7 @@ Rules from the current manifest schema:
 
 - `tagline` is one line, at most 64 characters, and does not end with punctuation.
 - Each permission reason is one short line, at most 64 characters, and does not end with punctuation. Omit a permission rather than leaving it empty.
-- `blender_version_min` is `5.2.0` because that is the manual that documents node copy between Blender instances. The JSON clipboard path can run on older editors, and this project does not claim them.
+- `blender_version_min` is `5.0.0`. Any Blender 5.x is supported. The JSON clipboard path does not depend on the 5.2 copy-buffer behavior; that only affects how Blender's own Ctrl/Cmd+C works alongside NodeVault. Pre-5.0 editors are not claimed.
 - There is no `bl_info`. Name, version, and Blender range live only in the manifest.
 - Imports inside the extension are relative (`from . import serialize`). Preferences use `bl_idname = __package__` and are read with `context.preferences.addons[__package__].preferences`. `__package__` is not a string literal. A submodule reaches it with `from .. import __package__ as base_package`.
 - Third-party Python libraries ship as wheels listed in the manifest. The core extension uses the standard library and `bpy` only, so it lists no wheels.
@@ -51,8 +51,8 @@ The extension ships the operators, the panel, and the vendored catalogs for the 
 
 The same operators are available from:
 
-- A Nodebin submenu in the node editor header.
-- The N-panel, tab name Nodebin.
+- A NodeVault submenu in the node editor header.
+- The N-panel, tab name NodeVault.
 - The keymap below.
 
 Copy's label is "Copy Nodes". Paste's label is "Paste Nodes".
@@ -66,7 +66,7 @@ Registered on the Node Editor keymap for every node tree type.
 | Ctrl or Cmd, plus Shift, plus C | Copy |
 | Ctrl or Cmd, plus Shift, plus V | Paste |
 
-Blender's own Ctrl/Cmd+C and Ctrl/Cmd+V stay bound to Blender. Unregister removes the Nodebin keymap items.
+Blender's own Ctrl/Cmd+C and Ctrl/Cmd+V stay bound to Blender. Unregister removes the NodeVault keymap items.
 
 ## N-panel
 
@@ -78,23 +78,23 @@ The tab shows:
 - After a paste that skipped anything, the skip list from the paste PID. The list clears on the next copy and on the next paste.
 - A Save button.
 
-Save runs the copy procedure and writes the envelope to a path the user picks. The default file name is `nodes.nodebin.json`. The browser page accepts that file as a drop.
+Save runs the copy procedure and writes the envelope to a path the user picks. The default file name is `nodes.nodevault.json`. The browser page accepts that file as a drop.
 
 ## Operators
 
 | bl_idname | Role |
 | --- | --- |
-| `nodebin.copy_nodes` | Copy PID. |
-| `nodebin.paste_nodes` | Paste PID. |
-| `nodebin.save_nodes` | Copy procedure, then a file write via `ExportHelper`. |
+| `nodevault.copy_nodes` | Copy PID. |
+| `nodevault.paste_nodes` | Paste PID. |
+| `nodevault.save_nodes` | Copy procedure, then a file write via `ExportHelper`. |
 
 `poll` matches the PID for that action. Reports use `self.report`. Success is info. A paste that created nothing, or a copy that stored warnings, is a warning. An unreadable clipboard or a tree-type mismatch is an error.
 
 ## Clipboard
 
-Nodebin reads and writes `context.window_manager.clipboard` for the `nodebin 1` envelope. That needs the `clipboard` permission.
+NodeVault reads and writes `context.window_manager.clipboard` for the `nodevault 1` envelope. That needs the `clipboard` permission.
 
-`bpy.ops.node.clipboard_copy()` is called first, as the copy PID describes, so Blender's on-disk copy buffer matches the selection. Nodebin does not read the system clipboard to discover what Ctrl/Cmd+C stored. Ctrl/Cmd+C does not store the node tree there.
+`bpy.ops.node.clipboard_copy()` is called first, as the copy PID describes, so Blender's on-disk copy buffer matches the selection. NodeVault does not read the system clipboard to discover what Ctrl/Cmd+C stored. Ctrl/Cmd+C does not store the node tree there.
 
 ## Layout
 

@@ -1,6 +1,6 @@
 # PID — Graph visualizer
 
-Primary. The component that draws a `nodebin.tree` plus a catalog. The paste page, and later the share page and the embed, all mount this component. They do not draw nodes themselves.
+Primary. The component that draws a `nodevault.tree` plus a catalog. The paste page, and later the share page and the embed, all mount this component. They do not draw nodes themselves.
 
 Package: `packages/node-view`. It imports the catalog loader and has no dependency on accounts, uploads, or routes.
 
@@ -8,7 +8,7 @@ Package: `packages/node-view`. It imports the catalog loader and has no dependen
 
 ```ts
 type NodeViewProps = {
-  tree: NodebinTree
+  tree: NodeVaultTree
   catalog: Catalog | null
   readOnly: true
   onCopy?: () => void
@@ -38,11 +38,11 @@ Fit computes the bounding box of those points, plus each node's width and an est
 - Double-click a group node to show that group's tree. A breadcrumb lists Root and each open group. A crumb or Escape pops one level.
 - The component does not reorder nodes and does not write back into `tree`.
 
-Use current React Flow (`@xyflow/react`) for pan, zoom, and edges, with one custom node renderer. The sample types in `prior_projects/nodebin-visualizer` (`dataNode`, `sourceNode`, `functionNode`, `valueNode`) are not used.
+Use current React Flow (`@xyflow/react`) for pan, zoom, and edges, with one custom node renderer. The sample types in `prior_projects/nodevault-visualizer` (`dataNode`, `sourceNode`, `functionNode`, `valueNode`) are not used.
 
 ## Look
 
-Match the static mock in `prior_projects/nodebin-visualizer/src/playground` and the theme values from the catalog.
+Match the static mock in `prior_projects/nodevault-visualizer/src/playground` and the theme values from the catalog.
 
 | Element | Rule |
 | --- | --- |

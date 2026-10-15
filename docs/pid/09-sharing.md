@@ -14,14 +14,14 @@ Paste in Blender from a link fetches the payload text, validates it, and runs th
 
 ## Post fields
 
-These sit beside the payload. None of them are written into `nodebin.tree`.
+These sit beside the payload. None of them are written into `nodevault.tree`.
 
 | Field | Required | Notes |
 | --- | --- | --- |
 | `slug` | yes | Public path `/p/:slug`. |
 | `title` | yes | |
 | `author_name`, `author_slug` | yes | Author path `/@author_slug`. |
-| `tree` | no | The `nodebin.tree` object. Null when the post was created without a payload. The page then shows the cover and a line that the graph appears when a payload is attached. |
+| `tree` | no | The `nodevault.tree` object. Null when the post was created without a payload. The page then shows the cover and a line that the graph appears when a payload is attached. |
 | `blender_version_string` | yes | Taken from the payload when one is present. Typed by the user otherwise. |
 | `tree_type` | yes | The same three values as the payload. |
 | `cover_url` | public posts | Still image and video poster. A vault draft synced from the add-on may omit it. The public grid and the share card require it. |
@@ -42,18 +42,18 @@ Caps: cover 10 MB, video 50 MB, blend 100 MB, payload 5 MB. Other video types ar
 
 **Author `/@author_slug`.** The same grid for one name.
 
-**Web upload.** Title, author, tree type, Blender version, cover, optional video, optional blend, optional `.nodebin.json`. The response is the public URL and the edit token. A later request with that token can attach a payload from the add-on.
+**Web upload.** Title, author, tree type, Blender version, cover, optional video, optional blend, optional `.nodevault.json`. The response is the public URL and the edit token. A later request with that token can attach a payload from the add-on.
 
 ## Share card
 
-Generated when the post is created and stored as `card_url`. The image is 1200 by 630. The cover fills the frame. A dark bar along the bottom holds the title, `@author`, the tree type, and the word Nodebin. The post's Open Graph and Twitter tags point at that image.
+Generated when the post is created and stored as `card_url`. The image is 1200 by 630. The cover fills the frame. A dark bar along the bottom holds the title, `@author`, the tree type, and the word NodeVault. The post's Open Graph and Twitter tags point at that image.
 
 ## Add-on: login, sync, open
 
 These operators ship with sharing, not with the core extension. The manifest then adds:
 
 ```toml
-network = "Sync node trees to your Nodebin vault"
+network = "Sync node trees to your NodeVault vault"
 ```
 
 Every request checks `bpy.app.online_access` first. When it is false, the operator reports that System preferences have Allow Online Access turned off, and it does not open a socket. When `bpy.app.online_access_overridden` is set, the report says this Blender was started with offline mode and the preference cannot be changed.
@@ -62,13 +62,13 @@ The author logs in once from the add-on preferences. The button opens the system
 
 The N-panel then has two extra buttons beside Copy and Paste.
 
-**Sync to vault.** Runs the same capture as Copy, including `bpy.ops.node.clipboard_copy()`. Uploads the `nodebin.tree` JSON to the logged-in account. If the running Blender's node copy-buffer path can be resolved, the `.blend` fragment is uploaded with it and stored as `blend_url`. No screenshot and no video are captured in Blender. The item is a vault draft: `cover_url` may be null, and `card_url` is absent until a cover exists. Sync of a selection that was already synced updates that draft instead of creating a second one. The match key is stored in the extension user directory, keyed by a hash of the blend filepath plus the node-tree name, and is replaced when Sync runs again on that tree.
+**Sync to vault.** Runs the same capture as Copy, including `bpy.ops.node.clipboard_copy()`. Uploads the `nodevault.tree` JSON to the logged-in account. If the running Blender's node copy-buffer path can be resolved, the `.blend` fragment is uploaded with it and stored as `blend_url`. No screenshot and no video are captured in Blender. The item is a vault draft: `cover_url` may be null, and `card_url` is absent until a cover exists. Sync of a selection that was already synced updates that draft instead of creating a second one. The match key is stored in the extension user directory, keyed by a hash of the blend filepath plus the node-tree name, and is replaced when Sync runs again on that tree.
 
 **Open.** Syncs if this tree has no draft yet, then opens the draft's page in the system browser. That page is where the author adds a cover, a video, and a description, and marks the draft public. The share card is generated at that moment, from the cover, using the rules above.
 
 A draft is listed in the author's vault and is absent from the public home grid. Public posts still require a cover.
 
-`nodebin.paste_link` takes a `/p/:slug` URL, fetches the payload, and runs the paste operator. When the post has a `blend_url` produced from Blender's copy buffer and `blender_version` equals the running version, paste writes that file to the node copy-buffer path and calls `bpy.ops.node.clipboard_paste` instead of the JSON builder. Any other blend, or a version mismatch, uses the JSON paste from the paste-in-Blender PID and reports that Blender's own paste was not used.
+`nodevault.paste_link` takes a `/p/:slug` URL, fetches the payload, and runs the paste operator. When the post has a `blend_url` produced from Blender's copy buffer and `blender_version` equals the running version, paste writes that file to the node copy-buffer path and calls `bpy.ops.node.clipboard_paste` instead of the JSON builder. Any other blend, or a version mismatch, uses the JSON paste from the paste-in-Blender PID and reports that Blender's own paste was not used.
 
 ## API
 

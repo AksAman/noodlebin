@@ -1,6 +1,6 @@
 # PID — Copy from Blender
 
-Primary. This is the first half of the core loop: a selection in a node editor becomes a `nodebin 1` clipboard payload. The payload shape is owned by the interchange PID. The keymap and panel are owned by the add-on PID.
+Primary. This is the first half of the core loop: a selection in a node editor becomes a `nodevault 1` clipboard payload. The payload shape is owned by the interchange PID. The keymap and panel are owned by the add-on PID.
 
 ## Who can run it
 
@@ -20,13 +20,13 @@ Blender 5.x node Copy (Ctrl/Cmd+C, `bpy.ops.node.clipboard_copy`) keeps a real c
 
 That file is a `.blend` fragment. `bpy.ops.node.clipboard_copy` is still documented as the internal clipboard. It does not write `window_manager.clipboard`. Pasting into a browser after Ctrl/Cmd+C yields nothing the graph visualizer can draw.
 
-Nodebin does not replace that operator. Nodebin Copy adds the text payload the browser needs, and it asks Blender to refresh its own copy buffer so the two stay aligned.
+NodeVault does not replace that operator. NodeVault Copy adds the text payload the browser needs, and it asks Blender to refresh its own copy buffer so the two stay aligned.
 
 ## What the user does
 
 1. Select the nodes they want to share. Frames, reroutes, groups, and zone ends are selected the same way as any other node.
-2. Run Nodebin: Copy from the node editor's Nodebin menu, the N-panel, or Ctrl/Cmd+Shift+C.
-3. The system clipboard holds the `nodebin 1` payload. A report says how many nodes were copied and the tree type.
+2. Run NodeVault: Copy from the node editor's NodeVault menu, the N-panel, or Ctrl/Cmd+Shift+C.
+3. The system clipboard holds the `nodevault 1` payload. A report says how many nodes were copied and the tree type.
 
 Native Ctrl/Cmd+C is unchanged and still only refreshes Blender's copy buffer.
 
@@ -44,7 +44,7 @@ A wire to a node that is still outside the set after these rules is omitted from
 
 ## Capture procedure
 
-1. Call `bpy.ops.node.clipboard_copy()` so Blender writes its copy buffer for this selection. If the operator cancels, Nodebin Copy cancels too and shows Blender's report. Nodebin does not try to read that `.blend` back in the core loop. The path comes from Blender's `node_copybuffer_filepath_get` in `source/blender/editors/space_node/clipboard.cc` and is not a Python API. Vault sync, in the sharing PID, may attach that file when the path can be resolved for the running version.
+1. Call `bpy.ops.node.clipboard_copy()` so Blender writes its copy buffer for this selection. If the operator cancels, NodeVault Copy cancels too and shows Blender's report. NodeVault does not try to read that `.blend` back in the core loop. The path comes from Blender's `node_copybuffer_filepath_get` in `source/blender/editors/space_node/clipboard.cc` and is not a Python API. Vault sync, in the sharing PID, may attach that file when the path can be resolved for the running version.
 2. Read `bpy.app.version` and `bpy.app.version_string`.
 3. Build the node set with the rules above.
 4. Assign payload ids. Root nodes are `n1`, `n2`, … in a stable order: ascending `location_absolute.y`, then ascending `location_absolute.x`, then `name`. The same selection must produce the same JSON except `copied_at`.
@@ -55,7 +55,7 @@ A wire to a node that is still outside the set after these rules is omitted from
 9. Write widgets for color ramps, curve mappings, and images as specified in the interchange PID.
 10. Write links whose both ends are in the node set.
 11. For each included group, append a tree. Group interface items come from `node_tree.interface.items_tree` in order. Use `in_out` on each socket. Do not read `node_tree.inputs` or `node_tree.outputs`. Those collections are the pre-4.0 API and are absent on current Blender.
-12. Serialize with the canonical key order from the interchange PID, prefix `nodebin 1\n`, and assign `context.window_manager.clipboard`.
+12. Serialize with the canonical key order from the interchange PID, prefix `nodevault 1\n`, and assign `context.window_manager.clipboard`.
 
 Group tree ids are `group:` plus the data-block name. A group data-block used twice is stored once and referenced twice via `group_tree_id`.
 

@@ -7,19 +7,19 @@ Primary. This document owns the clipboard payload. Copy, paste, the graph visual
 The system clipboard holds UTF-8 text:
 
 ```text
-nodebin 1
+nodevault 1
 { ...json... }
 ```
 
-Line 1 is exactly `nodebin 1` (the format version), with no spaces before it and a single newline after it. The rest of the clipboard is one JSON object. Parsers accept a missing trailing newline. Parsers reject a different magic, including `nodebin 2`, until a migration exists.
+Line 1 is exactly `nodevault 1` (the format version), with no spaces before it and a single newline after it. The rest of the clipboard is one JSON object. Parsers accept a missing trailing newline. Parsers reject a different magic, including `nodevault 2`, until a migration exists.
 
-A file saved from the browser uses the extension `.nodebin.json` and contains the same text, magic line included.
+A file saved from the browser uses the extension `.nodevault.json` and contains the same text, magic line included.
 
 The JSON object:
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `format` | string | yes | Always `nodebin.tree`. |
+| `format` | string | yes | Always `nodevault.tree`. |
 | `format_version` | number | yes | Always `1` for this PID. |
 | `blender_version` | `[major, minor, patch]` | yes | `bpy.app.version` at copy time. |
 | `blender_version_string` | string | yes | `bpy.app.version_string`, display only. |
@@ -252,7 +252,7 @@ A noise texture feeding the roughness of a Principled BSDF. Floats in the real p
 
 ```json
 {
-  "format": "nodebin.tree",
+  "format": "nodevault.tree",
   "format_version": 1,
   "blender_version": [5, 0, 1],
   "blender_version_string": "5.0.1",

@@ -1,6 +1,6 @@
 # PID — Node catalog
 
-Primary. The catalog is the registry a Blender version contributes to Nodebin. The graph visualizer uses it to draw nodes it has never had handwritten code for. The add-on uses it when pasting a tree that was copied on a different Blender version.
+Primary. The catalog is the registry a Blender version contributes to NodeVault. The graph visualizer uses it to draw nodes it has never had handwritten code for. The add-on uses it when pasting a tree that was copied on a different Blender version.
 
 Same-version paste does not require the catalog. The payload already contains the instance sockets and the property overrides. See the interchange PID.
 
@@ -59,7 +59,7 @@ Discover categories from the add menus registered in that binary. Do not hardcod
 
 Algorithm:
 
-1. For each tree type, create a throwaway node group `bpy.data.node_groups.new("_nodebin_catalog", tree_type)`.
+1. For each tree type, create a throwaway node group `bpy.data.node_groups.new("_nodevault_catalog", tree_type)`.
 2. Find the add menu for that editor. Prefer the menu class the node editor uses for Shift+A in that tree type. Search `bpy.types` for `Menu` subclasses whose `bl_idname` the node editor's `draw` references, or whose poll accepts this tree type.
 3. Walk the menu's `layout` by invoking its `draw` into a dummy layout is not possible without a UI. Instead, read the menu class's Python `draw` only as a hint. The reliable list is the set of node types the menu operators add: collect `bl_idname` values from `bpy.ops.node.add_node` enum items available for this tree, and from any `nodeitems` or asset menus that version exposes.
 4. If that yields an empty set, fall back to concrete subclasses of `ShaderNode`, `GeometryNode`, or `CompositorNode` whose `poll` or `poll_instance` accepts the throwaway tree. Those nodes land in a category id `UNCATEGORIZED`.

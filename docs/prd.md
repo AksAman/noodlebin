@@ -1,4 +1,4 @@
-# Nodebin — Master PID
+# NodeVault — Master PID
 
 This is the master product document. Feature detail lives in the PIDs under [`pid/`](pid/). An implementer reads the newest file in [`checkpoints/`](checkpoints/) first, then this file, then the primary PIDs in order. Sharing and embedding are specified, and they are not the first thing to build.
 
@@ -6,7 +6,7 @@ After every major or minor feature, the implementer stops, writes a checkpoint, 
 
 ## Product
 
-Nodebin copies a Blender node selection to the clipboard and pastes it into a browser, where the graph is drawn. The same clipboard payload pastes back into Blender and recreates the nodes.
+NodeVault copies a Blender node selection to the clipboard and pastes it into a browser, where the graph is drawn. The same clipboard payload pastes back into Blender and recreates the nodes.
 
 That round trip is the product. A person can do it with no account and no upload: copy in Blender, paste in the browser, copy in the browser, paste in Blender.
 
@@ -84,11 +84,11 @@ A Blender artist who builds shader, geometry, or compositor nodes and wants anot
 
 The first session looks like this:
 
-1. In Blender, select the nodes and run Nodebin: Copy.
-2. Open the Nodebin page and paste.
+1. In Blender, select the nodes and run NodeVault: Copy.
+2. Open the NodeVault page and paste.
 3. The graph appears, laid out as it was in Blender.
 4. Copy from that page.
-5. In another Blender file, focus the matching node editor and run Nodebin: Paste.
+5. In another Blender file, focus the matching node editor and run NodeVault: Paste.
 6. The nodes, values, and links are back.
 
 ## Priority
@@ -114,8 +114,8 @@ Blender add-on                         Browser
 ┌─────────────────────┐               ┌──────────────────────────┐
 │ Copy selection      │  clipboard    │ Paste target             │
 │        │            │ ───────────▶  │        │                 │
-│        ▼            │  nodebin 1    │        ▼                 │
-│ nodebin.tree JSON   │  + JSON       │ Graph visualizer         │
+│        ▼            │  nodevault 1    │        ▼                 │
+│ nodevault.tree JSON   │  + JSON       │ Graph visualizer         │
 │                     │ ◀───────────  │        │                 │
 │ Paste into editor   │  same payload │ Copy button              │
 └─────────────────────┘               └──────────────────────────┘
@@ -131,18 +131,18 @@ The add-on talks to the system clipboard. The browser talks to the system clipbo
 
 These are settled. Feature PIDs implement them.
 
-- The clipboard is the interchange. The first line is the ASCII magic `nodebin 1`. The remainder is UTF-8 JSON, `format` equal to `nodebin.tree`, `format_version` equal to `1`.
+- The clipboard is the interchange. The first line is the ASCII magic `nodevault 1`. The remainder is UTF-8 JSON, `format` equal to `nodevault.tree`, `format_version` equal to `1`.
 - The payload is self-sufficient for a same-version round trip. Paste in Blender creates each node fresh and applies the stored sockets, properties, and widgets. It does not need the catalog for that.
 - The catalog is the drawing registry and the cross-version guide. The browser joins the payload to the catalog for that `blender_version` to get header colors, socket colors, category, and the full socket list of a node at its default mode. Properties that change the socket layout are always stored on the instance.
 - Supported editors are shader (`ShaderNodeTree`), geometry nodes (`GeometryNodeTree`), and compositor (`CompositorNodeTree`).
-- Blender's own node Ctrl/Cmd+C and Ctrl/Cmd+V stay untouched. As of the 5.2 manual, that copy writes a partial `.blend` to Blender's on-disk copy buffer and another Blender on the same machine can paste it. It does not put text on the system clipboard, so a browser still cannot draw it. Nodebin's shortcut writes `nodebin 1` text to the system clipboard, which is the only payload the browser reads. Details are in the copy-from-Blender PID.
+- Blender's own node Ctrl/Cmd+C and Ctrl/Cmd+V stay untouched. As of the 5.2 manual, that copy writes a partial `.blend` to Blender's on-disk copy buffer and another Blender on the same machine can paste it. It does not put text on the system clipboard, so a browser still cannot draw it. NodeVault's shortcut writes `nodevault 1` text to the system clipboard, which is the only payload the browser reads. Details are in the copy-from-Blender PID.
 - The add-on is a current extension: `blender_manifest.toml`, no `bl_info`, relative imports, preferences keyed by `__package__`. Built with `blender --command extension build`. The add-on PID has the manifest.
 - The browser graph is read-only in the core product. Copy returns the payload that was pasted, byte for byte after a canonical parse-and-serialize that preserves every field. The page does not invent a second dialect.
 - Browser layout uses each node's absolute Blender position with Y flipped. Blender paste uses parent-relative positions and drops the graph so its center sits on the node cursor.
 - Groups are real node trees inside the payload, not flattened nodes. The browser can open a group. Blender paste recreates the group data-blocks first.
 - On a new Blender release, one headless command writes `catalog/versions/<version>/catalog.json`. Ordinary new nodes render without a code change. The command and the registry rules are in the catalog PID.
 - The site does not run Blender and does not execute anything inside a `.blend`. That constraint belongs to sharing and stays there.
-- Theme colors and the static HTML mock in `prior_projects/nodebin-visualizer` are a look reference. The old add-on is not the implementation. It targets Blender 2.92 and serializes the wrong object.
+- Theme colors and the static HTML mock in `prior_projects/nodevault-visualizer` are a look reference. The old add-on is not the implementation. It targets Blender 2.92 and serializes the wrong object.
 
 ## Repository the core implies
 
@@ -175,4 +175,4 @@ Specified so they are not forgotten, and sequenced so they do not block the loop
 
 ## Prior projects
 
-`prior_projects/NodeBinBlenderAddon` and `prior_projects/nodebin-visualizer` stay as reference. Take the playground's spacing, colors, and socket rows as the visual target. Take `bpy_colors.json` as an example of the catalog `themes` object. Leave the 2.92 serializer, the object named `Serializer`, and the sample React Flow node types (`dataNode`, `sourceNode`, `functionNode`, `valueNode`) behind.
+`prior_projects/NodeBinBlenderAddon` and `prior_projects/nodevault-visualizer` stay as reference. Take the playground's spacing, colors, and socket rows as the visual target. Take `bpy_colors.json` as an example of the catalog `themes` object. Leave the 2.92 serializer, the object named `Serializer`, and the sample React Flow node types (`dataNode`, `sourceNode`, `functionNode`, `valueNode`) behind.
