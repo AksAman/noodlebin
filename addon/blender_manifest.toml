@@ -1,0 +1,21 @@
+schema_version = "1.0.0"
+id = "nodevault"
+version = "0.1.0"
+name = "NodeVault"
+tagline = "Copy nodes to the browser and paste them back"
+maintainer = "Aman"
+type = "add-on"
+blender_version_min = "5.0.0"
+license = ["SPDX:GPL-3.0-or-later"]
+
+[permissions]
+clipboard = "Copy and paste node trees as text"
+files = "Save a node tree to a file"
+
+[build]
+paths_exclude_pattern = [
+  "__pycache__/",
+  "/.git/",
+  "/*.zip",
+  "tests/",
+]
