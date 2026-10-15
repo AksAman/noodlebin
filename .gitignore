@@ -1,6 +1,7 @@
 node_modules/
 dist/
 coverage/
+**/.vite/
 addon/catalog/
 .DS_Store
 __pycache__/
