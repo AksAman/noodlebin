@@ -1,9 +1,9 @@
 import type { CSSProperties } from "react"
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react"
 import { headerColor, lookupNode, socketColor } from "@nodevault/catalog"
-import type { InterfaceItem, NodeSocket, NodeVaultNode } from "@nodevault/interchange"
+import type { InterfaceItem, JsonValue, NodeSocket, NodeVaultNode } from "@nodevault/interchange"
 import { cssColor, cssThemeColor } from "./color"
-import { handleId, nodeTitle, visibleSockets } from "./layout"
+import { handleId, nodeTitle, nodeWidth, visibleSockets } from "./layout"
 import type { NvNodeData } from "./types"
 import {
   ColorRampBar,
@@ -181,12 +181,20 @@ export function NvNode({ data }: NodeProps<Node<NvNodeData>>) {
     }))
   }
 
-  const props = (rec?.properties ?? []).filter(showProperty)
+  const propValues: Record<string, JsonValue> = Object.fromEntries(
+    (rec?.properties ?? []).map((p) => [p.identifier, node.properties[p.identifier] ?? (p.default as JsonValue)]),
+  )
+  const props = (rec?.properties ?? []).filter((p) => showProperty(p, node.bl_idname, propValues))
   const fill = headerFill(node, catalog, kind)
   const outsOnly = inputs.length === 0
   const hasRamp = Boolean(node.widgets.color_ramp)
   const propertyRows = props.map((prop) => (
     <PropertyRow key={prop.identifier} prop={prop} value={node.properties[prop.identifier]} />
+  ))
+  const pointerRows = (POINTER_FIELDS[node.bl_idname] ?? []).map((name) => (
+    <div key={name} className="nv-prop">
+      <div className="nv-dropdown nv-pointer">{name}</div>
+    </div>
   ))
   const outputRows = outputs.map((s) => (
     <SocketRow
@@ -204,7 +212,7 @@ export function NvNode({ data }: NodeProps<Node<NvNodeData>>) {
       className={`nv-card${node.mute ? " nv-muted" : ""}${hasRamp ? " nv-has-ramp" : ""}`}
       title={title}
       style={{
-        width: Math.max(node.widgets.color_ramp ? 280 : 140, node.width),
+        width: nodeWidth(node),
         opacity: node.mute ? 0.45 : 1,
       }}
       data-id={node.id}
@@ -217,7 +225,7 @@ export function NvNode({ data }: NodeProps<Node<NvNodeData>>) {
       </header>
       <div className="nv-body">
         {!outsOnly && outputRows.length > 0 ? <div className="nv-out-stack">{outputRows}</div> : null}
-        {!outsOnly ? propertyRows : null}
+        {!outsOnly && propertyRows.length > 0 ? <div className="nv-props">{propertyRows}</div> : null}
         {kind === "group" ? <div className="nv-caption">{groupTree?.name ?? node.name}</div> : null}
         {node.widgets.color_ramp ? <ColorRampBar widget={node.widgets.color_ramp} /> : null}
         {node.widgets.mapping ? <CurveSparklines widget={node.widgets.mapping} /> : null}
@@ -236,10 +244,20 @@ export function NvNode({ data }: NodeProps<Node<NvNodeData>>) {
           ))}
           {outsOnly ? outputRows : null}
         </div>
-        {outsOnly ? propertyRows : null}
+        {outsOnly && (propertyRows.length > 0 || pointerRows.length > 0) ? (
+          <div className="nv-props">
+            {pointerRows}
+            {propertyRows}
+          </div>
+        ) : null}
       </div>
     </article>
   )
+}
+
+/** Object/ID pickers Blender draws on a node. The catalog has no pointer properties, so these are listed by hand. */
+const POINTER_FIELDS: Record<string, string[]> = {
+  ShaderNodeTexCoord: ["Object"],
 }
 
 export { zoneCaption }

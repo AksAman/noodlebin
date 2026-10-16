@@ -4,31 +4,52 @@ export function cn(...parts: Array<string | false | null | undefined>): string {
 
 export const shell = "flex min-h-0 flex-1 flex-col"
 
-export const gallery = "mx-auto w-full max-w-[960px] px-5 pb-12 pt-6"
+/** Scrolling pages: grow to fill the screen but never shrink, so the footer follows the content. */
+export const docShell = "flex flex-[1_0_auto] flex-col"
 
-export const btn =
-  "cursor-pointer rounded border border-[#555] bg-[#303030] px-3 py-1.5 text-[13px] text-nv-fg disabled:opacity-60"
+export const container = "mx-auto w-full max-w-[1240px] px-5 sm:px-8"
 
-export const btnAccent =
-  "inline-block cursor-pointer rounded border border-nv-accent-edge bg-nv-accent px-3 py-1.5 text-center text-[13px] font-semibold text-nv-ink no-underline disabled:opacity-60"
+export const page = `${container} pb-24`
+
+const btnBase =
+  "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium no-underline transition-colors duration-150 ease-out-quart disabled:cursor-default disabled:opacity-55"
+
+export const btn = cn(btnBase, "border border-line-strong bg-surface text-fg hover:border-subtle")
+
+export const btnAccent = cn(btnBase, "border border-transparent bg-accent text-accent-ink hover:bg-accent-hover")
+
+export const btnGhost = cn(btnBase, "border border-transparent bg-transparent text-muted hover:bg-sunken hover:text-fg")
 
 export const field =
-  "rounded-md border border-[#3f3f3f] bg-[#141414] px-2.5 py-2 text-[#e4e4e4]"
+  "w-full rounded-md border border-line-strong bg-surface px-3 py-2 text-[14px] text-fg placeholder:text-subtle focus-visible:border-accent focus-visible:outline-none"
 
-export const notice =
-  "rounded border border-[#6a5a20] bg-[#3a3218] px-2 py-1 text-xs"
+export const notice = "rounded-md bg-warn-bg px-2.5 py-1 text-xs text-warn-fg"
 
-export const canvas = "relative min-h-0 flex-1"
+export const errorBox = "rounded-md bg-danger-bg px-3 py-2 text-[13px] text-danger-fg"
+
+export const canvas = "relative min-h-0 flex-1 bg-canvas"
 
 export const fallback =
-  "absolute inset-x-[12%] inset-y-12 z-[8] flex flex-col gap-2 rounded-md border border-[#555] bg-[#1e1e1e] p-4"
+  "absolute inset-x-[8%] inset-y-10 z-[8] flex flex-col gap-3 rounded-lg border border-line-strong bg-surface p-4 text-fg shadow-[0_24px_60px_-20px_rgb(0_0_0_/_60%)]"
 
-const treeArt: Record<string, string> = {
-  ShaderNodeTree: "bg-[linear-gradient(135deg,#4a3820,#1e1a14)]",
-  GeometryNodeTree: "bg-[linear-gradient(135deg,#204a38,#141e1a)]",
-  CompositorNodeTree: "bg-[linear-gradient(135deg,#20304a,#14181e)]",
+export const meta = "text-[13px] text-muted tabular-nums"
+
+const treeDot: Record<string, string> = {
+  ShaderNodeTree: "bg-tree-shader",
+  GeometryNodeTree: "bg-tree-geometry",
+  CompositorNodeTree: "bg-tree-compositor",
 }
 
-export function treeArtClass(treeType: string): string {
-  return cn("min-h-[120px] bg-[#2a2a2a]", treeArt[treeType])
+export function treeDotClass(treeType: string): string {
+  return cn("inline-block size-2 shrink-0 rounded-full", treeDot[treeType] ?? "bg-subtle")
+}
+
+const editorName: Record<string, string> = {
+  ShaderNodeTree: "Shader Editor",
+  GeometryNodeTree: "Geometry Node Editor",
+  CompositorNodeTree: "Compositor",
+}
+
+export function treeEditorName(treeType: string): string {
+  return editorName[treeType] ?? "node editor"
 }

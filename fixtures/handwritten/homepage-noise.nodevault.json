@@ -1,0 +1,2434 @@
+{
+  "format": "nodevault.tree",
+  "format_version": 1,
+  "blender_version": [
+    5,
+    1,
+    0
+  ],
+  "blender_version_string": "5.1.0",
+  "tree_type": "ShaderNodeTree",
+  "copied_at": "2026-10-16T02:31:58Z",
+  "origin": {
+    "selection_center": [
+      -220,
+      100
+    ],
+    "node_count": 18
+  },
+  "trees": [
+    {
+      "id": "root",
+      "name": "Shader Nodetree",
+      "is_root": true,
+      "interface": [],
+      "nodes": [
+        {
+          "id": "n1",
+          "bl_idname": "ShaderNodeVectorMath",
+          "name": "Vector Math.002",
+          "label": "Distance to center",
+          "location": [
+            -840,
+            -200
+          ],
+          "location_absolute": [
+            -840,
+            -200
+          ],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {
+            "operation": "DISTANCE"
+          },
+          "widgets": {},
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Vector",
+                "name": "Vector",
+                "label": "Vector",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 0,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Vector_001",
+                "name": "Vector",
+                "label": "Vector",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 1,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Vector_002",
+                "name": "Vector",
+                "label": "Vector",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 2,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "Scale",
+                "name": "Scale",
+                "label": "Scale",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 3,
+                "default_value": 1,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              }
+            ],
+            "outputs": [
+              {
+                "identifier": "Vector",
+                "name": "Vector",
+                "label": "Vector",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 0,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 1,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n2",
+          "bl_idname": "ShaderNodeMath",
+          "name": "Math.003",
+          "label": "In cells",
+          "location": [
+            -640,
+            -200
+          ],
+          "location_absolute": [
+            -640,
+            -200
+          ],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {
+            "operation": "MULTIPLY"
+          },
+          "widgets": {},
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Value_001",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 1,
+                "default_value": 25,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Value_002",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 2,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              }
+            ],
+            "outputs": [
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n3",
+          "bl_idname": "ShaderNodeMath",
+          "name": "Math.004",
+          "label": "Inside dot",
+          "location": [
+            360,
+            -90
+          ],
+          "location_absolute": [
+            360,
+            -90
+          ],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {
+            "operation": "LESS_THAN"
+          },
+          "widgets": {},
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Value_001",
+                "name": "Value",
+                "label": "Threshold",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 1,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Value_002",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 2,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              }
+            ],
+            "outputs": [
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n4",
+          "bl_idname": "ShaderNodeTexCoord",
+          "name": "Texture Coordinate",
+          "label": "",
+          "location": [
+            -1400,
+            0
+          ],
+          "location_absolute": [
+            -1400,
+            0
+          ],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {},
+          "widgets": {},
+          "sockets": {
+            "inputs": [],
+            "outputs": [
+              {
+                "identifier": "Generated",
+                "name": "Generated",
+                "label": "Generated",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 0,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Normal",
+                "name": "Normal",
+                "label": "Normal",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 1,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "UV",
+                "name": "UV",
+                "label": "UV",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 2,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Object",
+                "name": "Object",
+                "label": "Object",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 3,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Camera",
+                "name": "Camera",
+                "label": "Camera",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 4,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Window",
+                "name": "Window",
+                "label": "Window",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 5,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Reflection",
+                "name": "Reflection",
+                "label": "Reflection",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 6,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n5",
+          "bl_idname": "ShaderNodeRGBToBW",
+          "name": "RGB to BW",
+          "label": "",
+          "location": [
+            -360,
+            60
+          ],
+          "location_absolute": [
+            -360,
+            60
+          ],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {},
+          "widgets": {},
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Color",
+                "name": "Color",
+                "label": "Color",
+                "bl_idname": "NodeSocketColor",
+                "type": "RGBA",
+                "index": 0,
+                "default_value": [
+                  0.5,
+                  0.5,
+                  0.5,
+                  1
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ],
+            "outputs": [
+              {
+                "identifier": "Val",
+                "name": "Val",
+                "label": "Val",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n6",
+          "bl_idname": "ShaderNodeMath",
+          "name": "Math",
+          "label": "Brightness",
+          "location": [
+            -180,
+            60
+          ],
+          "location_absolute": [
+            -180,
+            60
+          ],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {
+            "operation": "DIVIDE"
+          },
+          "widgets": {},
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Value_001",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 1,
+                "default_value": 0.3517,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Value_002",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 2,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              }
+            ],
+            "outputs": [
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n7",
+          "bl_idname": "ShaderNodeMath",
+          "name": "Math.001",
+          "label": "Dot area",
+          "location": [
+            0,
+            60
+          ],
+          "location_absolute": [
+            0,
+            60
+          ],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {
+            "operation": "SQRT"
+          },
+          "widgets": {},
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Value_001",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 1,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "Value_002",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 2,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              }
+            ],
+            "outputs": [
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n8",
+          "bl_idname": "ShaderNodeMath",
+          "name": "Math.002",
+          "label": "Dot radius",
+          "location": [
+            180,
+            60
+          ],
+          "location_absolute": [
+            180,
+            60
+          ],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {
+            "operation": "MULTIPLY_ADD"
+          },
+          "widgets": {},
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Value_001",
+                "name": "Value",
+                "label": "Multiplier",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 1,
+                "default_value": 0.35,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Value_002",
+                "name": "Value",
+                "label": "Addend",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 2,
+                "default_value": 0.05,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ],
+            "outputs": [
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n9",
+          "bl_idname": "ShaderNodeMath",
+          "name": "Math.006",
+          "label": "Strength",
+          "location": [
+            560,
+            60
+          ],
+          "location_absolute": [
+            560,
+            60
+          ],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {
+            "operation": "MULTIPLY"
+          },
+          "widgets": {},
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Value_001",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 1,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Value_002",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 2,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              }
+            ],
+            "outputs": [
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n10",
+          "bl_idname": "ShaderNodeVectorMath",
+          "name": "Vector Math",
+          "label": "Snap to grid",
+          "location": [
+            -1200,
+            120
+          ],
+          "location_absolute": [
+            -1200,
+            120
+          ],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {
+            "operation": "SNAP"
+          },
+          "widgets": {},
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Vector",
+                "name": "Vector",
+                "label": "Vector",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 0,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Vector_001",
+                "name": "Vector",
+                "label": "Increment",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 1,
+                "default_value": [
+                  0.04,
+                  0.04,
+                  1
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Vector_002",
+                "name": "Vector",
+                "label": "Vector",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 2,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "Scale",
+                "name": "Scale",
+                "label": "Scale",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 3,
+                "default_value": 1,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              }
+            ],
+            "outputs": [
+              {
+                "identifier": "Vector",
+                "name": "Vector",
+                "label": "Vector",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 0,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 1,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n11",
+          "bl_idname": "ShaderNodeVectorMath",
+          "name": "Vector Math.001",
+          "label": "Cell center",
+          "location": [
+            -1020,
+            120
+          ],
+          "location_absolute": [
+            -1020,
+            120
+          ],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {
+            "operation": "ADD"
+          },
+          "widgets": {},
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Vector",
+                "name": "Vector",
+                "label": "Vector",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 0,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Vector_001",
+                "name": "Vector",
+                "label": "Vector",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 1,
+                "default_value": [
+                  0.02,
+                  0.02,
+                  0.5
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Vector_002",
+                "name": "Vector",
+                "label": "Vector",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 2,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "Scale",
+                "name": "Scale",
+                "label": "Scale",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 3,
+                "default_value": 1,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              }
+            ],
+            "outputs": [
+              {
+                "identifier": "Vector",
+                "name": "Vector",
+                "label": "Vector",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 0,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 1,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n12",
+          "bl_idname": "ShaderNodeMath",
+          "name": "Math.005",
+          "label": "Grid dim",
+          "location": [
+            360,
+            120
+          ],
+          "location_absolute": [
+            360,
+            120
+          ],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {
+            "operation": "MULTIPLY_ADD"
+          },
+          "widgets": {},
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Value_001",
+                "name": "Value",
+                "label": "Multiplier",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 1,
+                "default_value": 0.8,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Value_002",
+                "name": "Value",
+                "label": "Addend",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 2,
+                "default_value": 0.2,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ],
+            "outputs": [
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n13",
+          "bl_idname": "ShaderNodeEmission",
+          "name": "Emission",
+          "label": "",
+          "location": [
+            760,
+            200
+          ],
+          "location_absolute": [
+            760,
+            200
+          ],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {},
+          "widgets": {},
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Color",
+                "name": "Color",
+                "label": "Color",
+                "bl_idname": "NodeSocketColor",
+                "type": "RGBA",
+                "index": 0,
+                "default_value": [
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Strength",
+                "name": "Strength",
+                "label": "Strength",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 1,
+                "default_value": 1,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Weight",
+                "name": "Weight",
+                "label": "Weight",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 2,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              }
+            ],
+            "outputs": [
+              {
+                "identifier": "Emission",
+                "name": "Emission",
+                "label": "Emission",
+                "bl_idname": "NodeSocketShader",
+                "type": "SHADER",
+                "index": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n14",
+          "bl_idname": "ShaderNodeOutputMaterial",
+          "name": "Material Output",
+          "label": "",
+          "location": [
+            960,
+            200
+          ],
+          "location_absolute": [
+            960,
+            200
+          ],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {},
+          "widgets": {},
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Surface",
+                "name": "Surface",
+                "label": "Surface",
+                "bl_idname": "NodeSocketShader",
+                "type": "SHADER",
+                "index": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Volume",
+                "name": "Volume",
+                "label": "Volume",
+                "bl_idname": "NodeSocketShader",
+                "type": "SHADER",
+                "index": 1,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Displacement",
+                "name": "Displacement",
+                "label": "Displacement",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 2,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": true,
+                "enabled": true
+              },
+              {
+                "identifier": "Thickness",
+                "name": "Thickness",
+                "label": "Thickness",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 3,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": true,
+                "enabled": true
+              }
+            ],
+            "outputs": []
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n15",
+          "bl_idname": "ShaderNodeTexNoise",
+          "name": "Noise Texture",
+          "label": "",
+          "location": [
+            -840,
+            220
+          ],
+          "location_absolute": [
+            -840,
+            220
+          ],
+          "width": 145,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {
+            "noise_dimensions": "3D",
+            "noise_type": "FBM"
+          },
+          "widgets": {},
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Vector",
+                "name": "Vector",
+                "label": "Vector",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 0,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": true,
+                "enabled": true
+              },
+              {
+                "identifier": "W",
+                "name": "W",
+                "label": "W",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 1,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "Scale",
+                "name": "Scale",
+                "label": "Scale",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 2,
+                "default_value": 3,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Detail",
+                "name": "Detail",
+                "label": "Detail",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 3,
+                "default_value": 3,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Roughness",
+                "name": "Roughness",
+                "label": "Roughness",
+                "bl_idname": "NodeSocketFloatFactor",
+                "type": "VALUE",
+                "index": 4,
+                "default_value": 0.55,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Lacunarity",
+                "name": "Lacunarity",
+                "label": "Lacunarity",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 5,
+                "default_value": 2,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Offset",
+                "name": "Offset",
+                "label": "Offset",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 6,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "Gain",
+                "name": "Gain",
+                "label": "Gain",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 7,
+                "default_value": 1,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "Distortion",
+                "name": "Distortion",
+                "label": "Distortion",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 8,
+                "default_value": 0.6,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ],
+            "outputs": [
+              {
+                "identifier": "Fac",
+                "name": "Factor",
+                "label": "Factor",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Color",
+                "name": "Color",
+                "label": "Color",
+                "bl_idname": "NodeSocketColor",
+                "type": "RGBA",
+                "index": 1,
+                "default_value": [
+                  0.8,
+                  0.8,
+                  0.8,
+                  1
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n16",
+          "bl_idname": "ShaderNodeValToRGB",
+          "name": "Color Ramp",
+          "label": "",
+          "location": [
+            -640,
+            220
+          ],
+          "location_absolute": [
+            -640,
+            220
+          ],
+          "width": 240,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {},
+          "widgets": {
+            "color_ramp": {
+              "color_mode": "RGB",
+              "interpolation": "LINEAR",
+              "hue_interpolation": "NEAR",
+              "elements": [
+                {
+                  "position": 0.5,
+                  "color": [
+                    0,
+                    0,
+                    0,
+                    1
+                  ]
+                },
+                {
+                  "position": 0.62,
+                  "color": [
+                    0.8949,
+                    0.2228,
+                    0.029,
+                    1
+                  ]
+                },
+                {
+                  "position": 0.74,
+                  "color": [
+                    0.005,
+                    0.3294,
+                    0.2486,
+                    1
+                  ]
+                }
+              ]
+            }
+          },
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Fac",
+                "name": "Factor",
+                "label": "Factor",
+                "bl_idname": "NodeSocketFloatFactor",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ],
+            "outputs": [
+              {
+                "identifier": "Color",
+                "name": "Color",
+                "label": "Color",
+                "bl_idname": "NodeSocketColor",
+                "type": "RGBA",
+                "index": 0,
+                "default_value": [
+                  0.8,
+                  0.8,
+                  0.8,
+                  1
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Alpha",
+                "name": "Alpha",
+                "label": "Alpha",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 1,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n17",
+          "bl_idname": "ShaderNodeMapRange",
+          "name": "Map Range",
+          "label": "Lit",
+          "location": [
+            0,
+            320
+          ],
+          "location_absolute": [
+            0,
+            320
+          ],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {
+            "interpolation_type": "SMOOTHSTEP",
+            "data_type": "FLOAT"
+          },
+          "widgets": {},
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Value",
+                "name": "Value",
+                "label": "Value",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 1,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "From Min",
+                "name": "From Min",
+                "label": "From Min",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 1,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "From Max",
+                "name": "From Max",
+                "label": "From Max",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 2,
+                "default_value": 0.25,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "To Min",
+                "name": "To Min",
+                "label": "To Min",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 3,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "To Max",
+                "name": "To Max",
+                "label": "To Max",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 4,
+                "default_value": 1,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Steps",
+                "name": "Steps",
+                "label": "Steps",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 5,
+                "default_value": 4,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "Vector",
+                "name": "Vector",
+                "label": "Vector",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 6,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": true,
+                "enabled": false
+              },
+              {
+                "identifier": "From_Min_FLOAT3",
+                "name": "From Min",
+                "label": "From Min",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 7,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "From_Max_FLOAT3",
+                "name": "From Max",
+                "label": "From Max",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 8,
+                "default_value": [
+                  1,
+                  1,
+                  1
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "To_Min_FLOAT3",
+                "name": "To Min",
+                "label": "To Min",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 9,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "To_Max_FLOAT3",
+                "name": "To Max",
+                "label": "To Max",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 10,
+                "default_value": [
+                  1,
+                  1,
+                  1
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "Steps_FLOAT3",
+                "name": "Steps",
+                "label": "Steps",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 11,
+                "default_value": [
+                  4,
+                  4,
+                  4
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              }
+            ],
+            "outputs": [
+              {
+                "identifier": "Result",
+                "name": "Result",
+                "label": "Result",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Vector",
+                "name": "Vector",
+                "label": "Vector",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 1,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        },
+        {
+          "id": "n18",
+          "bl_idname": "ShaderNodeMix",
+          "name": "Mix",
+          "label": "Grid or glow",
+          "location": [
+            360,
+            400
+          ],
+          "location_absolute": [
+            360,
+            400
+          ],
+          "width": 140,
+          "parent_id": null,
+          "mute": false,
+          "hide": false,
+          "hide_unused_sockets": false,
+          "use_custom_color": false,
+          "color": null,
+          "properties": {
+            "data_type": "RGBA"
+          },
+          "widgets": {},
+          "sockets": {
+            "inputs": [
+              {
+                "identifier": "Factor_Float",
+                "name": "Factor",
+                "label": "Factor",
+                "bl_idname": "NodeSocketFloatFactor",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0.5,
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Factor_Vector",
+                "name": "Factor",
+                "label": "Factor",
+                "bl_idname": "NodeSocketVectorFactor",
+                "type": "VECTOR",
+                "index": 1,
+                "default_value": [
+                  0.5,
+                  0.5,
+                  0.5
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "A_Float",
+                "name": "A",
+                "label": "A",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 2,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "B_Float",
+                "name": "B",
+                "label": "B",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 3,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "A_Vector",
+                "name": "A",
+                "label": "A",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 4,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "B_Vector",
+                "name": "B",
+                "label": "B",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 5,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "A_Color",
+                "name": "A",
+                "label": "A",
+                "bl_idname": "NodeSocketColor",
+                "type": "RGBA",
+                "index": 6,
+                "default_value": [
+                  0.05,
+                  0.05,
+                  0.05,
+                  1
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "B_Color",
+                "name": "B",
+                "label": "B",
+                "bl_idname": "NodeSocketColor",
+                "type": "RGBA",
+                "index": 7,
+                "default_value": [
+                  0.5,
+                  0.5,
+                  0.5,
+                  1
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "A_Rotation",
+                "name": "A",
+                "label": "A",
+                "bl_idname": "NodeSocketRotation",
+                "type": "ROTATION",
+                "index": 8,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "B_Rotation",
+                "name": "B",
+                "label": "B",
+                "bl_idname": "NodeSocketRotation",
+                "type": "ROTATION",
+                "index": 9,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              }
+            ],
+            "outputs": [
+              {
+                "identifier": "Result_Float",
+                "name": "Result",
+                "label": "Result",
+                "bl_idname": "NodeSocketFloat",
+                "type": "VALUE",
+                "index": 0,
+                "default_value": 0,
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "Result_Vector",
+                "name": "Result",
+                "label": "Result",
+                "bl_idname": "NodeSocketVector",
+                "type": "VECTOR",
+                "index": 1,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              },
+              {
+                "identifier": "Result_Color",
+                "name": "Result",
+                "label": "Result",
+                "bl_idname": "NodeSocketColor",
+                "type": "RGBA",
+                "index": 2,
+                "default_value": [
+                  0.8,
+                  0.8,
+                  0.8,
+                  1
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": true
+              },
+              {
+                "identifier": "Result_Rotation",
+                "name": "Result",
+                "label": "Result",
+                "bl_idname": "NodeSocketRotation",
+                "type": "ROTATION",
+                "index": 3,
+                "default_value": [
+                  0,
+                  0,
+                  0
+                ],
+                "hide": false,
+                "hide_value": false,
+                "enabled": false
+              }
+            ]
+          },
+          "group_tree_id": null,
+          "zone_pair_id": null
+        }
+      ],
+      "links": [
+        {
+          "id": "l1",
+          "from_node": "n4",
+          "from_socket": {
+            "identifier": "Generated",
+            "name": "Generated",
+            "index": 0
+          },
+          "to_node": "n10",
+          "to_socket": {
+            "identifier": "Vector",
+            "name": "Vector",
+            "index": 0
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l2",
+          "from_node": "n10",
+          "from_socket": {
+            "identifier": "Vector",
+            "name": "Vector",
+            "index": 0
+          },
+          "to_node": "n11",
+          "to_socket": {
+            "identifier": "Vector",
+            "name": "Vector",
+            "index": 0
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l3",
+          "from_node": "n11",
+          "from_socket": {
+            "identifier": "Vector",
+            "name": "Vector",
+            "index": 0
+          },
+          "to_node": "n15",
+          "to_socket": {
+            "identifier": "Vector",
+            "name": "Vector",
+            "index": 0
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l4",
+          "from_node": "n15",
+          "from_socket": {
+            "identifier": "Fac",
+            "name": "Factor",
+            "index": 0
+          },
+          "to_node": "n16",
+          "to_socket": {
+            "identifier": "Fac",
+            "name": "Factor",
+            "index": 0
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l5",
+          "from_node": "n16",
+          "from_socket": {
+            "identifier": "Color",
+            "name": "Color",
+            "index": 0
+          },
+          "to_node": "n5",
+          "to_socket": {
+            "identifier": "Color",
+            "name": "Color",
+            "index": 0
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l6",
+          "from_node": "n5",
+          "from_socket": {
+            "identifier": "Val",
+            "name": "Val",
+            "index": 0
+          },
+          "to_node": "n6",
+          "to_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 0
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l7",
+          "from_node": "n6",
+          "from_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 0
+          },
+          "to_node": "n7",
+          "to_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 0
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l8",
+          "from_node": "n7",
+          "from_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 0
+          },
+          "to_node": "n8",
+          "to_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 0
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l9",
+          "from_node": "n4",
+          "from_socket": {
+            "identifier": "Generated",
+            "name": "Generated",
+            "index": 0
+          },
+          "to_node": "n1",
+          "to_socket": {
+            "identifier": "Vector",
+            "name": "Vector",
+            "index": 0
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l10",
+          "from_node": "n11",
+          "from_socket": {
+            "identifier": "Vector",
+            "name": "Vector",
+            "index": 0
+          },
+          "to_node": "n1",
+          "to_socket": {
+            "identifier": "Vector_001",
+            "name": "Vector",
+            "index": 1
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l11",
+          "from_node": "n1",
+          "from_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 1
+          },
+          "to_node": "n2",
+          "to_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 0
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l12",
+          "from_node": "n2",
+          "from_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 0
+          },
+          "to_node": "n3",
+          "to_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 0
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l13",
+          "from_node": "n8",
+          "from_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 0
+          },
+          "to_node": "n3",
+          "to_socket": {
+            "identifier": "Value_001",
+            "name": "Value",
+            "index": 1
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l14",
+          "from_node": "n6",
+          "from_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 0
+          },
+          "to_node": "n17",
+          "to_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 0
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l15",
+          "from_node": "n17",
+          "from_socket": {
+            "identifier": "Result",
+            "name": "Result",
+            "index": 0
+          },
+          "to_node": "n18",
+          "to_socket": {
+            "identifier": "Factor_Float",
+            "name": "Factor",
+            "index": 0
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l16",
+          "from_node": "n16",
+          "from_socket": {
+            "identifier": "Color",
+            "name": "Color",
+            "index": 0
+          },
+          "to_node": "n18",
+          "to_socket": {
+            "identifier": "B_Color",
+            "name": "B",
+            "index": 7
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l17",
+          "from_node": "n17",
+          "from_socket": {
+            "identifier": "Result",
+            "name": "Result",
+            "index": 0
+          },
+          "to_node": "n12",
+          "to_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 0
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l18",
+          "from_node": "n12",
+          "from_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 0
+          },
+          "to_node": "n9",
+          "to_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 0
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l19",
+          "from_node": "n3",
+          "from_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 0
+          },
+          "to_node": "n9",
+          "to_socket": {
+            "identifier": "Value_001",
+            "name": "Value",
+            "index": 1
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l20",
+          "from_node": "n18",
+          "from_socket": {
+            "identifier": "Result_Color",
+            "name": "Result",
+            "index": 2
+          },
+          "to_node": "n13",
+          "to_socket": {
+            "identifier": "Color",
+            "name": "Color",
+            "index": 0
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l21",
+          "from_node": "n9",
+          "from_socket": {
+            "identifier": "Value",
+            "name": "Value",
+            "index": 0
+          },
+          "to_node": "n13",
+          "to_socket": {
+            "identifier": "Strength",
+            "name": "Strength",
+            "index": 1
+          },
+          "is_muted": false
+        },
+        {
+          "id": "l22",
+          "from_node": "n13",
+          "from_socket": {
+            "identifier": "Emission",
+            "name": "Emission",
+            "index": 0
+          },
+          "to_node": "n14",
+          "to_socket": {
+            "identifier": "Surface",
+            "name": "Surface",
+            "index": 0
+          },
+          "is_muted": false
+        }
+      ]
+    }
+  ]
+}

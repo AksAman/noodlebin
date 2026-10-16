@@ -1,11 +1,21 @@
 import { parseNodeVaultText } from "@/interchange"
 import { treeTypeLabel } from "@/lib/ingest"
-import { editTokenFromRequest, isSharingError, readBlend, readCover, readPayload, readVideo } from "@/lib/sharing"
+import { requireDurableStore } from "@/lib/publish"
+import {
+  editTokenFromRequest,
+  isSharingError,
+  parseLinkFields,
+  readBlend,
+  readCover,
+  readPayload,
+  readVideo,
+} from "@/lib/sharing"
 import { dataDir, getPublicPost, patchStoredPost } from "@/lib/store"
 import { NextResponse } from "next/server"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
+export const maxDuration = 60
 
 function fail(status: number, error: string) {
   return NextResponse.json({ error }, { status })
@@ -21,6 +31,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
 export async function PATCH(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const form = await request.formData()
+  const storage = requireDurableStore()
+  if (storage) return fail(storage.status, storage.error)
   const token = editTokenFromRequest(request, form)
   if (!token) return fail(401, "Edit token required.")
 
@@ -47,6 +59,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ sl
   const tree = await readPayload(treeFile, treeText || null, parseNodeVaultText)
   if (isSharingError(tree)) return fail(tree.status, tree.error)
   if (tree) patch.tree = tree
+  const links = parseLinkFields(form)
+  if (isSharingError(links)) return fail(links.status, links.error)
+  Object.assign(patch, links)
 
   const result = await patchStoredPost(slug, token, patch, dataDir())
   if (isSharingError(result)) return fail(result.status, result.error)

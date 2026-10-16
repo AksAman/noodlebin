@@ -69,14 +69,30 @@ function NodeViewInner({
     setNodes(built.nodes);
   }
 
-  const onNodesChange = useCallback((changes: NodeChange<Node<NvNodeData>>[]) => {
-    setNodes((currentNodes) =>
-      applyNodeChanges(
-        changes.filter((change) => change.type !== "remove"),
-        currentNodes,
-      ),
-    );
-  }, []);
+  const onNodesChange = useCallback(
+    (changes: NodeChange<Node<NvNodeData>>[]) => {
+      setNodes((currentNodes) =>
+        applyNodeChanges(
+          changes.filter((change) => change.type !== "remove"),
+          currentNodes,
+        ),
+      );
+    },
+    [],
+  );
+
+  const moved = useMemo(() => {
+    const home = new Map(built.nodes.map((n) => [n.id, n.position]));
+    return nodes.some((n) => {
+      const p = home.get(n.id);
+      return p !== undefined && (p.x !== n.position.x || p.y !== n.position.y);
+    });
+  }, [nodes, built.nodes]);
+
+  const resetLayout = useCallback(() => {
+    setNodes(built.nodes);
+    requestAnimationFrame(() => void fitView({ padding: 0.2, duration: 300 }));
+  }, [built.nodes, fitView]);
 
   useEffect(() => {
     const id = requestAnimationFrame(() => {
@@ -112,6 +128,19 @@ function NodeViewInner({
           void fitView({ padding: 0.2 });
         }
       }
+      if (
+        (event.key === "r" || event.key === "R") &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !event.altKey &&
+        !(
+          event.target instanceof HTMLInputElement ||
+          event.target instanceof HTMLTextAreaElement
+        )
+      ) {
+        event.preventDefault();
+        resetLayout();
+      }
       if (event.key === "Escape") {
         pop();
       }
@@ -125,7 +154,7 @@ function NodeViewInner({
         }
       }
     },
-    [fitView, onCopy, pop],
+    [fitView, onCopy, pop, resetLayout],
   );
 
   const grid = catalog?.themes["grid"];
@@ -147,6 +176,11 @@ function NodeViewInner({
             </button>
           ))}
         </nav>
+      ) : null}
+      {moved ? (
+        <button type="button" className="nv-reset" onClick={resetLayout}>
+          Reset layout <kbd className="nv-kbd">R</kbd>
+        </button>
       ) : null}
       <ol className="nv-a11y">
         {current.nodes.map((n) => (
@@ -176,7 +210,7 @@ function NodeViewInner({
         minZoom={0.15}
         maxZoom={2}
         colorMode="dark"
-        proOptions={{ hideAttribution: true }}
+        attributionPosition="bottom-left"
         defaultEdgeOptions={{ type: "default" }}
         onNodeDoubleClick={onNodeDoubleClick}
         onInit={() => void fitView({ padding: 0.2 })}

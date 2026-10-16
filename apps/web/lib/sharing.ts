@@ -1,10 +1,19 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto"
 import { TREE_TYPES, type NodeVaultPayload, type TreeType } from "@/interchange"
+import { parseTweet, parseYouTube } from "@/lib/embeds"
+import { checkShaderSource } from "@/lib/shaderCover"
+import { sniffBlend, sniffCover, sniffMp4 } from "@/lib/sniff"
 
 export const COVER_MAX = 10 * 1024 * 1024
 export const VIDEO_MAX = 50 * 1024 * 1024
 export const BLEND_MAX = 100 * 1024 * 1024
 export const PAYLOAD_MAX = 5 * 1024 * 1024
+/** Vercel Functions reject request bodies over 4.5 MB. */
+export const VERCEL_BODY_MAX = 4 * 1024 * 1024
+
+export function requestUploadMax(pidMax: number): number {
+  return process.env["VERCEL"] ? Math.min(pidMax, VERCEL_BODY_MAX) : pidMax
+}
 
 export const COVER_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"])
 
@@ -36,7 +45,42 @@ export type NewPostInput = {
   tree_type: TreeType
   blender_version_string: string
   nodevember_day: number | null
+  youtube_url: string | null
+  tweet_url: string | null
+  cover_shader: string | null
   files: NewPostFiles
+}
+
+export type PostLinks = { youtube_url?: string | null; tweet_url?: string | null; cover_shader?: string | null }
+
+/** Reads the optional link fields. An absent field stays absent; an empty one means "no link". */
+export function parseLinkFields(form: FormData): PostLinks | SharingError {
+  const links: PostLinks = {}
+  if (form.has("youtube_url")) {
+    const raw = String(form.get("youtube_url") ?? "").trim()
+    if (raw.length > 500) return { ok: false, status: 400, error: "YouTube link is too long." }
+    const parsed = raw ? parseYouTube(raw) : null
+    if (raw && !parsed) return { ok: false, status: 400, error: "YouTube link must point to a single video." }
+    links.youtube_url = parsed?.url ?? null
+  }
+  if (form.has("tweet_url")) {
+    const raw = String(form.get("tweet_url") ?? "").trim()
+    if (raw.length > 500) return { ok: false, status: 400, error: "X post link is too long." }
+    const parsed = raw ? parseTweet(raw) : null
+    if (raw && !parsed) return { ok: false, status: 400, error: "X post link must point to a single post on x.com or twitter.com." }
+    links.tweet_url = parsed?.url ?? null
+  }
+  if (form.has("cover_shader")) {
+    const raw = String(form.get("cover_shader") ?? "")
+    if (!raw.trim()) {
+      links.cover_shader = null
+    } else {
+      const checked = checkShaderSource(raw)
+      if (!checked.ok) return { ok: false, status: 400, error: checked.error }
+      links.cover_shader = checked.source
+    }
+  }
+  return links
 }
 
 export function slugify(value: string): string {
@@ -98,40 +142,56 @@ export function isSharingError(value: unknown): value is SharingError {
   return typeof value === "object" && value !== null && "ok" in value && (value as SharingError).ok === false
 }
 
-function coverExt(type: string): string | null {
-  if (type === "image/jpeg") return "jpg"
-  if (type === "image/png") return "png"
-  if (type === "image/webp") return "webp"
-  if (type === "image/gif") return "gif"
-  return null
-}
-
 export async function readCover(file: File | null): Promise<StoredFile | SharingError> {
   if (!file || file.size === 0) return { ok: false, status: 400, error: "A cover image is required." }
-  if (file.size > COVER_MAX) return { ok: false, status: 400, error: "Cover is larger than 10 MB." }
-  const type = file.type || "application/octet-stream"
-  const ext = coverExt(type)
-  if (!ext || !COVER_TYPES.has(type)) {
+  const max = requestUploadMax(COVER_MAX)
+  if (file.size > max) {
+    return {
+      ok: false,
+      status: 400,
+      error: process.env["VERCEL"] ? "Cover is larger than 4 MB (Vercel request limit)." : "Cover is larger than 10 MB.",
+    }
+  }
+  const bytes = new Uint8Array(await file.arrayBuffer())
+  const sniffed = sniffCover(bytes)
+  if (!sniffed || !COVER_TYPES.has(sniffed.type)) {
     return { ok: false, status: 400, error: "Cover must be jpeg, png, webp, or gif." }
   }
-  return { bytes: new Uint8Array(await file.arrayBuffer()), type, ext }
+  return { bytes, type: sniffed.type, ext: sniffed.ext }
 }
 
 export async function readVideo(file: File | null): Promise<StoredFile | SharingError | undefined> {
   if (!file || file.size === 0) return undefined
-  if (file.size > VIDEO_MAX) return { ok: false, status: 400, error: "Video is larger than 50 MB." }
-  if (file.type !== "video/mp4") return { ok: false, status: 400, error: "Video must be video/mp4." }
-  return { bytes: new Uint8Array(await file.arrayBuffer()), type: "video/mp4", ext: "mp4" }
+  const max = requestUploadMax(VIDEO_MAX)
+  if (file.size > max) {
+    return {
+      ok: false,
+      status: 400,
+      error: process.env["VERCEL"] ? "Video is larger than 4 MB (Vercel request limit)." : "Video is larger than 50 MB.",
+    }
+  }
+  const bytes = new Uint8Array(await file.arrayBuffer())
+  if (!sniffMp4(bytes)) return { ok: false, status: 400, error: "Video must be video/mp4." }
+  return { bytes, type: "video/mp4", ext: "mp4" }
 }
 
 export async function readBlend(file: File | null): Promise<StoredFile | SharingError | undefined> {
   if (!file || file.size === 0) return undefined
-  if (file.size > BLEND_MAX) return { ok: false, status: 400, error: "Blend is larger than 100 MB." }
+  const max = requestUploadMax(BLEND_MAX)
+  if (file.size > max) {
+    return {
+      ok: false,
+      status: 400,
+      error: process.env["VERCEL"] ? "Blend is larger than 4 MB (Vercel request limit)." : "Blend is larger than 100 MB.",
+    }
+  }
   const filename = file.name || "graph.blend"
   if (!filename.toLowerCase().endsWith(".blend")) {
     return { ok: false, status: 400, error: "Blend must be a .blend file." }
   }
-  return { bytes: new Uint8Array(await file.arrayBuffer()), type: "application/octet-stream", ext: "blend", filename }
+  const bytes = new Uint8Array(await file.arrayBuffer())
+  if (!sniffBlend(bytes)) return { ok: false, status: 400, error: "Blend must be a .blend file." }
+  return { bytes, type: "application/octet-stream", ext: "blend", filename }
 }
 
 export async function readPayload(
@@ -140,10 +200,11 @@ export async function readPayload(
   parse: (text: string) => NodeVaultPayload,
 ): Promise<NodeVaultPayload | null | SharingError> {
   let text = textField?.trim() ? textField : null
+  const payloadMax = requestUploadMax(PAYLOAD_MAX)
   if (file && file.size > 0) {
-    if (file.size > PAYLOAD_MAX) return { ok: false, status: 400, error: "Payload is larger than 5 MB." }
+    if (file.size > payloadMax) return { ok: false, status: 400, error: "Payload is larger than 5 MB." }
     text = await file.text()
-  } else if (text && Buffer.byteLength(text, "utf8") > PAYLOAD_MAX) {
+  } else if (text && Buffer.byteLength(text, "utf8") > payloadMax) {
     return { ok: false, status: 400, error: "Payload is larger than 5 MB." }
   }
   if (!text) return null
@@ -162,10 +223,13 @@ export async function parseCreateForm(
   const title = String(form.get("title") ?? "").trim()
   const author_name = String(form.get("author_name") ?? "").trim()
   if (!title) return { ok: false, status: 400, error: "Title is required." }
+  if (title.length > 120) return { ok: false, status: 400, error: "Title is too long." }
   if (!author_name) return { ok: false, status: 400, error: "Author name is required." }
+  if (author_name.length > 80) return { ok: false, status: 400, error: "Author name is too long." }
 
   const author_slug = slugify(String(form.get("author_slug") ?? "").trim() || author_name)
   const descriptionRaw = String(form.get("description") ?? "").trim()
+  if (descriptionRaw.length > 4000) return { ok: false, status: 400, error: "Description is too long." }
   const description = descriptionRaw ? descriptionRaw : null
 
   const coverField = form.get("cover")
@@ -188,6 +252,9 @@ export async function parseCreateForm(
 
   const day = parseNodevemberDay(String(form.get("nodevember_day") ?? "") || null)
   if (isSharingError(day)) return day
+
+  const links = parseLinkFields(form)
+  if (isSharingError(links)) return links
 
   let tree_type: TreeType
   let blender_version_string: string
@@ -222,6 +289,9 @@ export async function parseCreateForm(
     tree_type,
     blender_version_string,
     nodevember_day: day,
+    youtube_url: links.youtube_url ?? null,
+    tweet_url: links.tweet_url ?? null,
+    cover_shader: links.cover_shader ?? null,
     files,
   }
 }

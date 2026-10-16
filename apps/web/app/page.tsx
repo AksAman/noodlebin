@@ -1,50 +1,129 @@
-import { CoverGrid } from "@/components/CoverGrid"
-import { filterPosts } from "@/lib/posts"
-import { allPublicPosts } from "@/lib/store"
-import { cn, gallery, shell } from "@/lib/ui"
-import Link from "next/link"
+import { CoverGrid } from "@/components/CoverGrid";
+import { HeroShader } from "@/components/HeroShader";
+import { filterPosts, HOMEPAGE_NOISE_SLUG } from "@/lib/posts";
+import { allPublicPosts } from "@/lib/store";
+import {
+  btnAccent,
+  cn,
+  container,
+  docShell,
+  page,
+  treeDotClass,
+} from "@/lib/ui";
+import Link from "next/link";
 
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
 const FILTERS = [
   { id: "", label: "All" },
   { id: "ShaderNodeTree", label: "Shader" },
   { id: "GeometryNodeTree", label: "Geometry" },
   { id: "CompositorNodeTree", label: "Compositor" },
-] as const
+] as const;
 
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ tree?: string }>
+  searchParams: Promise<{ tree?: string }>;
 }) {
-  const { tree = "" } = await searchParams
-  const list = filterPosts(await allPublicPosts(), { tree_type: tree || null })
+  const { tree = "" } = await searchParams;
+  const list = filterPosts(await allPublicPosts(), { tree_type: tree || null });
 
   return (
-    <div className={cn(shell, "h-auto min-h-full")}>
-      <div className={gallery}>
-        <header>
-          <h1 className="mb-2 text-2xl text-[#eee]">Graphs</h1>
-          <p className="mb-4 max-w-xl leading-snug">Open a graph, copy it, paste it in Blender. To publish one, paste it first.</p>
-          <div className="flex flex-wrap gap-2">
-            {FILTERS.map((f) => (
+    <div className={docShell}>
+      <section className="relative isolate">
+        <HeroShader className="absolute inset-0 -z-10 size-full" />
+        <header
+          className={cn(
+            container,
+            "grid gap-x-12 gap-y-6 pb-16 pt-14 sm:pt-20 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end",
+          )}
+        >
+          <div>
+            <h1 className="m-0 max-w-[14ch] font-display text-[clamp(2.75rem,1.6rem+4.4vw,5.25rem)] font-semibold leading-[0.95] tracking-[-0.035em] text-fg">
+              Steal these graphs.
+            </h1>
+            <p className="mt-5 max-w-[46ch] text-[17px] leading-relaxed text-muted">
+              Every graph here copies straight back into Blender with its
+              values, links, frames, and groups intact.
+            </p>
+            <Link
+              className="group mt-6 inline-flex items-center gap-2 text-[12px] text-subtle no-underline transition-colors duration-150 hover:text-fg"
+              href={`/p/${HOMEPAGE_NOISE_SLUG}`}
+            >
+              <span
+                className={treeDotClass("ShaderNodeTree")}
+                aria-hidden="true"
+              />
+              The dots behind this are a Blender shader.
+              <span className="text-accent-fg underline-offset-4 group-hover:underline">
+                Copy the nodes
+              </span>
+            </Link>
+          </div>
+          <Link
+            className={cn(
+              btnAccent,
+              "justify-self-start px-4 py-2.5 text-[14px] lg:self-end",
+            )}
+            href="/paste"
+          >
+            Paste your own
+          </Link>
+        </header>
+      </section>
+
+      <div className={page}>
+        <nav
+          aria-label="Filter by tree type"
+          className="mb-8 flex flex-wrap items-center gap-1.5  pt-5"
+        >
+          {FILTERS.map((f) => {
+            const active = tree === f.id;
+            return (
               <Link
                 key={f.id}
+                aria-current={active ? "page" : undefined}
                 className={cn(
-                  "rounded border border-[#555] bg-[#303030] px-3 py-1.5 text-[13px] text-nv-fg no-underline",
-                  tree === f.id && "border-[#888] text-white",
+                  "inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[13px] no-underline transition-colors duration-150",
+                  active
+                    ? "border-fg bg-fg text-bg"
+                    : "border-line text-muted hover:border-line-strong hover:text-fg",
                 )}
                 href={f.id ? `/?tree=${f.id}` : "/"}
               >
+                {f.id ? (
+                  <span className={treeDotClass(f.id)} aria-hidden="true" />
+                ) : null}
                 {f.label}
               </Link>
-            ))}
+            );
+          })}
+          <span className="ml-auto text-[13px] text-subtle tabular-nums">
+            {list.length} graph{list.length === 1 ? "" : "s"}
+          </span>
+        </nav>
+
+        {list.length > 0 ? (
+          <CoverGrid posts={list} />
+        ) : (
+          <div className="py-16">
+            <p className="m-0 font-display text-2xl text-fg">
+              Nothing here yet.
+            </p>
+            <p className="mt-2 text-muted">
+              No graphs of this type have been shared.{" "}
+              <Link
+                className="text-accent-fg underline-offset-4 hover:underline"
+                href="/paste"
+              >
+                Paste one
+              </Link>{" "}
+              and be the first.
+            </p>
           </div>
-        </header>
-        <CoverGrid posts={list} />
-        {list.length === 0 ? <p className="max-w-md text-center text-xl leading-snug">No posts in this filter.</p> : null}
+        )}
       </div>
     </div>
-  )
+  );
 }

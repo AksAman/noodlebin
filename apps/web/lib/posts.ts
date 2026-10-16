@@ -1,8 +1,10 @@
 import { parseNodeVaultText, type NodeVaultPayload, type TreeType } from "@/interchange"
 import frameChild from "@/fixtures/handwritten/frame-child.nodevault.json"
 import groupInner from "@/fixtures/handwritten/group-inner.nodevault.json"
+import homepageNoise from "@/fixtures/handwritten/homepage-noise.nodevault.json"
 import threeStopRamp from "@/fixtures/handwritten/three-stop-ramp.nodevault.json"
 import workedExample from "@/fixtures/handwritten/worked-example-shader.nodevault.json"
+import { halftoneCoverSource } from "@/lib/halftone"
 
 export type VaultPost = {
   slug: string
@@ -14,7 +16,11 @@ export type VaultPost = {
   tree_type: TreeType
   blender_version_string: string
   cover_url: string | null
+  /** Shadertoy-style GLSL (a mainImage function) drawn live over the cover image. */
+  cover_shader: string | null
   video_url: string | null
+  youtube_url: string | null
+  tweet_url: string | null
   blend_url: string | null
   blend_filename: string | null
   card_url: string | null
@@ -23,7 +29,16 @@ export type VaultPost = {
   seeded: boolean
 }
 
+export type StoredPost = VaultPost & {
+  edit_token_hash: string
+  cover_file: string | null
+  video_file: string | null
+  blend_file: string | null
+}
+
 export type StaticPost = VaultPost
+
+export const HOMEPAGE_NOISE_SLUG = "homepage-background"
 
 function fromJson(value: unknown): NodeVaultPayload {
   return parseNodeVaultText(JSON.stringify(value))
@@ -35,6 +50,7 @@ function seed(
   tree: NodeVaultPayload,
   description: string,
   created_at: string,
+  cover_shader: string | null = null,
 ): VaultPost {
   return {
     slug,
@@ -46,7 +62,10 @@ function seed(
     tree_type: tree.tree_type,
     blender_version_string: tree.blender_version_string,
     cover_url: null,
+    cover_shader,
     video_url: null,
+    youtube_url: null,
+    tweet_url: null,
     blend_url: null,
     blend_filename: null,
     card_url: `/p/${slug}/opengraph-image`,
@@ -84,6 +103,14 @@ export const posts: VaultPost[] = [
     fromJson(groupInner),
     "A group instance and its inner RGB node.",
     "2026-01-04T00:00:00.000Z",
+  ),
+  seed(
+    HOMEPAGE_NOISE_SLUG,
+    "The homepage background",
+    fromJson(homepageNoise),
+    "The halftone shader behind the NodeVault homepage: a Noise Texture sampled once per grid cell, with each dot sized by how bright the Color Ramp makes it. Paste it onto a plane and Blender renders the same dots the homepage shows. Switch the view transform to Standard for matching colors.",
+    "2026-01-05T00:00:00.000Z",
+    halftoneCoverSource(),
   ),
 ]
 
