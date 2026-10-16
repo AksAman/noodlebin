@@ -152,7 +152,7 @@ export function PastePage() {
               ) : null}
             </div>
           </div>
-          <div className={canvas} data-theme="dark">
+          <div className={canvas} data-theme="dark" data-node-canvas>
             {error ? (
               <div role="alert" className={cn(errorBox, "absolute left-1/2 top-3 z-[6] max-w-xl -translate-x-1/2")}>
                 {error}
