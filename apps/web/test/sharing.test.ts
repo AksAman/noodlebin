@@ -25,6 +25,8 @@ function tempDir(): string {
 
 afterEach(() => {
   delete process.env["NODEVAULT_DATA_DIR"]
+  delete process.env["PUBLISH_SECRET"]
+  delete process.env["VERCEL"]
   for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true })
 })
 
@@ -161,6 +163,123 @@ describe("posts API", () => {
       params: Promise.resolve({ slug: created.post.slug }),
     })
     expect(res.status).toBe(401)
+  })
+
+  test("cover that is not an image is rejected even with an image MIME type", async () => {
+    tempDir()
+    const form = new FormData()
+    form.set("title", "Fake cover")
+    form.set("author_name", "Aman")
+    form.set("tree_type", "ShaderNodeTree")
+    form.set("blender_version_string", "5.1.0")
+    form.set("cover", new File([Buffer.from("<html>nope</html>")], "cover.png", { type: "image/png" }))
+    const res = await POST(new Request("http://nv.test/api/posts", { method: "POST", body: form }))
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as { error: string }
+    expect(body.error).toContain("jpeg")
+  })
+
+  test("POST without the publish secret is unauthorized when it is configured", async () => {
+    tempDir()
+    process.env["PUBLISH_SECRET"] = "correct-secret"
+    const fields = () => {
+      const form = new FormData()
+      form.set("title", "Locked publish")
+      form.set("author_name", "Aman")
+      form.set("tree_type", "ShaderNodeTree")
+      form.set("blender_version_string", "5.1.0")
+      form.set("cover", coverFile())
+      return form
+    }
+    const denied = await POST(new Request("http://nv.test/api/posts", { method: "POST", body: fields() }))
+    expect(denied.status).toBe(401)
+
+    const ok = await POST(
+      new Request("http://nv.test/api/posts", {
+        method: "POST",
+        headers: { "x-publish-token": "correct-secret" },
+        body: fields(),
+      }),
+    )
+    expect(ok.status).toBe(201)
+  })
+
+  test("Vercel production refuses publish when PUBLISH_SECRET is missing", async () => {
+    tempDir()
+    process.env["VERCEL"] = "1"
+    const form = new FormData()
+    form.set("title", "Unconfigured")
+    form.set("author_name", "Aman")
+    form.set("tree_type", "ShaderNodeTree")
+    form.set("blender_version_string", "5.1.0")
+    form.set("cover", coverFile())
+    const res = await POST(new Request("http://nv.test/api/posts", { method: "POST", body: form }))
+    expect(res.status).toBe(503)
+  })
+
+  test("POST stores normalized YouTube and X links, and PATCH can change or clear them", async () => {
+    tempDir()
+    const form = new FormData()
+    form.set("title", "With links")
+    form.set("author_name", "Aman")
+    form.set("tree_type", "ShaderNodeTree")
+    form.set("blender_version_string", "5.1.0")
+    form.set("cover", coverFile())
+    form.set("youtube_url", "youtu.be/dQw4w9WgXcQ")
+    form.set("tweet_url", "https://twitter.com/blender/status/1790000000000000000?s=20")
+    const res = await POST(new Request("http://nv.test/api/posts", { method: "POST", body: form }))
+    expect(res.status).toBe(201)
+    const created = (await res.json()) as {
+      edit_token: string
+      post: { slug: string; youtube_url: string | null; tweet_url: string | null }
+    }
+    expect(created.post.youtube_url).toBe("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+    expect(created.post.tweet_url).toBe("https://x.com/blender/status/1790000000000000000")
+
+    const patch = new FormData()
+    patch.set("youtube_url", "")
+    const patched = await PATCH(
+      new Request(`http://nv.test/api/posts/${created.post.slug}`, {
+        method: "PATCH",
+        headers: { authorization: `Bearer ${created.edit_token}` },
+        body: patch,
+      }),
+      { params: Promise.resolve({ slug: created.post.slug }) },
+    )
+    expect(patched.status).toBe(200)
+    const body = (await patched.json()) as { post: { youtube_url: string | null; tweet_url: string | null } }
+    expect(body.post.youtube_url).toBeNull()
+    expect(body.post.tweet_url).toBe("https://x.com/blender/status/1790000000000000000")
+  })
+
+  test("POST without links stores null for both", async () => {
+    tempDir()
+    const form = new FormData()
+    form.set("title", "No links")
+    form.set("author_name", "Aman")
+    form.set("tree_type", "ShaderNodeTree")
+    form.set("blender_version_string", "5.1.0")
+    form.set("cover", coverFile())
+    form.set("youtube_url", "")
+    const res = await POST(new Request("http://nv.test/api/posts", { method: "POST", body: form }))
+    const body = (await res.json()) as { post: { youtube_url: string | null; tweet_url: string | null } }
+    expect(body.post.youtube_url).toBeNull()
+    expect(body.post.tweet_url).toBeNull()
+  })
+
+  test("POST with a link that is not a single video or post is rejected", async () => {
+    tempDir()
+    const form = new FormData()
+    form.set("title", "Bad link")
+    form.set("author_name", "Aman")
+    form.set("tree_type", "ShaderNodeTree")
+    form.set("blender_version_string", "5.1.0")
+    form.set("cover", coverFile())
+    form.set("tweet_url", "https://x.com/blender")
+    const res = await POST(new Request("http://nv.test/api/posts", { method: "POST", body: form }))
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as { error: string }
+    expect(body.error).toContain("X post link")
   })
 
   test("non-mp4 video is rejected", async () => {

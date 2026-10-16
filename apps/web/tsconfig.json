@@ -19,6 +19,12 @@
       "@/node-view/styles.css": [
         "../../packages/node-view/src/styles.css"
       ],
+      "@/node-view/layout": [
+        "../../packages/node-view/src/layout.ts"
+      ],
+      "@/node-view/color": [
+        "../../packages/node-view/src/color.ts"
+      ],
       "@/node-view": [
         "../../packages/node-view/src/index.ts"
       ],

@@ -11,10 +11,12 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.2.0",
     "@nodevault/catalog": "workspace:*",
     "@nodevault/interchange": "workspace:*",
     "@nodevault/node-view": "workspace:*",
     "@tailwindcss/postcss": "^4.3.3",
+    "@vercel/blob": "^2.8.2",
     "@xyflow/react": "^12.8.2",
     "next": "^15.5.4",
     "postcss": "^8.5.30",

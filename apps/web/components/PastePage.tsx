@@ -1,12 +1,14 @@
 "use client"
 
+import { Kbd, useModKey } from "@/components/Keys"
+import { PayloadFallback } from "@/components/PayloadFallback"
 import { ShareSheet } from "@/components/ShareSheet"
 import { NodeView } from "@/node-view"
 import { shippedCatalogs } from "@/lib/catalogs"
 import { ingestText, serializeCopy, treeTypeLabel } from "@/lib/ingest"
 import type { CatalogResolution } from "@/catalog"
 import type { NodeVaultPayload } from "@/interchange"
-import { btn, btnAccent, canvas, fallback, notice as noticeClass, shell } from "@/lib/ui"
+import { btn, btnAccent, btnGhost, canvas, cn, errorBox, notice as noticeClass, shell, treeDotClass } from "@/lib/ui"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 function isTextField(target: EventTarget | null): boolean {
@@ -89,46 +91,43 @@ export function PastePage() {
   const groups = payload ? payload.trees.length - 1 : 0
 
   return (
-    <div className={shell}>
+    <div data-fullbleed className={shell}>
       {payload && root ? (
         <>
-          <div className="flex shrink-0 items-center gap-3 border-b border-nv-line bg-nv-raised px-3 py-2 text-[13px]">
-            <div className="flex flex-1 flex-wrap items-center gap-3">
-              <strong>{treeTypeLabel(payload.tree_type)}</strong>
-              <span>{payload.blender_version_string}</span>
+          <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-line bg-bg px-4 py-2.5 sm:px-8">
+            <div className="flex flex-1 flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] text-muted tabular-nums">
+              <span className="inline-flex items-center gap-2 font-medium text-fg">
+                <span className={treeDotClass(payload.tree_type)} aria-hidden="true" />
+                {treeTypeLabel(payload.tree_type)}
+              </span>
+              <span>Blender {payload.blender_version_string}</span>
               <span>
                 {payload.origin.node_count} node{payload.origin.node_count === 1 ? "" : "s"}
-                {groups > 0 ? ` · ${groups} group${groups === 1 ? "" : "s"}` : ""}
+                {groups > 0 ? `, ${groups} group${groups === 1 ? "" : "s"}` : ""}
               </span>
               {notice ? (
-                <span className={noticeClass}>
+                <span className={cn(noticeClass, "inline-flex items-center gap-2")}>
                   {notice}
-                  <button type="button" className="ml-2 cursor-pointer border-0 bg-transparent text-[#ccc]" onClick={() => setNotice(null)} aria-label="Dismiss">
+                  <button
+                    type="button"
+                    className="cursor-pointer border-0 bg-transparent p-0 text-[15px] leading-none text-current"
+                    onClick={() => setNotice(null)}
+                    aria-label="Dismiss notice"
+                  >
                     ×
                   </button>
                 </span>
               ) : null}
               {publishedUrl ? (
-                <a className="text-xs text-[#d4a574] no-underline" href={publishedUrl}>
-                  Shared
+                <a className="text-accent-fg underline-offset-4 hover:underline" href={publishedUrl}>
+                  View shared post
                 </a>
               ) : null}
             </div>
-            <div className="flex gap-2">
-              {!publishedUrl ? (
-                <button type="button" className={btnAccent} onClick={() => setShareOpen(true)}>
-                  Share
-                </button>
-              ) : null}
-              <button type="button" className={btn} onClick={() => setShowMinimap((v) => !v)}>
-                {showMinimap ? "Hide map" : "Show map"}
-              </button>
-              <button type="button" className={btn} onClick={() => void onCopy()}>
-                {copied ? "Copied" : "Copy"}
-              </button>
+            <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                className={btn}
+                className={btnGhost}
                 onClick={() => {
                   setPayload(null)
                   setResolution(null)
@@ -140,11 +139,22 @@ export function PastePage() {
               >
                 Clear
               </button>
+              <button type="button" className={btnGhost} aria-pressed={showMinimap} onClick={() => setShowMinimap((v) => !v)}>
+                {showMinimap ? "Hide map" : "Show map"}
+              </button>
+              <button type="button" className={btn} onClick={() => void onCopy()}>
+                {copied ? "Copied" : "Copy for Blender"}
+              </button>
+              {!publishedUrl ? (
+                <button type="button" className={btnAccent} onClick={() => setShareOpen(true)}>
+                  Share
+                </button>
+              ) : null}
             </div>
           </div>
-          <div className={canvas}>
+          <div className={canvas} data-theme="dark">
             {error ? (
-              <div className="absolute left-1/2 top-3 z-[6] max-w-xl -translate-x-1/2 rounded border border-[#744] bg-[#3a1818] px-3 py-2 text-[13px]">
+              <div role="alert" className={cn(errorBox, "absolute left-1/2 top-3 z-[6] max-w-xl -translate-x-1/2")}>
                 {error}
               </div>
             ) : null}
@@ -157,39 +167,71 @@ export function PastePage() {
               blenderVersion={payload.blender_version_string}
               showMinimap={showMinimap}
             />
-            {fallbackText ? (
-              <div className={fallback}>
-                <p>Copy this text, then paste it in Blender.</p>
-                <textarea
-                  className="flex-1 border border-[#444] bg-[#111] font-mono text-[11px] text-[#ddd]"
-                  readOnly
-                  value={fallbackText}
-                  autoFocus
-                  onFocus={(e) => e.target.select()}
-                />
-              </div>
-            ) : null}
-            {shareOpen ? (
-              <div className="absolute inset-0 z-[12] flex justify-end">
-                <button type="button" className="absolute inset-0 cursor-pointer border-0 bg-[rgb(12_12_12_/_55%)]" aria-label="Dismiss share" onClick={() => setShareOpen(false)} />
-                <ShareSheet
-                  payload={payload}
-                  onClose={(url) => {
-                    setShareOpen(false)
-                    if (url) setPublishedUrl(url)
-                  }}
-                />
-              </div>
-            ) : null}
+            {fallbackText ? <PayloadFallback text={fallbackText} /> : null}
           </div>
+          {shareOpen ? (
+            <div className="fixed inset-0 z-[40] flex justify-end">
+              <button
+                type="button"
+                className="absolute inset-0 cursor-pointer border-0 bg-[oklch(0.1_0.005_60/55%)]"
+                aria-label="Close share panel"
+                onClick={() => setShareOpen(false)}
+              />
+              <ShareSheet
+                payload={payload}
+                onClose={(url) => {
+                  setShareOpen(false)
+                  if (url) setPublishedUrl(url)
+                }}
+              />
+            </div>
+          ) : null}
         </>
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-[radial-gradient(circle,#4e4e4e_1.5px,#171717_2px)] bg-[size:40px_40px] p-8">
-          <p className="m-0 text-[11px] tracking-[0.16em] text-[#8a8a8a] uppercase">Paste</p>
-          <p className="max-w-md text-center text-xl leading-snug">Copy nodes in Blender, then paste here. Share when you want a link.</p>
-          {error ? <p className="max-w-xl text-center text-sm text-[#e8a0a0]">{error}</p> : null}
-        </div>
+        <EmptyState error={error} />
       )}
+    </div>
+  )
+}
+
+function EmptyState({ error }: { error: string | null }) {
+  const mod = useModKey()
+  const steps = [
+    <>Select nodes in any Blender node editor.</>,
+    <>
+      Press <Kbd>{`${mod} ⇧ C`}</Kbd> to copy them with NodeVault.
+    </>,
+    <>
+      Press <Kbd>{`${mod} V`}</Kbd> on this page.
+    </>,
+  ]
+  return (
+    <div
+      data-theme="dark"
+      className="flex flex-1 items-center bg-canvas bg-[radial-gradient(circle,oklch(0.36_0_0)_1.4px,transparent_1.8px)] bg-[size:36px_36px] px-5 py-16 sm:px-12"
+    >
+      <div className="mx-auto w-full max-w-[1240px] animate-rise">
+        <h1 className="m-0 font-display text-[clamp(2.75rem,1.6rem+4.4vw,5.25rem)] font-semibold leading-[0.95] tracking-[-0.035em] text-fg">
+          Paste a graph.
+        </h1>
+        <ol className="mt-10 grid max-w-3xl list-none gap-x-8 gap-y-5 p-0 sm:grid-cols-3">
+          {steps.map((step, i) => (
+            <li key={i} className="border-t border-line-strong pt-4 text-[15px] leading-relaxed text-muted">
+              <span className="mb-2 block font-display text-[22px] font-medium text-accent-fg tabular-nums">{i + 1}</span>
+              {step}
+            </li>
+          ))}
+        </ol>
+        <p className="mt-10 text-[14px] text-subtle">
+          You can also drop a <span className="text-muted">.json</span> payload file anywhere on this page. Nothing is uploaded until
+          you choose to share.
+        </p>
+        {error ? (
+          <p role="alert" className={cn(errorBox, "mt-6 inline-block max-w-xl")}>
+            {error}
+          </p>
+        ) : null}
+      </div>
     </div>
   )
 }

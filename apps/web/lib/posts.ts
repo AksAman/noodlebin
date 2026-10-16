@@ -15,12 +15,21 @@ export type VaultPost = {
   blender_version_string: string
   cover_url: string | null
   video_url: string | null
+  youtube_url: string | null
+  tweet_url: string | null
   blend_url: string | null
   blend_filename: string | null
   card_url: string | null
   nodevember_day: number | null
   created_at: string
   seeded: boolean
+}
+
+export type StoredPost = VaultPost & {
+  edit_token_hash: string
+  cover_file: string | null
+  video_file: string | null
+  blend_file: string | null
 }
 
 export type StaticPost = VaultPost
@@ -47,6 +56,8 @@ function seed(
     blender_version_string: tree.blender_version_string,
     cover_url: null,
     video_url: null,
+    youtube_url: null,
+    tweet_url: null,
     blend_url: null,
     blend_filename: null,
     card_url: `/p/${slug}/opengraph-image`,

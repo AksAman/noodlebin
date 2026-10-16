@@ -1,9 +1,10 @@
+import { PostEmbeds } from "@/components/PostEmbeds"
 import { PostGraph } from "@/components/PostGraph"
 import { resolveCatalog } from "@/catalog"
 import { shippedCatalogs } from "@/lib/catalogs"
 import { treeTypeLabel } from "@/lib/ingest"
 import { getPublicPost } from "@/lib/store"
-import { cn, gallery, shell } from "@/lib/ui"
+import { cn, page, docShell } from "@/lib/ui"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -41,18 +42,29 @@ export default async function PostRoute({ params }: { params: Promise<{ slug: st
 
   if (!post.tree || !resolution) {
     return (
-      <div className={cn(shell, "h-auto min-h-full")}>
-        <div className={gallery}>
+      <div className={docShell}>
+        <div className={cn(page, "grid gap-10 pt-14 sm:pt-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]")}>
           <header>
-            <h1 className="mb-2 text-2xl text-[#eee]">{post.title}</h1>
-            <p className="mb-4 max-w-xl leading-snug">
-              <Link href={`/@${post.author_slug}`}>@{post.author_slug}</Link>
+            <h1 className="m-0 font-display text-[clamp(2rem,1.4rem+2.4vw,3.25rem)] font-semibold leading-[1.02] tracking-[-0.03em] text-fg">
+              {post.title}
+            </h1>
+            <p className="mt-3 text-[14px] text-muted">
+              by{" "}
+              <Link className="text-fg underline-offset-4 hover:underline" href={`/@${post.author_slug}`}>
+                {post.author_name}
+              </Link>
               {" · "}
-              {treeTypeLabel(post.tree_type)} · {post.blender_version_string}
+              {treeTypeLabel(post.tree_type)} · Blender {post.blender_version_string}
             </p>
-            {post.description ? <p className="mb-4 max-w-xl leading-snug">{post.description}</p> : null}
-            <p className="pt-6 text-left text-xl leading-snug">The graph appears when a payload is attached.</p>
+            {post.description ? <p className="mt-5 max-w-[60ch] leading-relaxed text-muted">{post.description}</p> : null}
+            <p className="mt-8 border-t border-line pt-5 text-[14px] text-muted">
+              No graph is attached to this post yet, so there is nothing to copy.
+            </p>
           </header>
+          <div className="flex flex-col gap-6">
+            {post.cover_url ? <img className="block w-full rounded-lg ring-1 ring-line" src={post.cover_url} alt="" /> : null}
+            <PostEmbeds youtubeUrl={post.youtube_url} tweetUrl={post.tweet_url} title={post.title} />
+          </div>
         </div>
       </div>
     )

@@ -1,12 +1,14 @@
 import { parseNodeVaultText } from "@/interchange"
 import { treeTypeLabel } from "@/lib/ingest"
 import { filterPosts } from "@/lib/posts"
+import { requireDurableStore, requirePublishAccess } from "@/lib/publish"
 import { isSharingError, parseCreateForm } from "@/lib/sharing"
 import { allPublicPosts, createStoredPost, dataDir } from "@/lib/store"
 import { NextResponse } from "next/server"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
+export const maxDuration = 60
 
 function fail(status: number, error: string) {
   return NextResponse.json({ error }, { status })
@@ -27,6 +29,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const form = await request.formData()
+  const denied = requirePublishAccess(request, form) ?? requireDurableStore()
+  if (denied) return fail(denied.status, denied.error)
   const parsed = await parseCreateForm(form, parseNodeVaultText)
   if (isSharingError(parsed)) return fail(parsed.status, parsed.error)
   const created = await createStoredPost(parsed, dataDir())
