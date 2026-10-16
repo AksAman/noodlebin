@@ -90,9 +90,24 @@ export function treeToFlow(
     data: { ...n.data, blenderVersion },
   }))
   const nodes: Node<NvNodeData>[] = [...zones]
-  for (const node of tree.nodes) {
+  const byId = new Map(tree.nodes.map((n) => [n.id, n]))
+  const depthCache = new Map<string, number>()
+  const depth = (id: string, seen = new Set<string>()): number => {
+    const cached = depthCache.get(id)
+    if (cached !== undefined) return cached
+    const parent = byId.get(id)?.parent_id
+    const d = parent && byId.has(parent) && !seen.has(parent) ? depth(parent, seen.add(id)) + 1 : 0
+    depthCache.set(id, d)
+    return d
+  }
+  /* React Flow needs a parent ahead of its children, so frames sort before what they contain. */
+  const ordered = [...tree.nodes].sort((a, b) => depth(a.id) - depth(b.id))
+  for (const node of ordered) {
     const kind = asKind(widgetId(catalog, node))
-    const p = blenderToCanvas(node.location_absolute)
+    const abs = blenderToCanvas(node.location_absolute)
+    const parent = node.parent_id && depth(node.id) > 0 ? byId.get(node.parent_id) : undefined
+    const parentAbs = parent ? blenderToCanvas(parent.location_absolute) : null
+    const p = parentAbs ? { x: abs.x - parentAbs.x, y: abs.y - parentAbs.y } : abs
     const groupTree = node.group_tree_id
       ? trees.find((t) => t.id === node.group_tree_id)
       : undefined
@@ -100,6 +115,7 @@ export function treeToFlow(
       id: node.id,
       type: "nv",
       position: p,
+      ...(parent ? { parentId: parent.id } : {}),
       data: {
         payloadNode: node,
         tree,

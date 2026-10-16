@@ -143,6 +143,12 @@ body:has([data-fullbleed]) > .site-footer {
   display: none;
 }
 
+.hero-shader {
+  /* Quiet behind the headline, full strength on the right, gone before the gallery. */
+  mask-image: linear-gradient(to bottom, #000 40%, transparent 95%), linear-gradient(to right, rgb(0 0 0 / 10%) 10%, rgb(0 0 0 / 62%) 75%);
+  mask-composite: intersect;
+}
+
 .footer-stage {
   background-color: color-mix(in oklab, var(--bg) 60%, var(--sunken));
   background-image: radial-gradient(circle, var(--line-strong) 1px, transparent 1.2px);

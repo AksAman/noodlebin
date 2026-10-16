@@ -1,4 +1,5 @@
 import { GraphThumb } from "@/components/GraphThumb"
+import { ShaderCover } from "@/components/ShaderCover"
 import { treeTypeLabel } from "@/lib/ingest"
 import type { VaultPost } from "@/lib/posts"
 import { treeDotClass } from "@/lib/ui"
@@ -18,9 +19,11 @@ export function CoverGrid({ posts, showAuthor = true }: { posts: VaultPost[]; sh
           style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
         >
           <Link className="group block rounded-lg text-inherit no-underline" href={`/p/${post.slug}`}>
-            <div className="overflow-hidden rounded-lg bg-canvas ring-1 ring-line">
+            <div className="relative overflow-hidden rounded-lg bg-canvas ring-1 ring-line">
               <div className="transition-transform duration-500 ease-out-quart group-hover:scale-[1.025]">
-                {post.cover_url ? (
+                {post.cover_shader ? (
+                  <ShaderCover source={post.cover_shader} poster={post.cover_url} className={post.cover_url ? undefined : "aspect-[4/3]"} />
+                ) : post.cover_url ? (
                   <img className="block h-auto w-full" src={post.cover_url} alt="" loading="lazy" />
                 ) : post.tree ? (
                   <GraphThumb payload={post.tree} id={post.slug} />
@@ -28,6 +31,11 @@ export function CoverGrid({ posts, showAuthor = true }: { posts: VaultPost[]; sh
                   <div className="aspect-[4/3]" />
                 )}
               </div>
+              {post.cover_shader ? (
+                <span className="absolute left-2.5 top-2.5 rounded bg-black/60 px-1.5 py-0.5 font-mono text-[10px] tracking-wide text-white/85 backdrop-blur-sm">
+                  GLSL
+                </span>
+              ) : null}
             </div>
             <h2 className="mt-3.5 font-display text-[18px] font-medium leading-snug tracking-[-0.01em] text-fg decoration-line-strong underline-offset-4 group-hover:underline">
               {post.title}

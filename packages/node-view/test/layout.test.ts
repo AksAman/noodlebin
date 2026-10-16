@@ -52,7 +52,7 @@ describe("treeToFlow", () => {
     expect(ramp?.data.payloadNode.widgets.color_ramp?.elements).toHaveLength(3)
   })
 
-  test("frame sits behind its child using absolute positions", () => {
+  test("frame sits behind its child, which moves with it", () => {
     const payload = parseNodeVaultText(
       readFileSync(join(import.meta.dir, "../../../fixtures/handwritten/frame-child.nodevault.json"), "utf8"),
     )
@@ -63,7 +63,9 @@ describe("treeToFlow", () => {
     expect(frame?.zIndex).toBe(1)
     expect(child?.zIndex).toBe(2)
     expect(frame?.position).toEqual({ x: -40, y: -80 })
-    expect(child?.position).toEqual({ x: -20, y: -40 })
+    expect(child?.parentId).toBe("n1")
+    expect(child?.position).toEqual({ x: 20, y: 40 })
+    expect(nodes.indexOf(frame!)).toBeLessThan(nodes.indexOf(child!))
     expect(frame?.draggable).toBe(true)
     expect(child?.draggable).toBe(true)
   })

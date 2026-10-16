@@ -3,7 +3,9 @@
 import { serializeCopy, treeTypeLabel } from "@/lib/ingest"
 import type { NodeVaultPayload } from "@/interchange"
 import { Kbd, useModKey } from "@/components/Keys"
+import { ShaderCover } from "@/components/ShaderCover"
 import { parseTweet, parseYouTube } from "@/lib/embeds"
+import { checkShaderSource } from "@/lib/shaderCover"
 import { btnAccent, btnGhost, cn, errorBox, field, treeDotClass } from "@/lib/ui"
 import { useCallback, useEffect, useRef, useState } from "react"
 
@@ -76,6 +78,70 @@ function LinkField({ spec }: { spec: LinkSpec }) {
   )
 }
 
+const SHADER_STARTER = `void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+  vec2 uv = fragCoord / iResolution.xy;
+  fragColor = vec4(0.5 + 0.5 * cos(iTime + uv.xyx + vec3(0, 2, 4)), 1.0);
+}`
+
+/** Shadertoy-style GLSL that plays over the cover image. Reports its problem up so publishing can stop on it. */
+function ShaderField({ poster, onProblem }: { poster: string | null; onProblem: (problem: string | null) => void }) {
+  const [text, setText] = useState("")
+  const [live, setLive] = useState("")
+  const [compileError, setCompileError] = useState<string | null>(null)
+  useEffect(() => {
+    const id = setTimeout(() => setLive(text), 400)
+    return () => clearTimeout(id)
+  }, [text])
+  const checked = live.trim() ? checkShaderSource(live) : null
+  const problem = checked && !checked.ok ? checked.error : compileError
+  useEffect(() => onProblem(text.trim() ? problem : null), [problem, text, onProblem])
+  return (
+    <details className="group -mt-2 text-[13px]" open={text.length > 0 || undefined}>
+      <summary className="cursor-pointer list-none text-muted marker:hidden hover:text-fg">
+        <span className="mr-1.5 inline-block transition-transform duration-150 group-open:rotate-90" aria-hidden="true">
+          ›
+        </span>
+        Animate the cover with a GLSL shader <span className="text-subtle">(optional)</span>
+      </summary>
+      <div className="mt-3 flex flex-col gap-2">
+        {checked?.ok ? (
+          <ShaderCover
+            source={checked.source}
+            poster={poster}
+            className="aspect-video rounded-lg ring-1 ring-line"
+            onError={setCompileError}
+          />
+        ) : null}
+        <textarea
+          className={cn(field, "min-h-40 resize-y font-mono text-[12px] leading-relaxed")}
+          name="cover_shader"
+          spellCheck={false}
+          autoComplete="off"
+          wrap="off"
+          placeholder={SHADER_STARTER}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          aria-invalid={problem ? true : undefined}
+          aria-describedby="shader-hint"
+        />
+        <span
+          id="shader-hint"
+          role={problem ? "alert" : undefined}
+          className={cn("whitespace-pre-wrap text-[12px]", problem ? "font-mono text-danger-fg" : "text-subtle")}
+        >
+          {problem ??
+            "Paste a Shadertoy-style mainImage function. iResolution, iTime, and iFrame are available. The image above stays as the fallback and the link preview."}
+        </span>
+        {!text ? (
+          <button type="button" className={cn(btnGhost, "self-start")} onClick={() => setText(SHADER_STARTER)}>
+            Start from an example
+          </button>
+        ) : null}
+      </div>
+    </details>
+  )
+}
+
 function isTextField(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false
   return target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable
@@ -117,6 +183,7 @@ export function ShareSheet({
   const [coverName, setCoverName] = useState<string | null>(null)
   const [coverPreview, setCoverPreview] = useState<string | null>(null)
   const [coverError, setCoverError] = useState<string | null>(null)
+  const [shaderProblem, setShaderProblem] = useState<string | null>(null)
   const titleRef = useRef<HTMLInputElement>(null)
   const coverRef = useRef<HTMLInputElement>(null)
   const mod = useModKey()
@@ -226,6 +293,11 @@ export function ShareSheet({
           form.querySelector<HTMLInputElement>(`[name="${badLink.name}"]`)?.focus()
           return
         }
+        if (shaderProblem) {
+          setError(`The cover shader has a problem: ${shaderProblem}`)
+          form.querySelector<HTMLTextAreaElement>('[name="cover_shader"]')?.focus()
+          return
+        }
         body.set("tree_text", serializeCopy(payload))
         setBusy(true)
         setError(null)
@@ -293,6 +365,8 @@ export function ShareSheet({
             (coverName ? `${coverName} · paste another image to replace it` : "JPEG, PNG, WebP, or GIF. This is what people see in the gallery.")}
         </span>
       </label>
+
+      <ShaderField poster={coverPreview} onProblem={setShaderProblem} />
 
       <label className={label}>
         Title

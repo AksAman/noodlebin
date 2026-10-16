@@ -1,6 +1,7 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto"
 import { TREE_TYPES, type NodeVaultPayload, type TreeType } from "@/interchange"
 import { parseTweet, parseYouTube } from "@/lib/embeds"
+import { checkShaderSource } from "@/lib/shaderCover"
 import { sniffBlend, sniffCover, sniffMp4 } from "@/lib/sniff"
 
 export const COVER_MAX = 10 * 1024 * 1024
@@ -46,10 +47,11 @@ export type NewPostInput = {
   nodevember_day: number | null
   youtube_url: string | null
   tweet_url: string | null
+  cover_shader: string | null
   files: NewPostFiles
 }
 
-export type PostLinks = { youtube_url?: string | null; tweet_url?: string | null }
+export type PostLinks = { youtube_url?: string | null; tweet_url?: string | null; cover_shader?: string | null }
 
 /** Reads the optional link fields. An absent field stays absent; an empty one means "no link". */
 export function parseLinkFields(form: FormData): PostLinks | SharingError {
@@ -67,6 +69,16 @@ export function parseLinkFields(form: FormData): PostLinks | SharingError {
     const parsed = raw ? parseTweet(raw) : null
     if (raw && !parsed) return { ok: false, status: 400, error: "X post link must point to a single post on x.com or twitter.com." }
     links.tweet_url = parsed?.url ?? null
+  }
+  if (form.has("cover_shader")) {
+    const raw = String(form.get("cover_shader") ?? "")
+    if (!raw.trim()) {
+      links.cover_shader = null
+    } else {
+      const checked = checkShaderSource(raw)
+      if (!checked.ok) return { ok: false, status: 400, error: checked.error }
+      links.cover_shader = checked.source
+    }
   }
   return links
 }
@@ -279,6 +291,7 @@ export async function parseCreateForm(
     nodevember_day: day,
     youtube_url: links.youtube_url ?? null,
     tweet_url: links.tweet_url ?? null,
+    cover_shader: links.cover_shader ?? null,
     files,
   }
 }

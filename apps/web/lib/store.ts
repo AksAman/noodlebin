@@ -42,6 +42,7 @@ function publicOf(post: StoredPost): VaultPost {
     tree_type: post.tree_type,
     blender_version_string: post.blender_version_string,
     cover_url: post.cover_url,
+    cover_shader: post.cover_shader ?? null,
     video_url: post.video_url,
     youtube_url: post.youtube_url ?? null,
     tweet_url: post.tweet_url ?? null,
@@ -171,6 +172,7 @@ async function buildStored(
     tree_type: input.tree_type,
     blender_version_string: input.blender_version_string,
     cover_url: mediaUrl(slug, "cover", coverStored),
+    cover_shader: input.cover_shader,
     video_url: mediaUrl(slug, "video", video_file),
     youtube_url: input.youtube_url,
     tweet_url: input.tweet_url,
@@ -250,6 +252,7 @@ export async function patchStoredPost(
     }
     if (patch.youtube_url !== undefined) current.youtube_url = patch.youtube_url
     if (patch.tweet_url !== undefined) current.tweet_url = patch.tweet_url
+    if (patch.cover_shader !== undefined) current.cover_shader = patch.cover_shader
 
     await persistPatch(dir, current)
     return { post: publicOf(current) }

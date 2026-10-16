@@ -48,6 +48,7 @@ export async function ensureSchema(): Promise<Sql> {
       `
       await client`ALTER TABLE posts ADD COLUMN IF NOT EXISTS youtube_url TEXT`
       await client`ALTER TABLE posts ADD COLUMN IF NOT EXISTS tweet_url TEXT`
+      await client`ALTER TABLE posts ADD COLUMN IF NOT EXISTS cover_shader TEXT`
       await client`CREATE INDEX IF NOT EXISTS posts_author_slug_idx ON posts (author_slug)`
       await client`CREATE INDEX IF NOT EXISTS posts_created_at_idx ON posts (created_at DESC)`
     })()
@@ -66,6 +67,7 @@ type PostRow = {
   tree_type: TreeType
   blender_version_string: string
   cover_url: string | null
+  cover_shader: string | null
   video_url: string | null
   youtube_url: string | null
   tweet_url: string | null
@@ -92,6 +94,7 @@ export function rowToStored(row: PostRow): StoredPost {
     tree_type: row.tree_type,
     blender_version_string: row.blender_version_string,
     cover_url: row.cover_url,
+    cover_shader: row.cover_shader ?? null,
     video_url: row.video_url,
     youtube_url: row.youtube_url ?? null,
     tweet_url: row.tweet_url ?? null,
@@ -134,7 +137,7 @@ export async function pgInsert(post: StoredPost): Promise<void> {
       slug, title, author_name, author_slug, description, tree, tree_type,
       blender_version_string, cover_url, video_url, blend_url, blend_filename,
       card_url, nodevember_day, created_at, seeded, edit_token_hash,
-      cover_file, video_file, blend_file, youtube_url, tweet_url
+      cover_file, video_file, blend_file, youtube_url, tweet_url, cover_shader
     ) VALUES (
       ${post.slug}, ${post.title}, ${post.author_name}, ${post.author_slug},
       ${post.description}, ${post.tree === null ? null : JSON.stringify(post.tree)}, ${post.tree_type},
@@ -142,7 +145,7 @@ export async function pgInsert(post: StoredPost): Promise<void> {
       ${post.blend_url}, ${post.blend_filename}, ${post.card_url},
       ${post.nodevember_day}, ${post.created_at}, ${post.seeded},
       ${post.edit_token_hash}, ${post.cover_file}, ${post.video_file}, ${post.blend_file},
-      ${post.youtube_url}, ${post.tweet_url}
+      ${post.youtube_url}, ${post.tweet_url}, ${post.cover_shader}
     )
   `
 }
@@ -169,7 +172,8 @@ export async function pgUpdate(post: StoredPost): Promise<void> {
       video_file = ${post.video_file},
       blend_file = ${post.blend_file},
       youtube_url = ${post.youtube_url},
-      tweet_url = ${post.tweet_url}
+      tweet_url = ${post.tweet_url},
+      cover_shader = ${post.cover_shader}
     WHERE slug = ${post.slug}
   `
 }

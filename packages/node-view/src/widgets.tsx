@@ -121,9 +121,27 @@ export function ValueView({
   return null
 }
 
-export function showProperty(prop: CatalogProperty): boolean {
+/** Properties Blender's draw code only shows in some modes, keyed by node type. */
+const CONDITIONAL_PROPS: Record<string, Record<string, (props: Record<string, JsonValue>) => boolean>> = {
+  ShaderNodeMix: {
+    factor_mode: (p) => p.data_type === "VECTOR",
+    blend_type: (p) => p.data_type === "RGBA",
+    clamp_result: (p) => p.data_type === "RGBA",
+  },
+  ShaderNodeMapRange: {
+    clamp: (p) => p.interpolation_type !== "SMOOTHSTEP" && p.interpolation_type !== "SMOOTHERSTEP",
+  },
+}
+
+export function showProperty(
+  prop: CatalogProperty,
+  blIdname?: string,
+  values: Record<string, JsonValue> = {},
+): boolean {
   if (SKIP_PROPS.has(prop.identifier)) return false
-  return prop.type === "ENUM" || prop.type === "BOOLEAN"
+  if (prop.type !== "ENUM" && prop.type !== "BOOLEAN") return false
+  const rule = blIdname ? CONDITIONAL_PROPS[blIdname]?.[prop.identifier] : undefined
+  return rule ? rule(values) : true
 }
 
 export function PropertyRow({

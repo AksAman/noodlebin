@@ -1,5 +1,6 @@
 import { PostEmbeds } from "@/components/PostEmbeds"
 import { PostGraph } from "@/components/PostGraph"
+import { ShaderCover } from "@/components/ShaderCover"
 import { resolveCatalog } from "@/catalog"
 import { shippedCatalogs } from "@/lib/catalogs"
 import { treeTypeLabel } from "@/lib/ingest"
@@ -62,7 +63,15 @@ export default async function PostRoute({ params }: { params: Promise<{ slug: st
             </p>
           </header>
           <div className="flex flex-col gap-6">
-            {post.cover_url ? <img className="block w-full rounded-lg ring-1 ring-line" src={post.cover_url} alt="" /> : null}
+            {post.cover_shader ? (
+              <ShaderCover
+                source={post.cover_shader}
+                poster={post.cover_url}
+                className={cn("rounded-lg ring-1 ring-line", !post.cover_url && "aspect-[4/3]")}
+              />
+            ) : post.cover_url ? (
+              <img className="block w-full rounded-lg ring-1 ring-line" src={post.cover_url} alt="" />
+            ) : null}
             <PostEmbeds youtubeUrl={post.youtube_url} tweetUrl={post.tweet_url} title={post.title} />
           </div>
         </div>

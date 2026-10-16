@@ -8,6 +8,7 @@ import type { NodeVaultPayload } from "@/interchange"
 import { Kbd, useModKey } from "@/components/Keys"
 import { PayloadFallback } from "@/components/PayloadFallback"
 import { PostEmbeds, XGlyph } from "@/components/PostEmbeds"
+import { ShaderCover } from "@/components/ShaderCover"
 import { creator } from "@/lib/creator"
 import { btnAccent, btnGhost, canvas, cn, notice as noticeClass, treeDotClass, treeEditorName } from "@/lib/ui"
 import Link from "next/link"
@@ -58,6 +59,12 @@ export function PostGraph({
             poster={post.cover_url ?? undefined}
             src={post.video_url}
           />
+        ) : post.cover_shader ? (
+          <ShaderCover
+            source={post.cover_shader}
+            poster={post.cover_url}
+            className={cn("rounded-lg ring-1 ring-line", post.cover_url ? "max-h-56 md:max-h-72" : "aspect-[4/3]")}
+          />
         ) : post.cover_url ? (
           <img className="block max-h-56 w-full rounded-lg object-cover ring-1 ring-line md:max-h-72" src={post.cover_url} alt="" />
         ) : null}
@@ -77,6 +84,20 @@ export function PostGraph({
         {post.description ? <p className="m-0 max-w-[60ch] text-[15px] leading-relaxed text-muted">{post.description}</p> : null}
 
         <PostEmbeds youtubeUrl={post.youtube_url} tweetUrl={post.tweet_url} title={post.title} />
+
+        {post.cover_shader ? (
+          <details className="group text-[13px]">
+            <summary className="cursor-pointer list-none text-muted marker:hidden hover:text-fg">
+              <span className="mr-1.5 inline-block transition-transform duration-150 group-open:rotate-90" aria-hidden="true">
+                ›
+              </span>
+              Cover shader (GLSL)
+            </summary>
+            <pre className="mt-3 max-h-80 overflow-auto rounded-lg bg-sunken p-3 font-mono text-[11px] leading-relaxed text-fg">
+              {post.cover_shader}
+            </pre>
+          </details>
+        ) : null}
 
         <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 border-y border-line py-4 text-[13px] tabular-nums">
           <dt className="text-subtle">Tree</dt>

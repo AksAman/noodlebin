@@ -7,7 +7,9 @@ export const shell = "flex min-h-0 flex-1 flex-col"
 /** Scrolling pages: grow to fill the screen but never shrink, so the footer follows the content. */
 export const docShell = "flex flex-[1_0_auto] flex-col"
 
-export const page = "mx-auto w-full max-w-[1240px] px-5 pb-24 sm:px-8"
+export const container = "mx-auto w-full max-w-[1240px] px-5 sm:px-8"
+
+export const page = `${container} pb-24`
 
 const btnBase =
   "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-medium no-underline transition-colors duration-150 ease-out-quart disabled:cursor-default disabled:opacity-55"

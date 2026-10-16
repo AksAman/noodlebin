@@ -41,6 +41,46 @@
   cursor: pointer;
 }
 
+.nv-reset {
+  position: absolute;
+  z-index: 5;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgb(48 48 48 / 92%);
+  color: #e6e6e6;
+  border: 1px solid #555;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  animation: nv-reset-in 180ms ease-out both;
+}
+
+.nv-reset:hover {
+  border-color: #888;
+  color: #fff;
+}
+
+.nv-reset:focus-visible {
+  outline: 2px solid #4772b3;
+  outline-offset: 2px;
+}
+
+@keyframes nv-reset-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nv-reset {
+    animation: none;
+  }
+}
+
 .nv-root .react-flow__node {
   overflow: visible !important;
   cursor: grab;
@@ -79,7 +119,7 @@
 }
 
 .nv-header {
-  height: 24px;
+  height: 20px;
   border-radius: 4px 4px 0 0;
   display: flex;
   align-items: center;
@@ -115,12 +155,19 @@
   border-top: 1px solid #c7c7c7;
 }
 
+/* Row metrics measured from Blender's node editor: 20 unit rows, sockets 1 apart, 6 above and 7 below the body. */
 .nv-body {
   position: relative;
-  padding: 4px 6px 6px;
+  padding: 6px 6px 7px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
+}
+
+.nv-props {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
 }
 
 .nv-out-stack {
@@ -133,13 +180,13 @@
 .nv-ins {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
 }
 
 .nv-prop,
 .nv-sock {
   position: relative;
-  min-height: 24px;
+  min-height: 20px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -168,10 +215,14 @@
   padding-left: 8px;
 }
 
+.nv-sock {
+  margin-bottom: 1px;
+}
+
 .nv-sock-out {
   padding-right: 2px;
   justify-content: flex-end;
-  min-height: 24px;
+  min-height: 20px;
 }
 
 .nv-sock-name {
@@ -210,13 +261,13 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 1.5px;
+  gap: 0;
   min-height: 0;
-  padding-top: 2px;
 }
 
 .nv-vec-title {
   font-size: 10px;
+  line-height: 20px;
   opacity: 0.75;
   padding-left: 6px;
 }
@@ -248,7 +299,7 @@
 }
 
 .nv-sock-vector .nv-handle {
-  top: 8px !important;
+  top: 10px !important;
 }
 
 .nv-diamond {
@@ -299,7 +350,7 @@
 
 .nv-swatch-wide {
   width: 100%;
-  height: 24px;
+  height: 18px;
   border-radius: 4px;
 }
 
@@ -307,7 +358,7 @@
   position: relative;
   flex: 1;
   width: 100%;
-  height: 24px;
+  height: 18px;
   background: #545454;
   border-radius: 4px;
   overflow: hidden;
@@ -332,7 +383,7 @@
 .nv-dropdown {
   flex: 1;
   width: 100%;
-  height: 24px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -353,7 +404,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 24px;
+  height: 20px;
 }
 
 .nv-check-box {
@@ -391,7 +442,6 @@
 .nv-vec-axis {
   display: flex;
   align-items: center;
-  height: 22px;
   position: relative;
 }
 
@@ -416,13 +466,13 @@
 }
 
 .nv-vec-x .nv-bar {
-  background: #7a3535;
+  background: #545454;
 }
 .nv-vec-y .nv-bar {
-  background: #357a3a;
+  background: #545454;
 }
 .nv-vec-z .nv-bar {
-  background: #35377a;
+  background: #545454;
 }
 
 .nv-vec-x .nv-vec-letter {
@@ -608,6 +658,20 @@
   filter: brightness(1.08);
 }
 
-.react-flow__attribution {
-  display: none;
+.nv-pointer {
+  opacity: 0.7;
+}
+
+.nv-pointer::after {
+  content: none;
+}
+
+.nv-kbd {
+  margin-left: 6px;
+  padding: 0 4px;
+  border: 1px solid #5a5a5a;
+  border-radius: 3px;
+  font: inherit;
+  font-size: 10px;
+  color: #aaa;
 }
