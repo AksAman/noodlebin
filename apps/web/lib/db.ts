@@ -1,6 +1,7 @@
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless"
 import type { NodeVaultPayload, TreeType } from "@/interchange"
 import type { StoredPost } from "@/lib/posts"
+import { buildSearchText } from "@/lib/search"
 
 type Sql = NeonQueryFunction<false, false>
 
@@ -49,6 +50,11 @@ export async function ensureSchema(): Promise<Sql> {
       await client`ALTER TABLE posts ADD COLUMN IF NOT EXISTS youtube_url TEXT`
       await client`ALTER TABLE posts ADD COLUMN IF NOT EXISTS tweet_url TEXT`
       await client`ALTER TABLE posts ADD COLUMN IF NOT EXISTS cover_shader TEXT`
+      await client`ALTER TABLE posts ALTER COLUMN author_slug DROP NOT NULL`
+      await client`ALTER TABLE posts ADD COLUMN IF NOT EXISTS visibility TEXT NOT NULL DEFAULT 'public'`
+      await client`ALTER TABLE posts ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}'`
+      await client`ALTER TABLE posts ADD COLUMN IF NOT EXISTS search_text TEXT NOT NULL DEFAULT ''`
+      await client`ALTER TABLE posts ADD COLUMN IF NOT EXISTS user_id TEXT`
       await client`CREATE INDEX IF NOT EXISTS posts_author_slug_idx ON posts (author_slug)`
       await client`CREATE INDEX IF NOT EXISTS posts_created_at_idx ON posts (created_at DESC)`
     })()
@@ -61,7 +67,7 @@ type PostRow = {
   slug: string
   title: string
   author_name: string
-  author_slug: string
+  author_slug: string | null
   description: string | null
   tree: NodeVaultPayload | null
   tree_type: TreeType
@@ -81,6 +87,10 @@ type PostRow = {
   cover_file: string | null
   video_file: string | null
   blend_file: string | null
+  visibility: string | null
+  tags: string[] | null
+  search_text: string | null
+  user_id: string | null
 }
 
 export function rowToStored(row: PostRow): StoredPost {
@@ -104,24 +114,33 @@ export function rowToStored(row: PostRow): StoredPost {
     nodevember_day: row.nodevember_day,
     created_at: typeof row.created_at === "string" ? row.created_at : row.created_at.toISOString(),
     seeded: row.seeded,
+    visibility: row.visibility === "unlisted" ? "unlisted" : "public",
+    tags: Array.isArray(row.tags) ? row.tags : [],
+    search_text: row.search_text ?? "",
     edit_token_hash: row.edit_token_hash,
     cover_file: row.cover_file,
     video_file: row.video_file,
     blend_file: row.blend_file,
+    user_id: row.user_id,
   }
+}
+
+function withSearch(post: StoredPost): StoredPost {
+  if (post.search_text) return post
+  return { ...post, search_text: buildSearchText(post) }
 }
 
 export async function pgList(): Promise<StoredPost[]> {
   const client = await ensureSchema()
   const rows = (await client`SELECT * FROM posts ORDER BY created_at DESC`) as PostRow[]
-  return rows.map(rowToStored)
+  return rows.map((row) => withSearch(rowToStored(row)))
 }
 
 export async function pgGet(slug: string): Promise<StoredPost | undefined> {
   const client = await ensureSchema()
   const rows = (await client`SELECT * FROM posts WHERE slug = ${slug} LIMIT 1`) as PostRow[]
   const row = rows[0]
-  return row ? rowToStored(row) : undefined
+  return row ? withSearch(rowToStored(row)) : undefined
 }
 
 export async function pgSlugs(): Promise<string[]> {
@@ -137,7 +156,8 @@ export async function pgInsert(post: StoredPost): Promise<void> {
       slug, title, author_name, author_slug, description, tree, tree_type,
       blender_version_string, cover_url, video_url, blend_url, blend_filename,
       card_url, nodevember_day, created_at, seeded, edit_token_hash,
-      cover_file, video_file, blend_file, youtube_url, tweet_url, cover_shader
+      cover_file, video_file, blend_file, youtube_url, tweet_url, cover_shader,
+      visibility, tags, search_text, user_id
     ) VALUES (
       ${post.slug}, ${post.title}, ${post.author_name}, ${post.author_slug},
       ${post.description}, ${post.tree === null ? null : JSON.stringify(post.tree)}, ${post.tree_type},
@@ -145,7 +165,8 @@ export async function pgInsert(post: StoredPost): Promise<void> {
       ${post.blend_url}, ${post.blend_filename}, ${post.card_url},
       ${post.nodevember_day}, ${post.created_at}, ${post.seeded},
       ${post.edit_token_hash}, ${post.cover_file}, ${post.video_file}, ${post.blend_file},
-      ${post.youtube_url}, ${post.tweet_url}, ${post.cover_shader}
+      ${post.youtube_url}, ${post.tweet_url}, ${post.cover_shader},
+      ${post.visibility}, ${post.tags}, ${post.search_text}, ${post.user_id}
     )
   `
 }
@@ -173,7 +194,11 @@ export async function pgUpdate(post: StoredPost): Promise<void> {
       blend_file = ${post.blend_file},
       youtube_url = ${post.youtube_url},
       tweet_url = ${post.tweet_url},
-      cover_shader = ${post.cover_shader}
+      cover_shader = ${post.cover_shader},
+      visibility = ${post.visibility},
+      tags = ${post.tags},
+      search_text = ${post.search_text},
+      user_id = ${post.user_id}
     WHERE slug = ${post.slug}
   `
 }

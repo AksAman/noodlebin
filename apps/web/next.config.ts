@@ -35,6 +35,14 @@ const nextConfig: NextConfig = {
     }
     return config
   },
+  async headers() {
+    return [
+      {
+        source: "/embed/:slug",
+        headers: [{ key: "Content-Security-Policy", value: "frame-ancestors *" }],
+      },
+    ]
+  },
 }
 
 export default nextConfig

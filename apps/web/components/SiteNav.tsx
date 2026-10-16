@@ -1,5 +1,6 @@
 "use client"
 
+import { authClient } from "@/lib/auth-client"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { cn } from "@/lib/ui"
 import Link from "next/link"
@@ -17,6 +18,8 @@ export function Mark() {
 
 export function SiteNav() {
   const pathname = usePathname()
+  const { data: session } = authClient.useSession()
+  const handle = session?.user.handle
   const link = (href: string, label: string, active: boolean) => (
     <Link
       className={cn(
@@ -38,7 +41,12 @@ export function SiteNav() {
       </Link>
       {link("/", "Gallery", onGallery)}
       {link("/paste", "Paste", pathname === "/paste")}
-      <div className="ml-auto">
+      <div className="ml-auto flex items-center gap-2">
+        {handle ? (
+          <Link className="text-muted no-underline hover:text-fg" href="/account">
+            @{handle}
+          </Link>
+        ) : null}
         <ThemeToggle />
       </div>
     </nav>

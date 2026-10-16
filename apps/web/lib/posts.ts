@@ -5,12 +5,15 @@ import homepageNoise from "@/fixtures/handwritten/homepage-noise.nodevault.json"
 import threeStopRamp from "@/fixtures/handwritten/three-stop-ramp.nodevault.json"
 import workedExample from "@/fixtures/handwritten/worked-example-shader.nodevault.json"
 import { halftoneCoverSource } from "@/lib/halftone"
+import { buildSearchText, searchScore } from "@/lib/search"
+
+export type Visibility = "public" | "unlisted"
 
 export type VaultPost = {
   slug: string
   title: string
   author_name: string
-  author_slug: string
+  author_slug: string | null
   description: string | null
   tree: NodeVaultPayload | null
   tree_type: TreeType
@@ -27,6 +30,9 @@ export type VaultPost = {
   nodevember_day: number | null
   created_at: string
   seeded: boolean
+  visibility: Visibility
+  tags: string[]
+  search_text: string
 }
 
 export type StoredPost = VaultPost & {
@@ -34,6 +40,7 @@ export type StoredPost = VaultPost & {
   cover_file: string | null
   video_file: string | null
   blend_file: string | null
+  user_id: string | null
 }
 
 export type StaticPost = VaultPost
@@ -52,7 +59,7 @@ function seed(
   created_at: string,
   cover_shader: string | null = null,
 ): VaultPost {
-  return {
+  const post = {
     slug,
     title,
     author_name: "NodeVault",
@@ -72,7 +79,10 @@ function seed(
     nodevember_day: null,
     created_at,
     seeded: true,
+    visibility: "public" as const,
+    tags: [] as string[],
   }
+  return { ...post, search_text: buildSearchText(post) }
 }
 
 export const posts: VaultPost[] = [
@@ -133,12 +143,21 @@ export function postsFiltered(treeType: string | null): VaultPost[] {
 
 export function filterPosts(
   list: VaultPost[],
-  query: { author?: string | null; tree_type?: string | null },
+  query: { author?: string | null; tree_type?: string | null; q?: string | null; tag?: string | null },
 ): VaultPost[] {
-  let out = list
+  let out = list.filter((post) => post.visibility !== "unlisted")
   if (query.author) out = out.filter((p) => p.author_slug === query.author)
   if (query.tree_type) out = out.filter((p) => p.tree_type === query.tree_type)
-  return [...out].sort((a, b) => (a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0))
+  const tag = query.tag?.trim().toLowerCase()
+  if (tag) out = out.filter((p) => p.tags.includes(tag))
+  const q = query.q?.trim() ?? ""
+  const byDate = (a: VaultPost, b: VaultPost) => (a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0)
+  if (!q) return [...out].sort(byDate)
+  return out
+    .map((post) => ({ post, score: searchScore(post, q) }))
+    .filter((row) => row.score > 0)
+    .sort((a, b) => b.score - a.score || byDate(a.post, b.post))
+    .map((row) => row.post)
 }
 
 export function takenSlugs(list: VaultPost[]): Set<string> {

@@ -1,13 +1,14 @@
+import { AuthorCredit } from "@/components/AuthorCredit"
 import { PostEmbeds } from "@/components/PostEmbeds"
 import { PostGraph } from "@/components/PostGraph"
 import { ShaderCover } from "@/components/ShaderCover"
+import { SharePost } from "@/components/SharePost"
 import { resolveCatalog } from "@/catalog"
 import { shippedCatalogs } from "@/lib/catalogs"
 import { treeTypeLabel } from "@/lib/ingest"
 import { getPublicPost } from "@/lib/store"
 import { cn, page, docShell } from "@/lib/ui"
 import type { Metadata } from "next"
-import Link from "next/link"
 import { notFound } from "next/navigation"
 
 export const dynamic = "force-dynamic"
@@ -50,14 +51,14 @@ export default async function PostRoute({ params }: { params: Promise<{ slug: st
               {post.title}
             </h1>
             <p className="mt-3 text-[14px] text-muted">
-              by{" "}
-              <Link className="text-fg underline-offset-4 hover:underline" href={`/@${post.author_slug}`}>
-                {post.author_name}
-              </Link>
+              by <AuthorCredit name={post.author_name} slug={post.author_slug} />
               {" · "}
               {treeTypeLabel(post.tree_type)} · Blender {post.blender_version_string}
             </p>
             {post.description ? <p className="mt-5 max-w-[60ch] leading-relaxed text-muted">{post.description}</p> : null}
+            <div className="mt-6">
+              <SharePost slug={post.slug} />
+            </div>
             <p className="mt-8 border-t border-line pt-5 text-[14px] text-muted">
               No graph is attached to this post yet, so there is nothing to copy.
             </p>

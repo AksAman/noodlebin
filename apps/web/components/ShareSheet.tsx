@@ -3,15 +3,22 @@
 import { publishPost } from "@/lib/publishPost";
 import { serializeCopy, treeTypeLabel } from "@/lib/ingest";
 import type { NodeVaultPayload } from "@/interchange";
+import { Dialog } from "@/components/Dialog";
+import { SignInButtons } from "@/components/SignInButtons";
+import { TagPills } from "@/components/TagPills";
 import { Kbd, useModKey } from "@/components/Keys";
 import { ShaderCover } from "@/components/ShaderCover";
+import { authClient } from "@/lib/auth-client";
 import { captureNodeCanvas } from "@/lib/captureCanvas";
 import { parseTweet, parseYouTube } from "@/lib/embeds";
 import { coverByteBudget, publishFailureMessage } from "@/lib/publishBody";
 import { checkShaderSource } from "@/lib/shaderCover";
+import { SHARE_DRAFT_KEY, type ShareDraft } from "@/lib/shareDraft";
+import { addTag, tagToken } from "@/lib/tags";
 import { fitCoverFile } from "@/lib/shrinkCover";
 import {
   btnAccent,
+  btn,
   btnGhost,
   cn,
   errorBox,
@@ -19,8 +26,6 @@ import {
   treeDotClass,
 } from "@/lib/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-const AUTHOR_KEY = "nodevault.author_name";
 
 const COVER_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
@@ -58,7 +63,7 @@ function linkIsValid(spec: LinkSpec, raw: string): boolean {
   return !raw.trim() || spec.parse(raw) !== null;
 }
 
-function LinkField({ spec }: { spec: LinkSpec }) {
+function LinkField({ spec, defaultValue = "" }: { spec: LinkSpec; defaultValue?: string }) {
   const [invalid, setInvalid] = useState(false);
   const hintId = `${spec.name}-hint`;
   return (
@@ -73,6 +78,7 @@ function LinkField({ spec }: { spec: LinkSpec }) {
         spellCheck={false}
         maxLength={500}
         placeholder={spec.placeholder}
+        defaultValue={defaultValue}
         aria-invalid={invalid || undefined}
         aria-describedby={invalid ? hintId : undefined}
         onBlur={(e) => setInvalid(!linkIsValid(spec, e.target.value))}
@@ -98,11 +104,13 @@ const SHADER_STARTER = `void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 function ShaderField({
   poster,
   onProblem,
+  initial = "",
 }: {
   poster: string | null;
   onProblem: (problem: string | null) => void;
+  initial?: string;
 }) {
-  const [text, setText] = useState("");
+  const [text, setText] = useState(initial);
   const [live, setLive] = useState("");
   const [compileError, setCompileError] = useState<string | null>(null);
   useEffect(() => {
@@ -190,49 +198,42 @@ function isTextField(target: EventTarget | null): boolean {
 
 type Created = { url: string };
 
-const sheet =
-  "relative z-[1] flex h-full w-full max-w-[420px] animate-[sheet-in_380ms_var(--ease-out-expo)_both] flex-col gap-6 overflow-auto border-l border-line bg-bg px-6 pb-7 pt-6 text-fg shadow-[-24px_0_60px_-20px_rgb(0_0_0/45%)]";
+function embedSnippet(path: string): string {
+  const origin = typeof window === "undefined" ? "" : window.location.origin;
+  const slug = path.split("/").filter(Boolean).pop() ?? "";
+  return `<iframe src="${origin}/embed/${slug}" width="100%" height="480" style="border:0" title="NodeVault graph"></iframe>`;
+}
 
 const label = "flex flex-col gap-2 text-[13px] font-medium text-fg";
-
-function CloseButton({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      className="-mr-2 -mt-1 grid size-8 cursor-pointer place-items-center rounded-md border-0 bg-transparent text-muted hover:bg-sunken hover:text-fg"
-      onClick={onClick}
-      aria-label="Close"
-    >
-      <svg viewBox="0 0 16 16" className="size-4" aria-hidden="true">
-        <path
-          d="M4 4l8 8M12 4l-8 8"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </svg>
-    </button>
-  );
-}
 
 export function ShareSheet({
   payload,
   onClose,
+  restored = null,
 }: {
   payload: NodeVaultPayload;
   onClose: (publishedUrl?: string) => void;
+  restored?: ShareDraft | null;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [created, setCreated] = useState<Created | null>(null);
-  const [author, setAuthor] = useState("");
+  const [visibility, setVisibility] = useState<"public" | "unlisted">(
+    restored?.visibility ?? "public",
+  );
+  const [tags, setTags] = useState(() =>
+    (restored?.tags ?? "").split(",").map(tagToken).filter(Boolean),
+  );
   const [coverName, setCoverName] = useState<string | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [coverError, setCoverError] = useState<string | null>(null);
   const [shaderProblem, setShaderProblem] = useState<string | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
   const coverRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const mod = useModKey();
+  const { data: session } = authClient.useSession();
+  const handle = session?.user.handle;
 
   const showCover = useCallback((file: File | null) => {
     setCoverError(null);
@@ -281,21 +282,8 @@ export function ShareSheet({
   const defaultTitle = `${count} ${typeLabel.toLowerCase()} node${count === 1 ? "" : "s"}`;
 
   useEffect(() => {
-    try {
-      setAuthor(localStorage.getItem(AUTHOR_KEY) ?? "");
-    } catch {
-      setAuthor("");
-    }
     titleRef.current?.focus();
   }, []);
-
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose(created?.url);
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose, created]);
 
   useEffect(() => {
     return () => {
@@ -305,53 +293,66 @@ export function ShareSheet({
 
   if (created) {
     return (
-      <div
-        className={sheet}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="share-title"
-      >
-        <div className="flex items-start justify-between gap-3">
-          <h2
-            id="share-title"
-            className="m-0 font-display text-[28px] font-semibold leading-tight tracking-[-0.02em]"
+      <Dialog title="It’s live." onClose={() => onClose(created.url)}>
+        <div className="flex flex-col gap-4 px-5 py-5">
+          <p className="m-0 text-[15px] leading-relaxed text-muted">
+            {visibility === "unlisted"
+              ? "Anyone with the link can open the graph. It will not appear in the gallery."
+              : "Anyone with the link can open the graph and copy it into Blender. It is in the gallery."}
+          </p>
+          <a
+            className="break-all rounded-md border border-line-strong bg-bg px-3 py-2.5 font-mono text-[12px] text-fg no-underline"
+            href={created.url}
           >
-            It’s live.
-          </h2>
-          <CloseButton onClick={() => onClose(created.url)} />
+            {created.url}
+          </a>
+          <label className={label}>
+            Embed
+            <textarea
+              className={cn(field, "font-mono text-[12px]")}
+              readOnly
+              rows={3}
+              value={embedSnippet(created.url)}
+              onFocus={(event) => event.currentTarget.select()}
+            />
+          </label>
+          <a className={cn(btnAccent, "py-2.5")} href={created.url}>
+            Open post
+          </a>
         </div>
-        <p className="m-0 text-[15px] leading-relaxed text-muted">
-          Anyone with the link can open the graph and copy it into Blender.
-        </p>
-        <a
-          className="break-all rounded-md bg-sunken px-3 py-2.5 font-mono text-[12px] text-fg no-underline"
-          href={created.url}
-        >
-          {created.url}
-        </a>
-        <a className={cn(btnAccent, "py-2.5")} href={created.url}>
-          Open post
-        </a>
-      </div>
+      </Dialog>
     );
   }
 
   return (
+    <Dialog
+      title="Share this graph"
+      subtitle={
+        <span className="inline-flex flex-wrap items-center gap-x-2 tabular-nums">
+          <span className={treeDotClass(payload.tree_type)} aria-hidden="true" />
+          {typeLabel} · Blender {payload.blender_version_string} · {count} node{count === 1 ? "" : "s"}
+        </span>
+      }
+      onClose={() => onClose()}
+      wide
+    >
     <form
-      className={sheet}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="share-title"
+      ref={formRef}
+      className="flex min-h-0 flex-1 flex-col"
+      onKeyDown={(event) => {
+        if (event.key !== "Enter") return;
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (target.tagName === "TEXTAREA") return;
+        if (target instanceof HTMLButtonElement && target.type === "submit") return;
+        event.preventDefault();
+      }}
       onSubmit={(event) => {
         event.preventDefault();
         const form = event.currentTarget;
         const submitted = new FormData(form);
-        const name = String(submitted.get("author_name") ?? "").trim();
-        try {
-          if (name) localStorage.setItem(AUTHOR_KEY, name);
-        } catch {
-          /* ignore */
-        }
+        const pending = form.querySelector<HTMLInputElement>("[data-tag-draft]");
+        submitted.set("tags", addTag(tags, pending?.value ?? "").join(","));
         const badLink = LINKS.find(
           (l) => !linkIsValid(l, String(submitted.get(l.name) ?? "")),
         );
@@ -405,26 +406,7 @@ export function ShareSheet({
           .finally(() => setBusy(false));
       }}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2
-            id="share-title"
-            className="m-0 font-display text-[28px] font-semibold leading-tight tracking-[-0.02em]"
-          >
-            Share this graph
-          </h2>
-          <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-[13px] text-muted tabular-nums">
-            <span
-              className={treeDotClass(payload.tree_type)}
-              aria-hidden="true"
-            />
-            {typeLabel} · Blender {payload.blender_version_string} · {count}{" "}
-            node{count === 1 ? "" : "s"}
-          </p>
-        </div>
-        <CloseButton onClick={() => onClose()} />
-      </div>
-
+      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-auto px-5 py-5">
       <label className={label}>
         Cover image
         <span
@@ -475,7 +457,11 @@ export function ShareSheet({
         </span>
       </label>
 
-      <ShaderField poster={coverPreview} onProblem={setShaderProblem} />
+      <ShaderField
+        poster={coverPreview}
+        onProblem={setShaderProblem}
+        initial={restored?.cover_shader ?? ""}
+      />
 
       <label className={label}>
         Title
@@ -485,21 +471,46 @@ export function ShareSheet({
           name="title"
           required
           maxLength={120}
-          defaultValue={defaultTitle}
+          defaultValue={restored?.title || defaultTitle}
         />
       </label>
-      <label className={label}>
-        Your name
-        <input
-          className={field}
-          name="author_name"
-          required
-          maxLength={80}
-          autoComplete="name"
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-        />
-      </label>
+      {handle ? (
+        <p className="m-0 text-[13px] text-muted">
+          Posting as <span className="text-fg">@{handle}</span>
+        </p>
+      ) : (
+        <div className="flex flex-col gap-3 rounded-lg border border-line bg-bg p-3">
+          <p className="m-0 text-[13px] leading-relaxed text-muted">
+            This post stays anonymous. Sign in if you want it under your handle.
+          </p>
+          <SignInButtons
+            callbackURL="/paste"
+            onBefore={() => {
+              const form = formRef.current;
+              const value = (name: string) => {
+                const el = form?.elements.namedItem(name);
+                return el instanceof HTMLInputElement ||
+                  el instanceof HTMLTextAreaElement ||
+                  el instanceof HTMLSelectElement
+                  ? el.value
+                  : "";
+              };
+              const draft: ShareDraft = {
+                treeText: serializeCopy(payload),
+                title: value("title"),
+                author: "",
+                description: value("description"),
+                youtube_url: value("youtube_url"),
+                tweet_url: value("tweet_url"),
+                cover_shader: value("cover_shader"),
+                visibility,
+                tags: tags.join(","),
+              };
+              sessionStorage.setItem(SHARE_DRAFT_KEY, JSON.stringify(draft));
+            }}
+          />
+        </div>
+      )}
       <label className={label}>
         <span>
           Note <span className="font-normal text-subtle">(optional)</span>
@@ -508,8 +519,31 @@ export function ShareSheet({
           className={cn(field, "resize-y")}
           name="description"
           rows={3}
+          defaultValue={restored?.description ?? ""}
           placeholder="What should someone know before they paste this?"
         />
+      </label>
+      <div className={label}>
+        <span>
+          Tags <span className="font-normal text-subtle">(optional)</span>
+        </span>
+        <input type="hidden" name="tags" value={tags.join(",")} />
+        <TagPills tags={tags} onChange={setTags} />
+        <span className="text-[12px] font-normal text-subtle">Press Enter to add a tag.</span>
+      </div>
+      <label className={label}>
+        Visibility
+        <select
+          className={field}
+          name="visibility"
+          value={visibility}
+          onChange={(event) =>
+            setVisibility(event.target.value === "unlisted" ? "unlisted" : "public")
+          }
+        >
+          <option value="public">Public — listed in the gallery</option>
+          <option value="unlisted">Unlisted — only people with the link</option>
+        </select>
       </label>
 
       <fieldset className="m-0 flex flex-col gap-4 border-0 border-t border-line p-0 pt-5">
@@ -521,7 +555,11 @@ export function ShareSheet({
           </span>
         </legend>
         {LINKS.map((spec) => (
-          <LinkField key={spec.name} spec={spec} />
+          <LinkField
+            key={spec.name}
+            spec={spec}
+            defaultValue={restored?.[spec.name] ?? ""}
+          />
         ))}
       </fieldset>
 
@@ -530,9 +568,10 @@ export function ShareSheet({
           {error}
         </p>
       ) : null}
+      </div>
 
-      <div className="mt-auto flex justify-end gap-2 border-t border-line pt-5">
-        <button type="button" className={btnGhost} onClick={() => onClose()}>
+      <div className="flex justify-end gap-2 border-t border-line px-5 py-4">
+        <button type="button" className={btn} onClick={() => onClose()}>
           Not now
         </button>
         <button type="submit" className={cn(btnAccent, "px-5")} disabled={busy}>
@@ -540,5 +579,6 @@ export function ShareSheet({
         </button>
       </div>
     </form>
+    </Dialog>
   );
 }

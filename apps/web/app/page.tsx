@@ -1,4 +1,5 @@
 import { CoverGrid } from "@/components/CoverGrid";
+import { GallerySearch } from "@/components/GallerySearch";
 import { HeroShader } from "@/components/HeroShader";
 import { filterPosts, HOMEPAGE_NOISE_SLUG } from "@/lib/posts";
 import { allPublicPosts } from "@/lib/store";
@@ -21,13 +22,31 @@ const FILTERS = [
   { id: "CompositorNodeTree", label: "Compositor" },
 ] as const;
 
+function galleryHref(next: { tree?: string; q?: string; tag?: string; page?: number }): string {
+  const params = new URLSearchParams();
+  if (next.tree) params.set("tree", next.tree);
+  if (next.q) params.set("q", next.q);
+  if (next.tag) params.set("tag", next.tag);
+  if (next.page && next.page > 1) params.set("page", String(next.page));
+  const query = params.toString();
+  return query ? `/?${query}` : "/";
+}
+
+const PAGE_SIZE = 12;
+
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ tree?: string }>;
+  searchParams: Promise<{ tree?: string; q?: string; tag?: string; page?: string }>;
 }) {
-  const { tree = "" } = await searchParams;
-  const list = filterPosts(await allPublicPosts(), { tree_type: tree || null });
+  const { tree = "", q = "", tag = "", page: pageRaw = "" } = await searchParams;
+  const all = await allPublicPosts();
+  const base = filterPosts(all, { tree_type: tree || null, q });
+  const list = tag ? filterPosts(base, { tag }) : base;
+  const tagOptions = [...new Set(base.flatMap((post) => post.tags))].sort();
+  const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  const current = Math.min(pages, Math.max(1, Number(pageRaw) || 1));
+  const visible = list.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
 
   return (
     <div className={docShell}>
@@ -90,7 +109,7 @@ export default async function HomePage({
                     ? "border-fg bg-fg text-bg"
                     : "border-line text-muted hover:border-line-strong hover:text-fg",
                 )}
-                href={f.id ? `/?tree=${f.id}` : "/"}
+                href={galleryHref({ tree: f.id, q, tag })}
               >
                 {f.id ? (
                   <span className={treeDotClass(f.id)} aria-hidden="true" />
@@ -103,26 +122,81 @@ export default async function HomePage({
             {list.length} graph{list.length === 1 ? "" : "s"}
           </span>
         </nav>
+        <GallerySearch tree={tree} tag={tag} q={q} />
+        {tagOptions.length > 0 ? (
+          <div className="mb-8 flex flex-wrap gap-1.5">
+            {tagOptions.map((option) => {
+              const active = tag === option;
+              const href = galleryHref({ tree, q, tag: active ? "" : option });
+              return (
+                <Link
+                  key={option}
+                  href={href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-[12px] no-underline",
+                    active ? "border-fg bg-fg text-bg" : "border-line text-muted hover:text-fg",
+                  )}
+                >
+                  {option}
+                </Link>
+              );
+            })}
+          </div>
+        ) : null}
 
         {list.length > 0 ? (
-          <CoverGrid posts={list} />
+          <CoverGrid posts={visible} />
         ) : (
           <div className="py-16">
             <p className="m-0 font-display text-2xl text-fg">
-              Nothing here yet.
+              {q || tag ? "Nothing matches." : "Nothing here yet."}
             </p>
             <p className="mt-2 text-muted">
-              No graphs of this type have been shared.{" "}
-              <Link
-                className="text-accent-fg underline-offset-4 hover:underline"
-                href="/paste"
-              >
-                Paste one
-              </Link>{" "}
-              and be the first.
+              {q || tag ? (
+                "Try another word, or clear the search."
+              ) : (
+                <>
+                  No graphs of this type have been shared.{" "}
+                  <Link
+                    className="text-accent-fg underline-offset-4 hover:underline"
+                    href="/paste"
+                  >
+                    Paste one
+                  </Link>{" "}
+                  and be the first.
+                </>
+              )}
             </p>
           </div>
         )}
+        {pages > 1 ? (
+          <nav aria-label="Pages" className="mt-4 flex items-center justify-center gap-3 text-[13px]">
+            {current > 1 ? (
+              <Link
+                className="rounded-md border border-line-strong bg-surface px-3 py-1.5 text-fg no-underline hover:border-subtle"
+                href={galleryHref({ tree, q, tag, page: current - 1 })}
+              >
+                Previous
+              </Link>
+            ) : (
+              <span className="rounded-md border border-line px-3 py-1.5 text-subtle">Previous</span>
+            )}
+            <span className="tabular-nums text-muted">
+              {current} of {pages}
+            </span>
+            {current < pages ? (
+              <Link
+                className="rounded-md border border-line-strong bg-surface px-3 py-1.5 text-fg no-underline hover:border-subtle"
+                href={galleryHref({ tree, q, tag, page: current + 1 })}
+              >
+                Next
+              </Link>
+            ) : (
+              <span className="rounded-md border border-line px-3 py-1.5 text-subtle">Next</span>
+            )}
+          </nav>
+        ) : null}
       </div>
     </div>
   );
