@@ -5,6 +5,7 @@ import { join } from "node:path"
 import { GET as getPost, PATCH } from "@/app/api/posts/[slug]/route"
 import { GET, POST } from "@/app/api/posts/route"
 import { parseNodeVaultText } from "@/interchange"
+import { publishPost } from "@/lib/publishPost"
 import { hashEditToken, slugify, tokenMatches, uniqueSlug } from "@/lib/sharing"
 
 const png = Buffer.from(
@@ -202,6 +203,19 @@ describe("posts API", () => {
       }),
     )
     expect(ok.status).toBe(201)
+  })
+
+  test("the share action publishes without a client token", async () => {
+    tempDir()
+    process.env["PUBLISH_SECRET"] = "correct-secret"
+    const form = new FormData()
+    form.set("title", "From the sheet")
+    form.set("author_name", "Aman")
+    form.set("tree_type", "ShaderNodeTree")
+    form.set("blender_version_string", "5.1.0")
+    form.set("cover", coverFile())
+    const created = await publishPost(form)
+    expect("url" in created && created.url.startsWith("/p/")).toBe(true)
   })
 
   test("Vercel production refuses publish when PUBLISH_SECRET is missing", async () => {

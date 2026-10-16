@@ -1,11 +1,14 @@
 "use client"
 
+import { publishPost } from "@/lib/publishPost"
 import { serializeCopy, treeTypeLabel } from "@/lib/ingest"
 import type { NodeVaultPayload } from "@/interchange"
 import { Kbd, useModKey } from "@/components/Keys"
 import { ShaderCover } from "@/components/ShaderCover"
 import { parseTweet, parseYouTube } from "@/lib/embeds"
+import { coverByteBudget, publishFailureMessage } from "@/lib/publishBody"
 import { checkShaderSource } from "@/lib/shaderCover"
+import { fitCoverFile } from "@/lib/shrinkCover"
 import { btnAccent, btnGhost, cn, errorBox, field, treeDotClass } from "@/lib/ui"
 import { useCallback, useEffect, useRef, useState } from "react"
 
@@ -278,16 +281,14 @@ export function ShareSheet({
       onSubmit={(event) => {
         event.preventDefault()
         const form = event.currentTarget
-        const name = String(new FormData(form).get("author_name") ?? "").trim()
-        if (name) {
-          try {
-            localStorage.setItem(AUTHOR_KEY, name)
-          } catch {
-            /* ignore */
-          }
+        const submitted = new FormData(form)
+        const name = String(submitted.get("author_name") ?? "").trim()
+        try {
+          if (name) localStorage.setItem(AUTHOR_KEY, name)
+        } catch {
+          /* ignore */
         }
-        const body = new FormData(form)
-        const badLink = LINKS.find((l) => !linkIsValid(l, String(body.get(l.name) ?? "")))
+        const badLink = LINKS.find((l) => !linkIsValid(l, String(submitted.get(l.name) ?? "")))
         if (badLink) {
           setError(badLink.invalid)
           form.querySelector<HTMLInputElement>(`[name="${badLink.name}"]`)?.focus()
@@ -298,19 +299,28 @@ export function ShareSheet({
           form.querySelector<HTMLTextAreaElement>('[name="cover_shader"]')?.focus()
           return
         }
-        body.set("tree_text", serializeCopy(payload))
+        const treeText = serializeCopy(payload)
+        const cover = submitted.get("cover")
         setBusy(true)
         setError(null)
-        void fetch("/api/posts", { method: "POST", body })
-          .then(async (res) => {
-            const json = (await res.json()) as { error?: string; url?: string }
-            if (!res.ok || !json.url) {
-              setError(json.error ?? "Could not publish. Try again in a moment.")
-              return
-            }
-            setCreated({ url: json.url })
+        void (async () => {
+          const body = submitted
+          body.set("tree_text", treeText)
+          if (cover instanceof File && cover.size > 0) {
+            const fitted = await fitCoverFile(cover, coverByteBudget(new Blob([treeText]).size))
+            body.set("cover", fitted)
+          }
+          const createdPost = await publishPost(body)
+          if ("error" in createdPost) {
+            setError(createdPost.error)
+            return
+          }
+          setCreated({ url: createdPost.url })
+        })()
+          .catch((err: unknown) => {
+            const message = err instanceof Error ? err.message : ""
+            setError(publishFailureMessage(0, message) ?? (message || "Could not reach the server. Check your connection and try again."))
           })
-          .catch(() => setError("Could not reach the server. Check your connection and try again."))
           .finally(() => setBusy(false))
       }}
     >
