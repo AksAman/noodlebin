@@ -80,15 +80,20 @@ export default async function HomePage({
               </span>
             </Link>
           </div>
-          <Link
-            className={cn(
-              btnAccent,
-              "justify-self-start px-4 py-2.5 text-[14px] lg:self-end",
-            )}
-            href="/paste"
-          >
-            Paste your own
-          </Link>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 justify-self-start lg:self-end">
+            <Link
+              className={cn(btnAccent, "px-4 py-2.5 text-[14px]")}
+              href="/paste"
+            >
+              Paste your own
+            </Link>
+            <Link
+              className="text-[14px] text-muted underline-offset-4 hover:text-fg hover:underline"
+              href="/addon"
+            >
+              Get the Blender add-on
+            </Link>
+          </div>
         </header>
       </section>
 

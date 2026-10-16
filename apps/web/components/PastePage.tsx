@@ -11,6 +11,7 @@ import type { NodeVaultPayload } from "@/interchange"
 import { btn, btnAccent, btnGhost, canvas, cn, errorBox, notice as noticeClass, shell, treeDotClass } from "@/lib/ui"
 import { clearPasteRestoring, clearPasteSession, readPasteSession, writePasteSession } from "@/lib/pasteSession"
 import { readShareDraft, SHARE_DRAFT_KEY, type ShareDraft } from "@/lib/shareDraft"
+import Link from "next/link"
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 
 function isTextField(target: EventTarget | null): boolean {
@@ -217,7 +218,11 @@ function EmptyState({ error }: { error: string | null }) {
   const steps = [
     <>Select nodes in any Blender node editor.</>,
     <>
-      Press <Kbd>{`${mod} ⇧ C`}</Kbd> to copy them with NodeVault.
+      Press <Kbd>{`${mod} ⇧ C`}</Kbd> to copy them with the{" "}
+      <Link className="text-accent-fg underline-offset-4 hover:underline" href="/addon">
+        NodeVault add-on
+      </Link>
+      .
     </>,
     <>
       Press <Kbd>{`${mod} V`}</Kbd> on this page.

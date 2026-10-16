@@ -41,6 +41,7 @@ export function SiteNav() {
       </Link>
       {link("/", "Gallery", onGallery)}
       {link("/paste", "Paste", pathname === "/paste")}
+      {link("/addon", "Add-on", pathname === "/addon")}
       <div className="ml-auto flex items-center gap-2">
         {handle ? (
           <Link className="text-muted no-underline hover:text-fg" href="/account">

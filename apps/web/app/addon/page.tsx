@@ -1,0 +1,53 @@
+import { AddonSteps } from "@/components/AddonSteps"
+import { addon } from "@/lib/addon"
+import { btnAccent, cn, docShell, page } from "@/lib/ui"
+import type { Metadata } from "next"
+import Link from "next/link"
+
+export const metadata: Metadata = {
+  title: "Get the Blender add-on · NodeVault",
+  description: "Install the NodeVault add-on to copy node trees out of Blender and paste them back in.",
+}
+
+export default function AddonRoute() {
+  return (
+    <div className={docShell}>
+      <div className={cn(page, "pb-20 pt-14 sm:pt-20")}>
+        <h1 className="m-0 max-w-[16ch] font-display text-[clamp(2.5rem,1.6rem+3.6vw,4.5rem)] font-semibold leading-[0.98] tracking-[-0.035em] text-fg">
+          Get the Blender add-on.
+        </h1>
+        <p className="mt-5 max-w-[52ch] text-[17px] leading-relaxed text-muted">
+          NodeVault is two halves: this site, and a small add-on that copies node trees out of Blender and pastes them back in
+          with their values, links, frames, and groups. Works in Blender {addon.minBlender} and newer.
+        </p>
+        <div className="mt-8 flex flex-wrap items-center gap-4">
+          <a
+            className={cn(btnAccent, "px-5 py-3 text-[15px]")}
+            href={addon.releasesUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Download from GitHub Releases
+          </a>
+          <span className="text-[13px] text-subtle">
+            Grab the <span className="font-mono text-muted">nodevault-x.y.z.zip</span> under Assets.
+          </span>
+        </div>
+
+        <AddonSteps />
+
+        <p className="mt-12 text-[14px] text-muted">
+          Installed?{" "}
+          <Link className="text-accent-fg underline-offset-4 hover:underline" href="/">
+            Find a graph to steal
+          </Link>{" "}
+          or{" "}
+          <Link className="text-accent-fg underline-offset-4 hover:underline" href="/paste">
+            paste one of yours
+          </Link>
+          .
+        </p>
+      </div>
+    </div>
+  )
+}

@@ -13,6 +13,7 @@ import { PostEmbeds, XGlyph } from "@/components/PostEmbeds"
 import { ShaderCover } from "@/components/ShaderCover"
 import { creator } from "@/lib/creator"
 import { btnAccent, btnGhost, canvas, cn, notice as noticeClass, treeDotClass, treeEditorName } from "@/lib/ui"
+import Link from "next/link"
 import { useCallback, useRef, useState } from "react"
 
 export function PostGraph({
@@ -126,6 +127,13 @@ export function PostGraph({
           </button>
           <p className="m-0 text-[13px] leading-relaxed text-muted" aria-live="polite">
             In the {treeEditorName(post.tree_type)}, press <Kbd>{`${mod} ⇧ V`}</Kbd> to drop the nodes at your cursor.
+          </p>
+          <p className="m-0 text-[13px] leading-relaxed text-subtle">
+            Pasting needs the NodeVault add-on.{" "}
+            <Link className="text-accent-fg underline-offset-4 hover:underline" href="/addon">
+              Get it here
+            </Link>
+            .
           </p>
           {post.blend_url ? (
             <a className="text-[13px] text-accent-fg underline-offset-4 hover:underline" href={post.blend_url}>
