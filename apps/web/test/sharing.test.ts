@@ -310,4 +310,69 @@ describe("posts API", () => {
     const body = (await res.json()) as { error: string }
     expect(body.error).toContain("video/mp4")
   })
+
+  test("POST without a name is anonymous and still listed", async () => {
+    tempDir()
+    const form = new FormData()
+    form.set("title", "No name")
+    form.set("tree_type", "ShaderNodeTree")
+    form.set("blender_version_string", "5.1.0")
+    form.set("cover", coverFile())
+    const res = await POST(new Request("http://nv.test/api/posts", { method: "POST", body: form }))
+    expect(res.status).toBe(201)
+    const body = (await res.json()) as { post: { slug: string; author_name: string; author_slug: string | null } }
+    expect(body.post.author_name).toBe("Anonymous")
+    expect(body.post.author_slug).toBeNull()
+    const listed = await GET(new Request("http://nv.test/api/posts"))
+    const list = (await listed.json()) as { posts: { slug: string }[] }
+    expect(list.posts.some((post) => post.slug === body.post.slug)).toBe(true)
+  })
+
+  test("unlisted posts stay off the gallery and search, and remain available by slug", async () => {
+    tempDir()
+    const tree = readFileSync(fixturePath, "utf8")
+    const hidden = new FormData()
+    hidden.set("title", "Hidden ramp")
+    hidden.set("author_name", "Aman")
+    hidden.set("cover", coverFile())
+    hidden.set("tree_text", tree)
+    hidden.set("visibility", "unlisted")
+    hidden.set("tags", "secret")
+    const created = await POST(new Request("http://nv.test/api/posts", { method: "POST", body: hidden }))
+    expect(created.status).toBe(201)
+    const body = (await created.json()) as { post: { slug: string } }
+
+    const listed = await GET(new Request("http://nv.test/api/posts?q=color%20ramp"))
+    const list = (await listed.json()) as { posts: { slug: string }[] }
+    expect(list.posts.some((post) => post.slug === body.post.slug)).toBe(false)
+
+    const one = await getPost(new Request(`http://nv.test/api/posts/${body.post.slug}`), {
+      params: Promise.resolve({ slug: body.post.slug }),
+    })
+    expect(one.status).toBe(200)
+  })
+
+  test("search matches a title, a tag, and a node name", async () => {
+    tempDir()
+    const tree = readFileSync(fixturePath, "utf8")
+    const form = new FormData()
+    form.set("title", "Gallery ramp")
+    form.set("description", "A note about stops")
+    form.set("author_name", "Aman")
+    form.set("cover", coverFile())
+    form.set("tree_text", tree)
+    form.set("tags", "procedural, studio")
+    const created = await POST(new Request("http://nv.test/api/posts", { method: "POST", body: form }))
+    expect(created.status).toBe(201)
+    const body = (await created.json()) as { post: { slug: string } }
+
+    for (const q of ["gallery", "stops", "studio", "color ramp"]) {
+      const listed = await GET(new Request(`http://nv.test/api/posts?q=${encodeURIComponent(q)}`))
+      const list = (await listed.json()) as { posts: { slug: string }[] }
+      expect(list.posts.some((post) => post.slug === body.post.slug)).toBe(true)
+    }
+    const tagged = await GET(new Request("http://nv.test/api/posts?tag=procedural"))
+    const tags = (await tagged.json()) as { posts: { slug: string }[] }
+    expect(tags.posts.some((post) => post.slug === body.post.slug)).toBe(true)
+  })
 })

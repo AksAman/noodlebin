@@ -54,7 +54,7 @@ export function CoverGrid({ posts, showAuthor = true }: { posts: VaultPost[]; sh
                   <span aria-hidden="true" className="text-subtle">
                     ·
                   </span>
-                  <span>@{post.author_slug}</span>
+                  <span>{post.author_slug ? `@${post.author_slug}` : "Anonymous"}</span>
                 </>
               ) : null}
             </p>

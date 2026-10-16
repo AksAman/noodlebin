@@ -68,7 +68,7 @@ export default async function OpengraphImage({ params }: { params: Promise<{ slu
         >
           <div style={{ display: "flex", fontSize: 36, fontWeight: 700 }}>{post.title}</div>
           <div style={{ display: "flex", fontSize: 22, color: "#bbb", marginTop: 8 }}>
-            {`@${post.author_slug} · ${typeLabel} · NodeVault`}
+            {`${post.author_slug ? `@${post.author_slug}` : post.author_name} · ${typeLabel} · NodeVault`}
           </div>
         </div>
       </div>

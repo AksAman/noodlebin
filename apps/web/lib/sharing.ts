@@ -3,6 +3,7 @@ import { TREE_TYPES, type NodeVaultPayload, type TreeType } from "@/interchange"
 import { parseTweet, parseYouTube } from "@/lib/embeds"
 import { checkShaderSource } from "@/lib/shaderCover"
 import { sniffBlend, sniffCover, sniffMp4 } from "@/lib/sniff"
+import { TAG_LIMIT, tagToken } from "@/lib/tags"
 
 export const COVER_MAX = 10 * 1024 * 1024
 export const VIDEO_MAX = 50 * 1024 * 1024
@@ -39,7 +40,7 @@ export type NewPostFiles = {
 export type NewPostInput = {
   title: string
   author_name: string
-  author_slug: string
+  author_slug: string | null
   description: string | null
   tree: NodeVaultPayload | null
   tree_type: TreeType
@@ -48,6 +49,9 @@ export type NewPostInput = {
   youtube_url: string | null
   tweet_url: string | null
   cover_shader: string | null
+  visibility: "public" | "unlisted"
+  tags: string[]
+  user_id: string | null
   files: NewPostFiles
 }
 
@@ -81,6 +85,19 @@ export function parseLinkFields(form: FormData): PostLinks | SharingError {
     }
   }
   return links
+}
+
+export function parseTags(raw: string): string[] | SharingError {
+  if (!raw.trim()) return []
+  const tags = [...new Set(raw.split(",").map((tag) => tagToken(tag)).filter(Boolean))]
+  if (tags.length > TAG_LIMIT) return { ok: false, status: 400, error: "Use at most 8 tags." }
+  return tags
+}
+
+export function parseVisibility(raw: string): "public" | "unlisted" | SharingError {
+  const value = raw.trim() || "public"
+  if (value === "public" || value === "unlisted") return value
+  return { ok: false, status: 400, error: "Visibility must be public or unlisted." }
 }
 
 export function slugify(value: string): string {
@@ -221,13 +238,17 @@ export async function parseCreateForm(
   parsePayload: (text: string) => NodeVaultPayload,
 ): Promise<NewPostInput | SharingError> {
   const title = String(form.get("title") ?? "").trim()
-  const author_name = String(form.get("author_name") ?? "").trim()
+  const typedName = String(form.get("author_name") ?? "").trim()
   if (!title) return { ok: false, status: 400, error: "Title is required." }
   if (title.length > 120) return { ok: false, status: 400, error: "Title is too long." }
-  if (!author_name) return { ok: false, status: 400, error: "Author name is required." }
-  if (author_name.length > 80) return { ok: false, status: 400, error: "Author name is too long." }
+  if (typedName.length > 80) return { ok: false, status: 400, error: "Author name is too long." }
+  const author_name = typedName || "Anonymous"
+  const author_slug = typedName ? slugify(typedName) : null
 
-  const author_slug = slugify(String(form.get("author_slug") ?? "").trim() || author_name)
+  const visibility = parseVisibility(String(form.get("visibility") ?? ""))
+  if (typeof visibility !== "string") return visibility
+  const tags = parseTags(String(form.get("tags") ?? ""))
+  if (!Array.isArray(tags)) return tags
   const descriptionRaw = String(form.get("description") ?? "").trim()
   if (descriptionRaw.length > 4000) return { ok: false, status: 400, error: "Description is too long." }
   const description = descriptionRaw ? descriptionRaw : null
@@ -292,6 +313,9 @@ export async function parseCreateForm(
     youtube_url: links.youtube_url ?? null,
     tweet_url: links.tweet_url ?? null,
     cover_shader: links.cover_shader ?? null,
+    visibility,
+    tags,
+    user_id: null,
     files,
   }
 }

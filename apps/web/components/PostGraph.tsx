@@ -1,5 +1,6 @@
 "use client"
 
+import { AuthorCredit } from "@/components/AuthorCredit"
 import { NodeView } from "@/node-view"
 import { serializeCopy, treeTypeLabel } from "@/lib/ingest"
 import type { Catalog } from "@/catalog"
@@ -7,11 +8,11 @@ import type { VaultPost } from "@/lib/posts"
 import type { NodeVaultPayload } from "@/interchange"
 import { Kbd, useModKey } from "@/components/Keys"
 import { PayloadFallback } from "@/components/PayloadFallback"
+import { SharePost } from "@/components/SharePost"
 import { PostEmbeds, XGlyph } from "@/components/PostEmbeds"
 import { ShaderCover } from "@/components/ShaderCover"
 import { creator } from "@/lib/creator"
 import { btnAccent, btnGhost, canvas, cn, notice as noticeClass, treeDotClass, treeEditorName } from "@/lib/ui"
-import Link from "next/link"
 import { useCallback, useRef, useState } from "react"
 
 export function PostGraph({
@@ -74,10 +75,7 @@ export function PostGraph({
             {post.title}
           </h1>
           <p className="mt-3 text-[14px] text-muted">
-            by{" "}
-            <Link className="text-fg underline-offset-4 hover:underline" href={`/@${post.author_slug}`}>
-              {post.author_name}
-            </Link>
+            by <AuthorCredit name={post.author_name} slug={post.author_slug} />
           </p>
         </div>
 
@@ -134,6 +132,7 @@ export function PostGraph({
               Download {post.blend_filename ?? "graph.blend"}
             </a>
           ) : null}
+          <SharePost slug={post.slug} />
         </div>
 
         <a

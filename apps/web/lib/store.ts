@@ -3,6 +3,7 @@ import { dirname, join, resolve } from "node:path"
 import type { NodeVaultPayload } from "@/interchange"
 import { pgGet, pgInsert, pgList, pgSlugs, pgUpdate, usesPostgres } from "@/lib/db"
 import { isSafeSlug, mediaUrl, readMediaBytes, writeMedia } from "@/lib/media"
+import { buildSearchText } from "@/lib/search"
 import { posts as seedPosts, type StoredPost, type VaultPost } from "@/lib/posts"
 import {
   hashEditToken,
@@ -52,14 +53,33 @@ function publicOf(post: StoredPost): VaultPost {
     nodevember_day: post.nodevember_day,
     created_at: post.created_at,
     seeded: post.seeded,
+    visibility: post.visibility === "unlisted" ? "unlisted" : "public",
+    tags: post.tags ?? [],
+    search_text: post.search_text || buildSearchText(post),
   }
+}
+
+function normalizeDisk(post: StoredPost): StoredPost {
+  const next: StoredPost = {
+    ...post,
+    author_slug: post.author_slug ?? null,
+    cover_shader: post.cover_shader ?? null,
+    youtube_url: post.youtube_url ?? null,
+    tweet_url: post.tweet_url ?? null,
+    visibility: post.visibility === "unlisted" ? "unlisted" : "public",
+    tags: post.tags ?? [],
+    user_id: post.user_id ?? null,
+    search_text: post.search_text ?? "",
+  }
+  if (!next.search_text) next.search_text = buildSearchText(next)
+  return next
 }
 
 async function readDisk(dir: string): Promise<StoredPost[]> {
   try {
     const raw = await readFile(catalogPath(dir), "utf8")
     const parsed = JSON.parse(raw) as DiskShape
-    return Array.isArray(parsed.posts) ? parsed.posts : []
+    return (Array.isArray(parsed.posts) ? parsed.posts : []).map(normalizeDisk)
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code
     if (code === "ENOENT") return []
@@ -96,7 +116,7 @@ export async function allPublicPosts(dir = dataDir()): Promise<VaultPost[]> {
   const bySlug = new Map<string, VaultPost>()
   for (const post of seedPosts) bySlug.set(post.slug, post)
   for (const post of stored) bySlug.set(post.slug, post)
-  return [...bySlug.values()]
+  return [...bySlug.values()].filter((post) => post.visibility !== "unlisted")
 }
 
 export async function getPublicPost(slug: string, dir = dataDir()): Promise<VaultPost | undefined> {
@@ -162,7 +182,7 @@ async function buildStored(
     blend_filename = input.files.blend.filename ?? "graph.blend"
   }
 
-  return {
+  const stored: StoredPost = {
     slug,
     title: input.title,
     author_name: input.author_name,
@@ -182,11 +202,17 @@ async function buildStored(
     nodevember_day: input.nodevember_day,
     created_at: new Date().toISOString(),
     seeded: false,
+    visibility: input.visibility,
+    tags: input.tags,
+    search_text: "",
     edit_token_hash: hashEditToken(token),
     cover_file: coverStored,
     video_file,
     blend_file,
+    user_id: input.user_id,
   }
+  stored.search_text = buildSearchText(stored)
+  return stored
 }
 
 export async function createStoredPost(
@@ -253,6 +279,7 @@ export async function patchStoredPost(
     if (patch.youtube_url !== undefined) current.youtube_url = patch.youtube_url
     if (patch.tweet_url !== undefined) current.tweet_url = patch.tweet_url
     if (patch.cover_shader !== undefined) current.cover_shader = patch.cover_shader
+    current.search_text = buildSearchText(current)
 
     await persistPatch(dir, current)
     return { post: publicOf(current) }

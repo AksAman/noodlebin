@@ -4,6 +4,7 @@ import { siteOrigin } from "@/lib/site"
 import { themeBootScript } from "@/lib/theme"
 import { Funnel_Display, Funnel_Sans, Geist_Mono } from "next/font/google"
 import type { ReactNode } from "react"
+import { headers } from "next/headers"
 import "./globals.css"
 import "@xyflow/react/dist/style.css"
 import "@/node-view/styles.css"
@@ -18,16 +19,17 @@ export const metadata = {
   description: "Copy Blender nodes to the browser and paste them back",
 }
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const embed = (await headers()).get("x-nodevault-embed") === "1"
   return (
     <html lang="en" className={`h-full ${display.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
       <body className="m-0 flex h-full flex-col bg-bg font-sans text-[15px] text-fg">
-        <SiteNav />
+        {embed ? null : <SiteNav />}
         {children}
-        <SiteFooter />
+        {embed ? null : <SiteFooter />}
       </body>
     </html>
   )

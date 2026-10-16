@@ -18,7 +18,9 @@ export async function GET(request: Request) {
   const url = new URL(request.url)
   const author = url.searchParams.get("author")
   const tree_type = url.searchParams.get("tree_type")
-  const list = filterPosts(await allPublicPosts(dataDir()), { author, tree_type })
+  const q = url.searchParams.get("q")
+  const tag = url.searchParams.get("tag")
+  const list = filterPosts(await allPublicPosts(dataDir()), { author, tree_type, q, tag })
   return NextResponse.json({
     posts: list.map((post) => ({
       ...post,

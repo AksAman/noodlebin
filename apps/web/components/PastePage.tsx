@@ -9,6 +9,7 @@ import { ingestText, serializeCopy, treeTypeLabel } from "@/lib/ingest"
 import type { CatalogResolution } from "@/catalog"
 import type { NodeVaultPayload } from "@/interchange"
 import { btn, btnAccent, btnGhost, canvas, cn, errorBox, notice as noticeClass, shell, treeDotClass } from "@/lib/ui"
+import { readShareDraft, SHARE_DRAFT_KEY, type ShareDraft } from "@/lib/shareDraft"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 function isTextField(target: EventTarget | null): boolean {
@@ -27,6 +28,7 @@ export function PastePage() {
   const [showMinimap, setShowMinimap] = useState(true)
   const [shareOpen, setShareOpen] = useState(false)
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null)
+  const [restored, setRestored] = useState<ShareDraft | null>(null)
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const applyText = useCallback((text: string) => {
@@ -71,6 +73,14 @@ export function PastePage() {
       document.removeEventListener("drop", onDrop)
       document.removeEventListener("dragover", onDragOver)
     }
+  }, [applyText])
+
+  useEffect(() => {
+    const draft = readShareDraft(sessionStorage.getItem(SHARE_DRAFT_KEY))
+    if (!draft) return
+    sessionStorage.removeItem(SHARE_DRAFT_KEY)
+    setRestored(draft)
+    applyText(draft.treeText)
   }, [applyText])
 
   const onCopy = useCallback(async () => {
@@ -170,21 +180,14 @@ export function PastePage() {
             {fallbackText ? <PayloadFallback text={fallbackText} /> : null}
           </div>
           {shareOpen ? (
-            <div className="fixed inset-0 z-[40] flex justify-end">
-              <button
-                type="button"
-                className="absolute inset-0 cursor-pointer border-0 bg-[oklch(0.1_0.005_60/55%)]"
-                aria-label="Close share panel"
-                onClick={() => setShareOpen(false)}
-              />
-              <ShareSheet
-                payload={payload}
-                onClose={(url) => {
-                  setShareOpen(false)
-                  if (url) setPublishedUrl(url)
-                }}
-              />
-            </div>
+            <ShareSheet
+              payload={payload}
+              restored={restored}
+              onClose={(url) => {
+                setShareOpen(false)
+                if (url) setPublishedUrl(url)
+              }}
+            />
           ) : null}
         </>
       ) : (
