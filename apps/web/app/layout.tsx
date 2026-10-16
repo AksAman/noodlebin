@@ -1,5 +1,6 @@
 import { SiteFooter } from "@/components/SiteFooter"
 import { SiteNav } from "@/components/SiteNav"
+import { siteOrigin } from "@/lib/site"
 import { themeBootScript } from "@/lib/theme"
 import { Funnel_Display, Funnel_Sans, Geist_Mono } from "next/font/google"
 import type { ReactNode } from "react"
@@ -12,7 +13,7 @@ const sans = Funnel_Sans({ subsets: ["latin"], variable: "--font-funnel-sans", d
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" })
 
 export const metadata = {
-  metadataBase: new URL("http://localhost:5173"),
+  metadataBase: new URL(siteOrigin()),
   title: "NodeVault",
   description: "Copy Blender nodes to the browser and paste them back",
 }
