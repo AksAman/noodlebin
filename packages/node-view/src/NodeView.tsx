@@ -23,6 +23,7 @@ import { cssThemeColor } from "./color";
 import { treeToFlow } from "./graph";
 import { NvEdge } from "./NvEdge";
 import { NvNode } from "./NvNode";
+import { ShowPreviewsContext } from "./preview-context";
 import type { NvNodeData } from "./types";
 
 const nodeTypes = { nv: NvNode };
@@ -64,6 +65,7 @@ function NodeViewInner({
   );
   const [nodes, setNodes] = useState(built.nodes);
   const [flow, setFlow] = useState(built);
+  const [showPreviews, setShowPreviews] = useState(true);
   if (flow !== built) {
     setFlow(built);
     setNodes(built.nodes);
@@ -162,21 +164,35 @@ function NodeViewInner({
   const bgColor = "#171717";
 
   return (
+    <ShowPreviewsContext.Provider value={showPreviews}>
     <div className="nv-root" ref={wrapRef} tabIndex={0} onKeyDown={onKeyDown}>
-      {stack.length > 1 ? (
-        <nav className="nv-crumbs" aria-label="Group trees">
-          {stack.map((t, i) => (
-            <button
-              key={`${t.id}-${i}`}
-              type="button"
-              className="nv-crumb"
-              onClick={() => setStack((s) => s.slice(0, i + 1))}
-            >
-              {i === 0 ? "Root" : t.name || t.id}
-            </button>
-          ))}
-        </nav>
-      ) : null}
+      <div className="nv-chrome">
+        <button
+          type="button"
+          className="nv-preview-toggle"
+          aria-pressed={showPreviews}
+          onClick={() => setShowPreviews((on) => !on)}
+        >
+          <span className={`nv-check${showPreviews ? " nv-check-on" : ""}`}>
+            <span className="nv-check-box" />
+          </span>
+          Show node previews
+        </button>
+        {stack.length > 1 ? (
+          <nav className="nv-crumbs" aria-label="Group trees">
+            {stack.map((t, i) => (
+              <button
+                key={`${t.id}-${i}`}
+                type="button"
+                className="nv-crumb"
+                onClick={() => setStack((s) => s.slice(0, i + 1))}
+              >
+                {i === 0 ? "Root" : t.name || t.id}
+              </button>
+            ))}
+          </nav>
+        ) : null}
+      </div>
       {moved ? (
         <button type="button" className="nv-reset" onClick={resetLayout}>
           Reset layout <kbd className="nv-kbd">R</kbd>
@@ -233,6 +249,7 @@ function NodeViewInner({
         ) : null}
       </ReactFlow>
     </div>
+    </ShowPreviewsContext.Provider>
   );
 }
 

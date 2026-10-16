@@ -3,6 +3,7 @@ import { TREE_TYPES, type NodeVaultPayload, type TreeType } from "@/interchange"
 import { parseTweet, parseYouTube } from "@/lib/embeds"
 import { checkShaderSource } from "@/lib/shaderCover"
 import { sniffBlend, sniffCover, sniffMp4 } from "@/lib/sniff"
+import { env } from "@/env"
 import { TAG_LIMIT, tagToken } from "@/lib/tags"
 
 export const COVER_MAX = 10 * 1024 * 1024
@@ -13,7 +14,7 @@ export const PAYLOAD_MAX = 5 * 1024 * 1024
 export const VERCEL_BODY_MAX = 4 * 1024 * 1024
 
 export function requestUploadMax(pidMax: number): number {
-  return process.env["VERCEL"] ? Math.min(pidMax, VERCEL_BODY_MAX) : pidMax
+  return env.VERCEL ? Math.min(pidMax, VERCEL_BODY_MAX) : pidMax
 }
 
 export const COVER_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"])
@@ -166,7 +167,7 @@ export async function readCover(file: File | null): Promise<StoredFile | Sharing
     return {
       ok: false,
       status: 400,
-      error: process.env["VERCEL"] ? "Cover is larger than 4 MB (Vercel request limit)." : "Cover is larger than 10 MB.",
+      error: env.VERCEL ? "Cover is larger than 4 MB (Vercel request limit)." : "Cover is larger than 10 MB.",
     }
   }
   const bytes = new Uint8Array(await file.arrayBuffer())
@@ -184,7 +185,7 @@ export async function readVideo(file: File | null): Promise<StoredFile | Sharing
     return {
       ok: false,
       status: 400,
-      error: process.env["VERCEL"] ? "Video is larger than 4 MB (Vercel request limit)." : "Video is larger than 50 MB.",
+      error: env.VERCEL ? "Video is larger than 4 MB (Vercel request limit)." : "Video is larger than 50 MB.",
     }
   }
   const bytes = new Uint8Array(await file.arrayBuffer())
@@ -199,7 +200,7 @@ export async function readBlend(file: File | null): Promise<StoredFile | Sharing
     return {
       ok: false,
       status: 400,
-      error: process.env["VERCEL"] ? "Blend is larger than 4 MB (Vercel request limit)." : "Blend is larger than 100 MB.",
+      error: env.VERCEL ? "Blend is larger than 4 MB (Vercel request limit)." : "Blend is larger than 100 MB.",
     }
   }
   const filename = file.name || "graph.blend"

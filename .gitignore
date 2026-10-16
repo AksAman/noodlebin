@@ -6,6 +6,7 @@ dist/
 coverage/
 **/.vite/
 **/.next/
+apps/web/generated/
 **/.data/
 addon/catalog/
 .DS_Store

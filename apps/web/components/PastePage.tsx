@@ -9,8 +9,9 @@ import { ingestText, serializeCopy, treeTypeLabel } from "@/lib/ingest"
 import type { CatalogResolution } from "@/catalog"
 import type { NodeVaultPayload } from "@/interchange"
 import { btn, btnAccent, btnGhost, canvas, cn, errorBox, notice as noticeClass, shell, treeDotClass } from "@/lib/ui"
+import { clearPasteRestoring, clearPasteSession, readPasteSession, writePasteSession } from "@/lib/pasteSession"
 import { readShareDraft, SHARE_DRAFT_KEY, type ShareDraft } from "@/lib/shareDraft"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 
 function isTextField(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false
@@ -31,19 +32,21 @@ export function PastePage() {
   const [restored, setRestored] = useState<ShareDraft | null>(null)
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const applyText = useCallback((text: string) => {
+  const applyText = useCallback((text: string, options?: { openShare?: boolean }) => {
     const result = ingestText(text, shippedCatalogs)
     if (!result.ok) {
       setError(result.error.message)
-      return
+      return false
     }
+    writePasteSession(sessionStorage, text)
     setError(null)
     setPayload(result.payload)
     setResolution(result.catalog)
     setNotice(result.catalog.notice)
     setFallbackText(null)
     setPublishedUrl(null)
-    setShareOpen(true)
+    setShareOpen(options?.openShare ?? true)
+    return true
   }, [])
 
   useEffect(() => {
@@ -75,12 +78,22 @@ export function PastePage() {
     }
   }, [applyText])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const draft = readShareDraft(sessionStorage.getItem(SHARE_DRAFT_KEY))
-    if (!draft) return
-    sessionStorage.removeItem(SHARE_DRAFT_KEY)
-    setRestored(draft)
-    applyText(draft.treeText)
+    if (draft) {
+      sessionStorage.removeItem(SHARE_DRAFT_KEY)
+      setRestored(draft)
+      applyText(draft.treeText)
+      clearPasteRestoring()
+      return
+    }
+    const saved = readPasteSession(sessionStorage)
+    if (!saved) {
+      clearPasteRestoring()
+      return
+    }
+    if (!applyText(saved, { openShare: false })) clearPasteSession(sessionStorage)
+    clearPasteRestoring()
   }, [applyText])
 
   const onCopy = useCallback(async () => {
@@ -139,6 +152,8 @@ export function PastePage() {
                 type="button"
                 className={btnGhost}
                 onClick={() => {
+                  clearPasteRestoring()
+                  clearPasteSession(sessionStorage)
                   setPayload(null)
                   setResolution(null)
                   setError(null)
@@ -213,7 +228,7 @@ function EmptyState({ error }: { error: string | null }) {
       data-theme="dark"
       className="flex flex-1 items-center bg-canvas bg-[radial-gradient(circle,oklch(0.36_0_0)_1.4px,transparent_1.8px)] bg-[size:36px_36px] px-5 py-16 sm:px-12"
     >
-      <div className="mx-auto w-full max-w-[1240px] animate-rise">
+      <div data-paste-copy className="mx-auto w-full max-w-[1240px] animate-rise">
         <h1 className="m-0 font-display text-[clamp(2.75rem,1.6rem+4.4vw,5.25rem)] font-semibold leading-[0.95] tracking-[-0.035em] text-fg">
           Paste a graph.
         </h1>

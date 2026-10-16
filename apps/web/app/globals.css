@@ -207,6 +207,11 @@ body:has([data-fullbleed]) > .site-footer {
   }
 }
 
+/* Hide the paste prompt before paint when a saved graph is about to be restored. */
+html[data-paste-restoring] [data-paste-copy] {
+  visibility: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

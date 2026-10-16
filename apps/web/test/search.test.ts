@@ -47,7 +47,7 @@ describe("search priority", () => {
             links: [],
           },
         ],
-      } as SearchablePost["tree"],
+      } as unknown as SearchablePost["tree"],
     })
     expect(searchScore(titled, "rgb")).toBeGreaterThan(searchScore(buried, "rgb"))
     expect(searchScore(buried, "rgb")).toBeGreaterThan(0)

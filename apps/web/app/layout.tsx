@@ -1,6 +1,7 @@
 import { SiteFooter } from "@/components/SiteFooter"
 import { SiteNav } from "@/components/SiteNav"
 import { siteOrigin } from "@/lib/site"
+import { pasteBootScript } from "@/lib/pasteSession"
 import { themeBootScript } from "@/lib/theme"
 import { Funnel_Display, Funnel_Sans, Geist_Mono } from "next/font/google"
 import type { ReactNode } from "react"
@@ -25,6 +26,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html lang="en" className={`h-full ${display.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
+        <script dangerouslySetInnerHTML={{ __html: pasteBootScript }} />
       </head>
       <body className="m-0 flex h-full flex-col bg-bg font-sans text-[15px] text-fg">
         {embed ? null : <SiteNav />}

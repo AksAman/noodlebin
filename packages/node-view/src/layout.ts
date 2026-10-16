@@ -33,7 +33,11 @@ export function nodeTitle(node: NodeVaultNode, catalog: Catalog | null): string 
   return node.name || node.bl_idname
 }
 
-export function estimatedHeight(node: NodeVaultNode, catalog: Catalog | null): number {
+export function estimatedHeight(
+  node: NodeVaultNode,
+  catalog: Catalog | null,
+  options?: { texturePreview?: boolean },
+): number {
   const kind = widgetId(catalog, node)
   if (kind === "reroute") return 16
   if (kind === "frame") return node.height ?? 80
@@ -45,6 +49,12 @@ export function estimatedHeight(node: NodeVaultNode, catalog: Catalog | null): n
   if (node.widgets.mapping) extra += 52 * node.widgets.mapping.curves.length
   if (node.widgets.image) extra += 20
   if (kind === "group") extra += 20
+  if (
+    options?.texturePreview &&
+    (node.bl_idname === "ShaderNodeTexNoise" || node.bl_idname === "ShaderNodeTexVoronoi")
+  ) {
+    extra += nodeWidth(node) - 8
+  }
   const socketRows =
     vis.inputs.length > 0 && vis.outputs.length > 0
       ? vis.inputs.length + vis.outputs.length

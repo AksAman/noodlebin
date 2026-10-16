@@ -1,4 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises"
+import { env } from "@/env"
 import { dirname, join, resolve } from "node:path"
 import type { NodeVaultPayload } from "@/interchange"
 import { pgGet, pgInsert, pgList, pgSlugs, pgUpdate, usesPostgres } from "@/lib/db"
@@ -23,7 +24,7 @@ type DiskShape = { posts: StoredPost[] }
 const writeChain = new Map<string, Promise<unknown>>()
 
 export function dataDir(): string {
-  const fromEnv = process.env["NODEVAULT_DATA_DIR"]
+  const fromEnv = env.NODEVAULT_DATA_DIR
   if (fromEnv) return resolve(fromEnv)
   return join(process.cwd(), ".data")
 }

@@ -1,15 +1,18 @@
-import type { CSSProperties } from "react"
+import { useContext, type CSSProperties } from "react"
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react"
 import { headerColor, lookupNode, socketColor } from "@nodevault/catalog"
 import type { InterfaceItem, JsonValue, NodeSocket, NodeVaultNode } from "@nodevault/interchange"
 import { cssColor, cssThemeColor } from "./color"
 import { handleId, nodeTitle, nodeWidth, visibleSockets } from "./layout"
 import type { NvNodeData } from "./types"
+import { ShowPreviewsContext } from "./preview-context"
+import { hasTexturePreview } from "./texture-preview"
 import {
   ColorRampBar,
   CurveSparklines,
   ImageCaption,
   PropertyRow,
+  TexturePreview,
   ValueView,
   showProperty,
 } from "./widgets"
@@ -100,6 +103,7 @@ function interfaceSockets(items: InterfaceItem[], inOut: "INPUT" | "OUTPUT"): In
 }
 
 export function NvNode({ data }: NodeProps<Node<NvNodeData>>) {
+  const showPreviews = useContext(ShowPreviewsContext)
   const { payloadNode: node, catalog, linkedInputs, blenderVersion, kind, groupTree } = data
   const rec = lookupNode(catalog, node.bl_idname)
   const title = `${node.bl_idname} · Blender ${blenderVersion}`
@@ -188,6 +192,7 @@ export function NvNode({ data }: NodeProps<Node<NvNodeData>>) {
   const fill = headerFill(node, catalog, kind)
   const outsOnly = inputs.length === 0
   const hasRamp = Boolean(node.widgets.color_ramp)
+  const preview = showPreviews && hasTexturePreview(node.bl_idname)
   const propertyRows = props.map((prop) => (
     <PropertyRow key={prop.identifier} prop={prop} value={node.properties[prop.identifier]} />
   ))
@@ -250,6 +255,7 @@ export function NvNode({ data }: NodeProps<Node<NvNodeData>>) {
             {propertyRows}
           </div>
         ) : null}
+        {preview ? <TexturePreview node={node} /> : null}
       </div>
     </article>
   )
