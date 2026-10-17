@@ -6,6 +6,7 @@ import { claimHandle, providerUsername } from "@/lib/handles";
 import { ensureSchema, getPrisma } from "@/lib/prisma";
 import { siteOrigin } from "@/lib/site";
 import { usesPostgres } from "@/lib/db";
+import { dash } from "@better-auth/infra";
 
 let cached: any = null;
 let ready: Promise<void> | null = null;
@@ -50,8 +51,8 @@ export function getAuth() {
       // same user object the create hook then claims, so the provider username
       // still wins over the display name.
       validateUserInfo({ user, source }) {
-        const username = providerUsername(source.oauth)
-        if (username) user.handle = username
+        const username = providerUsername(source.oauth);
+        if (username) user.handle = username;
       },
     },
     account: {
@@ -102,7 +103,7 @@ export function getAuth() {
         },
       },
     },
-    plugins: [nextCookies()],
+    plugins: [nextCookies(), dash()],
   });
   return cached;
 }
