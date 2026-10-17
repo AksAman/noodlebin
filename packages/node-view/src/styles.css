@@ -409,6 +409,8 @@
 
 .react-flow__minimap {
   background: var(--nv-minimap) !important;
+  border: 1px solid var(--nv-card-border);
+  border-radius: 4px;
   width: 108px !important;
   height: 72px !important;
 }
