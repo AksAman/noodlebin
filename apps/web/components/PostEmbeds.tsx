@@ -1,5 +1,6 @@
 "use client"
 
+import { InlineLoader } from "@/components/Loader"
 import { parseTweet, parseYouTube, youTubeEmbedSrc, type TweetLink } from "@/lib/embeds"
 import { cn } from "@/lib/ui"
 import { useEffect, useRef, useState } from "react"
@@ -107,7 +108,9 @@ function TweetEmbed({ tweet }: { tweet: TweetLink }) {
           <XGlyph className="size-5 shrink-0" />
           <span className="min-w-0 flex-1">
             <span className="block text-[14px] font-medium">{tweet.user === "i" ? "Post on X" : `Post by @${tweet.user}`}</span>
-            <span className="block text-[12px] text-muted">{state === "loading" ? "Loading post…" : "Open on x.com"}</span>
+            <span className="block text-[12px] text-muted">
+              {state === "loading" ? <InlineLoader label="Loading post" /> : "Open on x.com"}
+            </span>
           </span>
           <span aria-hidden="true" className="text-subtle">
             ↗

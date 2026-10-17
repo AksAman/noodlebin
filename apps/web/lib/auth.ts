@@ -33,6 +33,11 @@ export function getAuth() {
     baseURL: env.BETTER_AUTH_URL || siteOrigin(),
     trustedOrigins: [siteOrigin(), env.NEXT_PUBLIC_BASE_URL],
     database: prismaAdapter(getPrisma(), { provider: "postgresql" }),
+    emailAndPassword: {
+      enabled: true,
+      autoSignIn: true,
+      requireEmailVerification: false,
+    },
     user: {
       additionalFields: {
         handle: {
@@ -45,7 +50,7 @@ export function getAuth() {
     account: {
       accountLinking: {
         enabled: true,
-        trustedProviders: ["google", "discord", "twitter", "email-password"],
+        trustedProviders: ["google", "discord", "twitter", "credential"],
       },
     },
     socialProviders: {

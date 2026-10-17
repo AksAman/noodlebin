@@ -229,10 +229,7 @@ function EmptyState({ error }: { error: string | null }) {
     </>,
   ]
   return (
-    <div
-      data-theme="dark"
-      className="flex flex-1 items-center bg-canvas bg-[radial-gradient(circle,oklch(0.36_0_0)_1.4px,transparent_1.8px)] bg-[size:36px_36px] px-5 py-16 sm:px-12"
-    >
+    <div className="paste-stage flex flex-1 items-center px-5 py-16 sm:px-12">
       <div data-paste-copy className="mx-auto w-full max-w-[1240px] animate-rise">
         <h1 className="m-0 font-display text-[clamp(2.75rem,1.6rem+4.4vw,5.25rem)] font-semibold leading-[0.95] tracking-[-0.035em] text-fg">
           Paste a graph.

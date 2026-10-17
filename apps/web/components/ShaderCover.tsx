@@ -2,6 +2,7 @@
 
 import { friendlyCompileLog, wrapShadertoy } from "@/lib/shaderCover"
 import { cn } from "@/lib/ui"
+import { Noodle } from "@/components/Loader"
 import { useEffect, useRef, useState } from "react"
 
 /*
@@ -223,7 +224,13 @@ export function ShaderCover({
 
   return (
     <div className={cn("relative overflow-hidden bg-black", className)}>
-      {poster ? <img className="block h-full w-full object-cover" src={poster} alt="" /> : null}
+      {poster ? (
+        <img className="block h-full w-full object-cover" src={poster} alt="" />
+      ) : !live ? (
+        <span className="absolute inset-0 grid place-items-center">
+          <Noodle className="loader-reveal" />
+        </span>
+      ) : null}
       <canvas
         ref={canvasRef}
         aria-hidden="true"

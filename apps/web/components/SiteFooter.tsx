@@ -373,6 +373,9 @@ export function SiteFooter() {
                   <Link className="text-fg no-underline underline-offset-4 hover:underline" href="/paste">
                     Paste a graph
                   </Link>
+                  <Link className="text-fg no-underline underline-offset-4 hover:underline" href="/sign-in">
+                    Sign in
+                  </Link>
                 </nav>
                 <div className="relative -mx-3.5 mt-1 border-t border-line px-3.5 pt-3 text-right text-subtle">
                   Made by
