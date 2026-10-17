@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises"
 import { env } from "@/env"
 import { dirname, join, resolve } from "node:path"
 import type { NodeVaultPayload } from "@/interchange"
+import { revalidateTag, unstable_cache } from "next/cache"
 import { pgGet, pgInsert, pgList, pgSlugs, pgUpdate, usesPostgres } from "@/lib/db"
 import { isSafeSlug, mediaUrl, readMediaBytes, writeMedia } from "@/lib/media"
 import { buildSearchText } from "@/lib/search"
@@ -112,12 +113,41 @@ export async function listStored(dir = dataDir()): Promise<StoredPost[]> {
   return readDisk(dir)
 }
 
-export async function allPublicPosts(dir = dataDir()): Promise<VaultPost[]> {
+const POSTS_TAG = "posts"
+
+async function loadPublicPosts(dir: string): Promise<VaultPost[]> {
   const stored = (await listStored(dir)).map(publicOf)
   const bySlug = new Map<string, VaultPost>()
   for (const post of seedPosts) bySlug.set(post.slug, post)
   for (const post of stored) bySlug.set(post.slug, post)
   return [...bySlug.values()].filter((post) => post.visibility !== "unlisted")
+}
+
+const cachedPublicPosts = unstable_cache(loadPublicPosts, ["public-posts"], {
+  tags: [POSTS_TAG],
+  revalidate: false,
+})
+
+export async function allPublicPosts(dir = dataDir()): Promise<VaultPost[]> {
+  try {
+    return await cachedPublicPosts(dir)
+  } catch (err) {
+    // Bun tests call the route handlers outside a Next.js server, which has no data cache.
+    if (err instanceof Error && err.message.startsWith("Invariant: incrementalCache missing")) {
+      return loadPublicPosts(dir)
+    }
+    throw err
+  }
+}
+
+function invalidatePostLists(): void {
+  try {
+    // Expire immediately. updateTag is server-action only, and these writes also run in route handlers.
+    revalidateTag(POSTS_TAG, { expire: 0 })
+  } catch (err) {
+    if (err instanceof Error && err.message.includes("static generation store missing")) return
+    throw err
+  }
 }
 
 export async function getPublicPost(slug: string, dir = dataDir()): Promise<VaultPost | undefined> {
@@ -141,23 +171,25 @@ async function takenSlugs(dir: string): Promise<Set<string>> {
 async function persistNew(dir: string, stored: StoredPost): Promise<void> {
   if (usesPostgres()) {
     await pgInsert(stored)
-    return
+  } else {
+    const posts = await readDisk(dir)
+    posts.push(stored)
+    await writeDisk(dir, posts)
   }
-  const posts = await readDisk(dir)
-  posts.push(stored)
-  await writeDisk(dir, posts)
+  invalidatePostLists()
 }
 
 async function persistPatch(dir: string, stored: StoredPost): Promise<void> {
   if (usesPostgres()) {
     await pgUpdate(stored)
-    return
+  } else {
+    const posts = await readDisk(dir)
+    const index = posts.findIndex((p) => p.slug === stored.slug)
+    if (index < 0) throw new Error("Post missing during patch.")
+    posts[index] = stored
+    await writeDisk(dir, posts)
   }
-  const posts = await readDisk(dir)
-  const index = posts.findIndex((p) => p.slug === stored.slug)
-  if (index < 0) throw new Error("Post missing during patch.")
-  posts[index] = stored
-  await writeDisk(dir, posts)
+  invalidatePostLists()
 }
 
 async function buildStored(
