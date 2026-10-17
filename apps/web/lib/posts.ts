@@ -1,13 +1,9 @@
+import homepageNoise from "@/fixtures/handwritten/homepage-noise.nodevault.json";
 import {
   parseNodeVaultText,
   type NodeVaultPayload,
   type TreeType,
 } from "@/interchange";
-import frameChild from "@/fixtures/handwritten/frame-child.nodevault.json";
-import groupInner from "@/fixtures/handwritten/group-inner.nodevault.json";
-import homepageNoise from "@/fixtures/handwritten/homepage-noise.nodevault.json";
-import threeStopRamp from "@/fixtures/handwritten/three-stop-ramp.nodevault.json";
-import workedExample from "@/fixtures/handwritten/worked-example-shader.nodevault.json";
 import { halftoneCoverSource } from "@/lib/halftone";
 import { buildSearchText, searchScore } from "@/lib/search";
 

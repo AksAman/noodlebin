@@ -2,7 +2,7 @@
 
 import { THEME_KEY } from "@/lib/theme"
 import { cn } from "@/lib/ui"
-import { useEffect, useState } from "react"
+import { useEffect, useState, type JSX } from "react"
 
 type Choice = "system" | "light" | "dark"
 

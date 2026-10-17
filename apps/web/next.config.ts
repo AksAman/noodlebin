@@ -9,17 +9,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["@prisma/client", "pg"],
   transpilePackages: ["@nodevault/node-view", "@nodevault/catalog", "@nodevault/interchange"],
   turbopack: {
-    resolveAlias: {
-      "@/fixtures": resolve(repo, "fixtures"),
-      "@/catalog-data": resolve(repo, "catalog"),
-      "@/node-view/styles.css": resolve(repo, "packages/node-view/src/styles.css"),
-      "@/node-view/layout": resolve(repo, "packages/node-view/src/layout.ts"),
-      "@/node-view/color": resolve(repo, "packages/node-view/src/color.ts"),
-      "@/node-view": resolve(repo, "packages/node-view/src/index.ts"),
-      "@/catalog/load": resolve(repo, "packages/catalog/src/load.ts"),
-      "@/catalog": resolve(repo, "packages/catalog/src/index.ts"),
-      "@/interchange": resolve(repo, "packages/interchange/src/index.ts"),
-    },
+    root: repo,
   },
   webpack: (config) => {
     config.resolve.alias = {
