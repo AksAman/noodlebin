@@ -1,4 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises"
+import { env } from "@/env"
 import { dirname, join, relative, resolve, sep } from "node:path"
 import { put } from "@vercel/blob"
 
@@ -9,7 +10,7 @@ export function isSafeSlug(slug: string): boolean {
 }
 
 export function usesBlob(): boolean {
-  return Boolean(process.env["BLOB_READ_WRITE_TOKEN"])
+  return Boolean(env.BLOB_READ_WRITE_TOKEN)
 }
 
 export function isVercelBlobUrl(value: string): boolean {

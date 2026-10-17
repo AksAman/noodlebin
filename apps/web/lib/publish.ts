@@ -1,4 +1,5 @@
 import { timingSafeEqual } from "node:crypto"
+import { env } from "@/env"
 import { usesPostgres } from "@/lib/db"
 import { hashEditToken, type SharingError } from "@/lib/sharing"
 
@@ -13,9 +14,9 @@ export function publishTokenFromRequest(request: Request, form: FormData | null)
 }
 
 export function requirePublishAccess(request: Request, form: FormData | null): SharingError | null {
-  const expected = process.env["PUBLISH_SECRET"]
+  const expected = env.PUBLISH_SECRET
   if (!expected) {
-    if (process.env["VERCEL"]) {
+    if (env.VERCEL) {
       return { ok: false, status: 503, error: "Publishing is not configured." }
     }
     return null
@@ -31,7 +32,7 @@ export function requirePublishAccess(request: Request, form: FormData | null): S
 }
 
 export function requireDurableStore(): SharingError | null {
-  if (process.env["VERCEL"] && !usesPostgres()) {
+  if (env.VERCEL && !usesPostgres()) {
     return { ok: false, status: 503, error: "Storage is not configured." }
   }
   return null

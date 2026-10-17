@@ -14,20 +14,79 @@ import type { NodeVaultTree } from "@nodevault/interchange";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type KeyboardEvent,
+  type RefObject,
 } from "react";
 import { cssThemeColor } from "./color";
 import { treeToFlow } from "./graph";
 import { NvEdge } from "./NvEdge";
 import { NvNode } from "./NvNode";
+import { ShowPreviewsContext } from "./preview-context";
 import type { NvNodeData } from "./types";
 
 const nodeTypes = { nv: NvNode };
 const edgeTypes = { default: NvEdge };
 const nodeClassName = (node: Node) => node.type ?? "";
+
+type CanvasScheme = "light" | "dark";
+
+type CanvasTheme = {
+  scheme: CanvasScheme;
+  bg: string;
+  grid: string;
+};
+
+const DARK_CANVAS: CanvasTheme = {
+  scheme: "dark",
+  bg: "#171717",
+  grid: "#4e4e4e",
+};
+
+function readScheme(el: HTMLElement): CanvasScheme {
+  if (el.closest("[data-theme='dark']")) return "dark";
+  const explicit = document.documentElement.getAttribute("data-theme");
+  if (explicit === "light" || explicit === "dark") return explicit;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
+
+function useCanvasTheme(ref: RefObject<HTMLElement | null>): CanvasTheme {
+  const [theme, setTheme] = useState<CanvasTheme>(DARK_CANVAS);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const apply = () => {
+      const scheme = readScheme(el);
+      el.dataset.nvScheme = scheme;
+      const styles = getComputedStyle(el);
+      setTheme({
+        scheme,
+        bg: styles.getPropertyValue("--nv-bg").trim() || DARK_CANVAS.bg,
+        grid: styles.getPropertyValue("--nv-grid").trim() || DARK_CANVAS.grid,
+      });
+    };
+    apply();
+    const observer = new MutationObserver(apply);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    media.addEventListener("change", apply);
+    return () => {
+      observer.disconnect();
+      media.removeEventListener("change", apply);
+    };
+  }, [ref]);
+
+  return theme;
+}
 
 export type NodeViewProps = {
   tree: NodeVaultTree;
@@ -64,6 +123,7 @@ function NodeViewInner({
   );
   const [nodes, setNodes] = useState(built.nodes);
   const [flow, setFlow] = useState(built);
+  const [showPreviews, setShowPreviews] = useState(true);
   if (flow !== built) {
     setFlow(built);
     setNodes(built.nodes);
@@ -158,25 +218,51 @@ function NodeViewInner({
   );
 
   const grid = catalog?.themes["grid"];
-  const gridColor = grid ? cssThemeColor(grid) : "#4e4e4e";
-  const bgColor = "#171717";
+  const theme = useCanvasTheme(wrapRef);
+  const gridColor =
+    theme.scheme === "light"
+      ? theme.grid
+      : grid
+        ? cssThemeColor(grid)
+        : theme.grid;
+  const bgColor = theme.scheme === "light" ? theme.bg : DARK_CANVAS.bg;
 
   return (
-    <div className="nv-root" ref={wrapRef} tabIndex={0} onKeyDown={onKeyDown}>
-      {stack.length > 1 ? (
-        <nav className="nv-crumbs" aria-label="Group trees">
-          {stack.map((t, i) => (
-            <button
-              key={`${t.id}-${i}`}
-              type="button"
-              className="nv-crumb"
-              onClick={() => setStack((s) => s.slice(0, i + 1))}
-            >
-              {i === 0 ? "Root" : t.name || t.id}
-            </button>
-          ))}
-        </nav>
-      ) : null}
+    <ShowPreviewsContext.Provider value={showPreviews}>
+    <div
+      className="nv-root"
+      data-nv-scheme={theme.scheme}
+      ref={wrapRef}
+      tabIndex={0}
+      onKeyDown={onKeyDown}
+    >
+      <div className="nv-chrome">
+        <button
+          type="button"
+          className="nv-preview-toggle"
+          aria-pressed={showPreviews}
+          onClick={() => setShowPreviews((on) => !on)}
+        >
+          <span className={`nv-check${showPreviews ? " nv-check-on" : ""}`}>
+            <span className="nv-check-box" />
+          </span>
+          Show node previews
+        </button>
+        {stack.length > 1 ? (
+          <nav className="nv-crumbs" aria-label="Group trees">
+            {stack.map((t, i) => (
+              <button
+                key={`${t.id}-${i}`}
+                type="button"
+                className="nv-crumb"
+                onClick={() => setStack((s) => s.slice(0, i + 1))}
+              >
+                {i === 0 ? "Root" : t.name || t.id}
+              </button>
+            ))}
+          </nav>
+        ) : null}
+      </div>
       {moved ? (
         <button type="button" className="nv-reset" onClick={resetLayout}>
           Reset layout <kbd className="nv-kbd">R</kbd>
@@ -209,7 +295,7 @@ function NodeViewInner({
         zoomOnPinch
         minZoom={0.15}
         maxZoom={2}
-        colorMode="dark"
+        colorMode={theme.scheme}
         attributionPosition="bottom-left"
         defaultEdgeOptions={{ type: "default" }}
         onNodeDoubleClick={onNodeDoubleClick}
@@ -233,6 +319,7 @@ function NodeViewInner({
         ) : null}
       </ReactFlow>
     </div>
+    </ShowPreviewsContext.Provider>
   );
 }
 

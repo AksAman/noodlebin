@@ -1,7 +1,8 @@
 "use client"
 
+import { InlineLoader, Noodle } from "@/components/Loader"
 import { SOCIALS, authClient, type SocialProvider } from "@/lib/auth-client"
-import { cn, errorBox } from "@/lib/ui"
+import { btnAccent, cn, errorBox, field } from "@/lib/ui"
 import { useState, type ReactNode } from "react"
 
 const socialButton =
@@ -19,7 +20,10 @@ export function SignInButtons({
   connected?: string[]
 }) {
   const [error, setError] = useState<string | null>(null)
-  const [pending, setPending] = useState<SocialProvider | null>(null)
+  const [pending, setPending] = useState<SocialProvider | "email" | null>(null)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [creating, setCreating] = useState(true)
 
   async function go(provider: SocialProvider) {
     setError(null)
@@ -40,6 +44,29 @@ export function SignInButtons({
     }
   }
 
+  async function submitEmail() {
+    setError(null)
+    setPending("email")
+    onBefore?.()
+    const address = email.trim()
+    const name = address.split("@")[0] || "user"
+    try {
+      const result = creating
+        ? await authClient.signUp.email({ email: address, password, name })
+        : await authClient.signIn.email({ email: address, password })
+      if (result.error) {
+        setPending(null)
+        setError(result.error.message || "Could not sign in.")
+        return
+      }
+      if (window.location.pathname !== callbackURL) window.location.assign(callbackURL)
+      else setPending(null)
+    } catch (err) {
+      setPending(null)
+      setError(err instanceof Error ? err.message : "Could not sign in.")
+    }
+  }
+
   return (
     <div className="flex flex-col gap-2">
       {SOCIALS.map((social) => {
@@ -52,11 +79,71 @@ export function SignInButtons({
             disabled={pending !== null || already}
             onClick={() => void go(social.id)}
           >
-            <ProviderMark id={social.id} />
+            {pending === social.id ? <Noodle size="sm" mono /> : <ProviderMark id={social.id} />}
             {already ? `${social.label} connected` : mode === "link" ? `Connect ${social.label}` : `Continue with ${social.label}`}
           </button>
         )
       })}
+      {mode === "sign-in" ? (
+        <div
+          className="mt-2 flex flex-col gap-2 border-t border-line pt-3"
+          onKeyDown={(event) => {
+            if (event.key !== "Enter") return
+            event.stopPropagation()
+            event.preventDefault()
+            if (pending === null) void submitEmail()
+          }}
+        >
+          <label className="flex flex-col gap-1 text-[12px] text-muted">
+            Email
+            <input
+              className={field}
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-[12px] text-muted">
+            Password
+            <input
+              className={field}
+              type="password"
+              autoComplete={creating ? "new-password" : "current-password"}
+              required
+              minLength={8}
+              maxLength={128}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </label>
+          <button
+            type="button"
+            className={cn(btnAccent, "h-10 w-full")}
+            disabled={pending !== null || !email.trim() || password.length < 8}
+            onClick={() => void submitEmail()}
+          >
+            {pending === "email" ? (
+              <InlineLoader mono label={creating ? "Creating account" : "Signing in"} className="justify-center" />
+            ) : creating ? (
+              "Create account"
+            ) : (
+              "Sign in with email"
+            )}
+          </button>
+          <button
+            type="button"
+            className="cursor-pointer self-start text-[12px] text-muted underline-offset-4 hover:text-fg hover:underline"
+            onClick={() => {
+              setError(null)
+              setCreating((value) => !value)
+            }}
+          >
+            {creating ? "Already have an account? Sign in" : "Need an account? Create one"}
+          </button>
+        </div>
+      ) : null}
       {error ? (
         <p role="alert" className={cn(errorBox, "m-0")}>
           {error}

@@ -1,12 +1,14 @@
-import type { CSSProperties, ReactNode } from "react"
+import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react"
 import type { CatalogProperty } from "@nodevault/catalog"
 import type {
   ColorRampWidget,
   CurveMappingWidget,
   ImageWidget,
   JsonValue,
+  NodeVaultNode,
 } from "@nodevault/interchange"
 import { cssColor } from "./color"
+import { hasTexturePreview, paintTexturePreview, texturePreviewKey } from "./texture-preview"
 
 const SKIP_PROPS = new Set(["warning_propagation", "is_active_output"])
 
@@ -253,7 +255,7 @@ export function CurveSparklines({ widget }: { widget: CurveMappingWidget }) {
         const d = pts.map((p, j) => `${j === 0 ? "M" : "L"} ${sx(p[0])} ${sy(p[1])}`).join(" ")
         return (
           <svg key={i} className="nv-curve" width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
-            <path d={d} fill="none" stroke="#c7c7c7" strokeWidth="1.5" />
+            <path d={d} fill="none" stroke="currentColor" strokeWidth="1.5" />
           </svg>
         )
       })}
@@ -263,4 +265,25 @@ export function CurveSparklines({ widget }: { widget: CurveMappingWidget }) {
 
 export function ImageCaption({ widget }: { widget: ImageWidget }) {
   return <div className="nv-caption">{widget.name || widget.filepath || "(image)"}</div>
+}
+
+const PREVIEW_SIZE = 96
+
+export function TexturePreview({ node }: { node: NodeVaultNode }) {
+  const ref = useRef<HTMLCanvasElement>(null)
+  const signature = texturePreviewKey(node)
+  useLayoutEffect(() => {
+    const canvas = ref.current
+    if (!canvas) return
+    canvas.width = PREVIEW_SIZE
+    canvas.height = PREVIEW_SIZE
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+    const image = ctx.createImageData(PREVIEW_SIZE, PREVIEW_SIZE)
+    paintTexturePreview(node, image.data, PREVIEW_SIZE)
+    ctx.putImageData(image, 0, 0)
+  }, [node, signature])
+  if (!hasTexturePreview(node.bl_idname)) return null
+  const label = node.bl_idname === "ShaderNodeTexVoronoi" ? "Voronoi texture preview" : "Noise texture preview"
+  return <canvas ref={ref} className="nv-tex-preview" aria-label={label} draggable={false} />
 }

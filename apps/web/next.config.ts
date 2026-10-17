@@ -6,6 +6,7 @@ const appDir = dirname(fileURLToPath(import.meta.url))
 const repo = resolve(appDir, "../..")
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["@prisma/client", "pg"],
   transpilePackages: ["@nodevault/node-view", "@nodevault/catalog", "@nodevault/interchange"],
   turbopack: {
     resolveAlias: {

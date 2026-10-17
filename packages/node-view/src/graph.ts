@@ -45,7 +45,7 @@ function zoneBoxes(tree: NodeVaultTree, catalog: Catalog | null): Node<NvNodeDat
     for (const n of involved) {
       const p = blenderToCanvas(n.location_absolute)
       const w = nodeWidth(n)
-      const h = estimatedHeight(n, catalog)
+      const h = estimatedHeight(n, catalog, { texturePreview: true })
       minX = Math.min(minX, p.x)
       minY = Math.min(minY, p.y)
       maxX = Math.max(maxX, p.x + w)

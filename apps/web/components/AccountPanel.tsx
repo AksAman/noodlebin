@@ -1,16 +1,24 @@
 "use client"
 
+import { PageLoader } from "@/components/Loader"
 import { SignInButtons } from "@/components/SignInButtons"
 import { authClient } from "@/lib/auth-client"
 import { btnGhost, docShell, page } from "@/lib/ui"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 type Account = { providerId: string }
 
 export function AccountPanel() {
+  const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
   const [accounts, setAccounts] = useState<Account[]>([])
+
+  useEffect(() => {
+    if (isPending) return
+    if (!session?.user) router.replace("/sign-in")
+  }, [isPending, router, session])
 
   useEffect(() => {
     if (!session) return
@@ -19,26 +27,10 @@ export function AccountPanel() {
     })
   }, [session])
 
-  if (isPending) {
+  if (isPending || !session?.user) {
     return (
       <div className={docShell}>
-        <div className={cnPage}>Checking sign-in…</div>
-      </div>
-    )
-  }
-
-  if (!session?.user) {
-    return (
-      <div className={docShell}>
-        <div className={cnPage}>
-          <h1 className="m-0 font-display text-4xl font-semibold tracking-[-0.03em]">Sign in</h1>
-          <p className="mt-3 max-w-[46ch] text-muted">
-            Optional. A handle is how graphs are credited to you. You can keep publishing without one.
-          </p>
-          <div className="mt-6">
-            <SignInButtons callbackURL="/account" />
-          </div>
-        </div>
+        <PageLoader className="min-h-[60vh]" label={isPending ? "Checking sign-in" : "Taking you to sign in"} />
       </div>
     )
   }

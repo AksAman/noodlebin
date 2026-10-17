@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  handle        String?   @unique(map: "user_handle_unique")
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId], map: "account_provider_unique")
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+model Post {
+  slug                 String   @id
+  title                String
+  authorName           String   @map("author_name")
+  authorSlug           String?  @map("author_slug")
+  description          String?
+  tree                 Json?
+  treeType             String   @map("tree_type")
+  blenderVersionString String   @map("blender_version_string")
+  coverUrl             String?  @map("cover_url")
+  videoUrl             String?  @map("video_url")
+  blendUrl             String?  @map("blend_url")
+  blendFilename        String?  @map("blend_filename")
+  cardUrl              String?  @map("card_url")
+  nodevemberDay        Int?     @map("nodevember_day")
+  createdAt            DateTime @default(now()) @map("created_at")
+  seeded               Boolean  @default(false)
+  editTokenHash        String   @map("edit_token_hash")
+  coverFile            String?  @map("cover_file")
+  videoFile            String?  @map("video_file")
+  blendFile            String?  @map("blend_file")
+  youtubeUrl           String?  @map("youtube_url")
+  tweetUrl             String?  @map("tweet_url")
+  coverShader          String?  @map("cover_shader")
+  visibility           String   @default("public")
+  tags                 String[] @default([])
+  searchText           String   @default("") @map("search_text")
+  userId               String?  @map("user_id")
+
+  @@index([authorSlug], map: "posts_author_slug_idx")
+  @@index([createdAt(sort: Desc)], map: "posts_created_at_idx")
+  @@map("posts")
+}

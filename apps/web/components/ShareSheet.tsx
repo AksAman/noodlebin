@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineLoader } from "@/components/Loader"
 import { publishPost } from "@/lib/publishPost";
 import { serializeCopy, treeTypeLabel } from "@/lib/ingest";
 import type { NodeVaultPayload } from "@/interchange";
@@ -575,7 +576,7 @@ export function ShareSheet({
           Not now
         </button>
         <button type="submit" className={cn(btnAccent, "px-5")} disabled={busy}>
-          {busy ? "Publishing…" : "Publish"}
+          {busy ? <InlineLoader mono label="Publishing" /> : "Publish"}
         </button>
       </div>
     </form>
