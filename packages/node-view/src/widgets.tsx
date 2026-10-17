@@ -255,7 +255,7 @@ export function CurveSparklines({ widget }: { widget: CurveMappingWidget }) {
         const d = pts.map((p, j) => `${j === 0 ? "M" : "L"} ${sx(p[0])} ${sy(p[1])}`).join(" ")
         return (
           <svg key={i} className="nv-curve" width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
-            <path d={d} fill="none" stroke="#c7c7c7" strokeWidth="1.5" />
+            <path d={d} fill="none" stroke="currentColor" strokeWidth="1.5" />
           </svg>
         )
       })}

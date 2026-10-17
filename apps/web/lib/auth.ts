@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { env } from "@/env";
-import { claimHandle } from "@/lib/handles";
+import { claimHandle, providerUsername } from "@/lib/handles";
 import { ensureSchema, getPrisma } from "@/lib/prisma";
 import { siteOrigin } from "@/lib/site";
 import { usesPostgres } from "@/lib/db";
@@ -46,6 +46,13 @@ export function getAuth() {
           input: false,
         },
       },
+      // input: false strips handle out of mapProfileToUser. This runs on the
+      // same user object the create hook then claims, so the provider username
+      // still wins over the display name.
+      validateUserInfo({ user, source }) {
+        const username = providerUsername(source.oauth)
+        if (username) user.handle = username
+      },
     },
     account: {
       accountLinking: {
@@ -66,10 +73,7 @@ export function getAuth() {
         ? {
             twitter: {
               ...twitter,
-              mapProfileToUser: (profile) => ({
-                name: profile.data.name,
-                handle: profile.data.username,
-              }),
+              mapProfileToUser: (profile) => ({ name: profile.data.name }),
             },
           }
         : {}),
@@ -79,7 +83,6 @@ export function getAuth() {
               ...discord,
               mapProfileToUser: (profile) => ({
                 name: profile.global_name || profile.username,
-                handle: profile.username,
               }),
             },
           }

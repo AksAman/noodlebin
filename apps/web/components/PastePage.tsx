@@ -8,7 +8,7 @@ import { shippedCatalogs } from "@/lib/catalogs"
 import { ingestText, serializeCopy, treeTypeLabel } from "@/lib/ingest"
 import type { CatalogResolution } from "@/catalog"
 import type { NodeVaultPayload } from "@/interchange"
-import { btn, btnAccent, btnGhost, canvas, cn, errorBox, notice as noticeClass, shell, treeDotClass } from "@/lib/ui"
+import { btn, btnAccent, btnGhost, cn, errorBox, notice as noticeClass, shell, treeDotClass } from "@/lib/ui"
 import { clearPasteRestoring, clearPasteSession, readPasteSession, writePasteSession } from "@/lib/pasteSession"
 import { readShareDraft, SHARE_DRAFT_KEY, type ShareDraft } from "@/lib/shareDraft"
 import Link from "next/link"
@@ -178,7 +178,7 @@ export function PastePage() {
               ) : null}
             </div>
           </div>
-          <div className={canvas} data-theme="dark" data-node-canvas>
+          <div className="relative min-h-0 flex-1 bg-bg" data-node-canvas>
             {error ? (
               <div role="alert" className={cn(errorBox, "absolute left-1/2 top-3 z-[6] max-w-xl -translate-x-1/2")}>
                 {error}

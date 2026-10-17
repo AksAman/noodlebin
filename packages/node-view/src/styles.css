@@ -5,13 +5,104 @@
   outline: none;
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  color: #c7c7c7;
+  color: var(--nv-fg);
   font-size: 11px;
+  --nv-fg: #c7c7c7;
+  --nv-bg: #171717;
+  --nv-grid: #4e4e4e;
+  --nv-card: #303030;
+  --nv-card-border: rgba(255, 255, 255, 0.15);
+  --nv-card-border-hover: rgba(255, 255, 255, 0.45);
+  --nv-selected: #fff;
+  --nv-shadow: 0 1px 1px rgba(0, 0, 0, 0.45), 0 4px 10px rgba(0, 0, 0, 0.35);
+  --nv-selected-shadow: 0 0 0 1px #fff, 0 4px 10px rgba(0, 0, 0, 0.4);
+  --nv-chrome-bg: rgb(48 48 48 / 92%);
+  --nv-chrome-fg: #e6e6e6;
+  --nv-chrome-border: #555;
+  --nv-chrome-hover-border: #888;
+  --nv-chrome-hover-fg: #fff;
+  --nv-header-fg: #e6e6e6;
+  --nv-mute-line: #c7c7c7;
+  --nv-diamond: #171717;
+  --nv-minimap: #252525;
+  --nv-minimap-mask: rgba(0, 0, 0, 0.45);
+  --nv-minimap-node: #555;
+  --nv-swatch-border: #111;
+  --nv-bar: #545454;
+  --nv-dropdown-bg: #303030;
+  --nv-dropdown-border: #444;
+  --nv-check: #545454;
+  --nv-check-border: #3a3a3a;
+  --nv-widget: #3c3c3c;
+  --nv-widget-border: #4a4a4a;
+  --nv-widget-fg: #d0d0d0;
+  --nv-axis-x: #f0b0b0;
+  --nv-axis-y: #b0f0b4;
+  --nv-axis-z: #b0b4f0;
+  --nv-ramp-border: #111;
+  --nv-ramp-stop: #111;
+  --nv-ramp-active: #f2f2f2;
+  --nv-frame-bg: rgba(48, 48, 48, 0.35);
+  --nv-frame-border: #666;
+  --nv-frame-fg: #c7c7c7;
+  --nv-kbd-border: #5a5a5a;
+  --nv-kbd-fg: #aaa;
+  --nv-preview-bg: #111;
+  --nv-curve: #c7c7c7;
+}
+
+/* Light page theme. A canvas marked data-theme="dark" (shared posts, embeds) stays on the defaults above. */
+.nv-root[data-nv-scheme="light"] {
+  --nv-fg: var(--fg);
+  --nv-bg: var(--bg);
+  --nv-grid: var(--line-strong);
+  --nv-card: var(--surface);
+  --nv-card-border: color-mix(in oklab, var(--fg) 16%, transparent);
+  --nv-card-border-hover: color-mix(in oklab, var(--fg) 36%, transparent);
+  --nv-selected: var(--fg);
+  --nv-shadow: 0 1px 1px rgb(40 32 20 / 6%), 0 6px 16px rgb(40 32 20 / 8%);
+  --nv-selected-shadow: 0 0 0 1px var(--fg), 0 6px 16px rgb(40 32 20 / 10%);
+  --nv-chrome-bg: color-mix(in oklab, var(--surface) 92%, transparent);
+  --nv-chrome-fg: var(--fg);
+  --nv-chrome-border: var(--line-strong);
+  --nv-chrome-hover-border: var(--subtle);
+  --nv-chrome-hover-fg: var(--fg);
+  --nv-mute-line: var(--muted);
+  --nv-diamond: var(--nv-bg);
+  --nv-minimap: var(--sunken);
+  --nv-minimap-mask: color-mix(in oklab, var(--fg) 10%, transparent);
+  --nv-minimap-node: color-mix(in oklab, var(--fg) 28%, var(--surface));
+  --nv-swatch-border: color-mix(in oklab, var(--fg) 35%, transparent);
+  --nv-bar: var(--sunken);
+  --nv-dropdown-bg: var(--bg);
+  --nv-dropdown-border: var(--line-strong);
+  --nv-check: var(--sunken);
+  --nv-check-border: var(--line-strong);
+  --nv-widget: var(--sunken);
+  --nv-widget-border: var(--line-strong);
+  --nv-widget-fg: var(--fg);
+  --nv-axis-x: #a33d3d;
+  --nv-axis-y: #2d7a40;
+  --nv-axis-z: #3a4cae;
+  --nv-ramp-border: color-mix(in oklab, var(--fg) 40%, transparent);
+  --nv-ramp-stop: var(--fg);
+  --nv-ramp-active: var(--fg);
+  --nv-frame-bg: color-mix(in oklab, var(--sunken) 80%, transparent);
+  --nv-frame-border: var(--subtle);
+  --nv-frame-fg: var(--muted);
+  --nv-kbd-border: var(--line-strong);
+  --nv-kbd-fg: var(--muted);
+  --nv-preview-bg: var(--sunken);
+  --nv-curve: var(--muted);
 }
 
 .nv-root .react-flow {
   width: 100%;
   height: 100%;
+}
+
+.nv-curve {
+  color: var(--nv-curve);
 }
 
 .nv-a11y {
@@ -28,9 +119,9 @@
 }
 
 .nv-crumb {
-  background: #303030;
-  color: #c7c7c7;
-  border: 1px solid #555;
+  background: var(--nv-card);
+  color: var(--nv-fg);
+  border: 1px solid var(--nv-chrome-border);
   border-radius: 4px;
   padding: 4px 8px;
   font-size: 12px;
@@ -43,9 +134,9 @@
   bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgb(48 48 48 / 92%);
-  color: #e6e6e6;
-  border: 1px solid #555;
+  background: var(--nv-chrome-bg);
+  color: var(--nv-chrome-fg);
+  border: 1px solid var(--nv-chrome-border);
   border-radius: 6px;
   padding: 6px 12px;
   font-size: 12px;
@@ -55,8 +146,8 @@
 }
 
 .nv-reset:hover {
-  border-color: #888;
-  color: #fff;
+  border-color: var(--nv-chrome-hover-border);
+  color: var(--nv-chrome-hover-fg);
 }
 
 .nv-reset:focus-visible {
@@ -93,25 +184,21 @@
 }
 
 .nv-card {
-  background: #303030;
+  background: var(--nv-card);
   border-radius: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow:
-    0 1px 1px rgba(0, 0, 0, 0.45),
-    0 4px 10px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--nv-card-border);
+  box-shadow: var(--nv-shadow);
   overflow: visible;
 }
 
 .nv-card:hover {
-  border-color: rgba(255, 255, 255, 0.45);
+  border-color: var(--nv-card-border-hover);
 }
 
 .react-flow__node.selected .nv-card,
 .react-flow__node.selected .nv-card:hover {
-  border-color: #fff;
-  box-shadow:
-    0 0 0 1px #fff,
-    0 4px 10px rgba(0, 0, 0, 0.4);
+  border-color: var(--nv-selected);
+  box-shadow: var(--nv-selected-shadow);
 }
 
 .nv-header {
@@ -123,7 +210,7 @@
   padding: 0 8px 0 7px;
   font-size: 12px;
   position: relative;
-  color: #e6e6e6;
+  color: var(--nv-header-fg);
   box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.28);
 }
 
@@ -148,7 +235,7 @@
   left: 0;
   right: 0;
   top: 50%;
-  border-top: 1px solid #c7c7c7;
+  border-top: 1px solid var(--nv-mute-line);
 }
 
 /* Row metrics measured from Blender's node editor: 20 unit rows, sockets 1 apart, 6 above and 7 below the body. */
@@ -300,7 +387,7 @@
 .nv-diamond {
   width: 11px;
   height: 11px;
-  background: #171717;
+  background: var(--nv-diamond);
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
   display: grid;
   place-items: center;
@@ -321,17 +408,17 @@
 }
 
 .react-flow__minimap {
-  background: #252525 !important;
+  background: var(--nv-minimap) !important;
   width: 108px !important;
   height: 72px !important;
 }
 
 .react-flow__minimap-mask {
-  fill: rgba(0, 0, 0, 0.45) !important;
+  fill: var(--nv-minimap-mask) !important;
 }
 
 .react-flow__minimap-node {
-  fill: #555 !important;
+  fill: var(--nv-minimap-node) !important;
   stroke: none !important;
 }
 
@@ -339,7 +426,7 @@
   width: 16px;
   height: 16px;
   border-radius: 2px;
-  border: 1px solid #111;
+  border: 1px solid var(--nv-swatch-border);
   flex-shrink: 0;
 }
 
@@ -354,7 +441,7 @@
   flex: 1;
   width: 100%;
   height: 18px;
-  background: #545454;
+  background: var(--nv-bar);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -383,8 +470,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 8px;
-  background: #303030;
-  border: 1px solid #444;
+  background: var(--nv-dropdown-bg);
+  border: 1px solid var(--nv-dropdown-border);
   border-radius: 4px;
   font-size: 11px;
 }
@@ -406,8 +493,8 @@
   width: 14px;
   height: 14px;
   border-radius: 3px;
-  background: #545454;
-  border: 1px solid #3a3a3a;
+  background: var(--nv-check);
+  border: 1px solid var(--nv-check-border);
   box-sizing: border-box;
   position: relative;
   flex-shrink: 0;
@@ -464,24 +551,20 @@
   pointer-events: none;
 }
 
-.nv-vec-x .nv-bar {
-  background: #545454;
-}
-.nv-vec-y .nv-bar {
-  background: #545454;
-}
+.nv-vec-x .nv-bar,
+.nv-vec-y .nv-bar,
 .nv-vec-z .nv-bar {
-  background: #545454;
+  background: var(--nv-bar);
 }
 
 .nv-vec-x .nv-vec-letter {
-  color: #f0b0b0;
+  color: var(--nv-axis-x);
 }
 .nv-vec-y .nv-vec-letter {
-  color: #b0f0b4;
+  color: var(--nv-axis-y);
 }
 .nv-vec-z .nv-vec-letter {
-  color: #b0b4f0;
+  color: var(--nv-axis-z);
 }
 
 .nv-ramp {
@@ -502,9 +585,9 @@
   height: 22px;
   flex: 0 0 22px;
   border-radius: 4px;
-  background: #3c3c3c;
-  border: 1px solid #4a4a4a;
-  color: #d0d0d0;
+  background: var(--nv-widget);
+  border: 1px solid var(--nv-widget-border);
+  color: var(--nv-widget-fg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -518,7 +601,7 @@
   height: 0;
   border-left: 3.5px solid transparent;
   border-right: 3.5px solid transparent;
-  border-top: 4px solid #d0d0d0;
+  border-top: 4px solid var(--nv-widget-fg);
 }
 
 .nv-ramp-toolbar .nv-dropdown {
@@ -531,7 +614,7 @@
   position: relative;
   height: 14px;
   border-radius: 2px;
-  border: 1px solid #111;
+  border: 1px solid var(--nv-ramp-border);
   margin-bottom: 14px;
 }
 
@@ -541,7 +624,7 @@
   width: 12px;
   height: 14px;
   margin-left: -6px;
-  background: #111;
+  background: var(--nv-ramp-stop);
   clip-path: polygon(50% 0, 100% 36%, 100% 100%, 0 100%, 0 36%);
 }
 
@@ -557,7 +640,7 @@
 }
 
 .nv-ramp-stop-active {
-  background: #f2f2f2;
+  background: var(--nv-ramp-active);
 }
 
 .nv-ramp-pos {
@@ -570,8 +653,8 @@
   flex: 0 0 42px;
   height: 22px;
   border-radius: 4px;
-  background: #3c3c3c;
-  border: 1px solid #4a4a4a;
+  background: var(--nv-widget);
+  border: 1px solid var(--nv-widget-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -600,14 +683,14 @@
 }
 
 .nv-frame {
-  background: rgba(48, 48, 48, 0.35);
-  border: 1px solid #666;
+  background: var(--nv-frame-bg);
+  border: 1px solid var(--nv-frame-border);
   border-radius: 4px;
 }
 
 .nv-frame-label {
   padding: 6px 10px;
-  color: #c7c7c7;
+  color: var(--nv-frame-fg);
 }
 
 .nv-reroute {
@@ -668,11 +751,11 @@
 .nv-kbd {
   margin-left: 6px;
   padding: 0 4px;
-  border: 1px solid #5a5a5a;
+  border: 1px solid var(--nv-kbd-border);
   border-radius: 3px;
   font: inherit;
   font-size: 10px;
-  color: #aaa;
+  color: var(--nv-kbd-fg);
 }
 
 .nv-chrome {
@@ -690,9 +773,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgb(48 48 48 / 92%);
-  color: #e6e6e6;
-  border: 1px solid #555;
+  background: var(--nv-chrome-bg);
+  color: var(--nv-chrome-fg);
+  border: 1px solid var(--nv-chrome-border);
   border-radius: 6px;
   padding: 6px 10px;
   font: inherit;
@@ -712,6 +795,6 @@
   margin-top: 6px;
   aspect-ratio: 1;
   border-radius: 2px;
-  background: #111;
+  background: var(--nv-preview-bg);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.55);
 }
