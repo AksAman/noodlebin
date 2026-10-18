@@ -244,6 +244,8 @@ export function ShareSheet({
   const [draftRev, setDraftRev] = useState(0);
   const titleRef = useRef<HTMLInputElement>(null);
   const coverRef = useRef<HTMLInputElement>(null);
+  const coverFileRef = useRef<File | null>(null);
+  const coverPickedRef = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
   const publishedRef = useRef(false);
   const mod = useModKey();
@@ -257,10 +259,12 @@ export function ShareSheet({
   }, [signInOpen]);
 
   const showCover = useCallback((file: File | null) => {
+    const chosen = file && file.size > 0 ? file : null;
+    coverFileRef.current = chosen;
     setCoverError(null);
-    setCoverName(file?.name ?? null);
-    setCoverPreview(file ? URL.createObjectURL(file) : null);
-    if (!file) {
+    setCoverName(chosen?.name ?? null);
+    setCoverPreview(chosen ? URL.createObjectURL(chosen) : null);
+    if (!chosen) {
       setCoverDataUrl("");
       return;
     }
@@ -268,7 +272,7 @@ export function ShareSheet({
     reader.onload = () => {
       setCoverDataUrl(typeof reader.result === "string" ? reader.result : "");
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(chosen);
   }, []);
 
   const touchDraft = useCallback(() => setDraftRev((n) => n + 1), []);
@@ -299,6 +303,7 @@ export function ShareSheet({
           type: image.type,
         },
       );
+      coverPickedRef.current = true;
       const transfer = new DataTransfer();
       transfer.items.add(named);
       input.files = transfer.files;
@@ -319,12 +324,12 @@ export function ShareSheet({
 
   useEffect(() => {
     const dataUrl = restored?.coverDataUrl;
-    if (!dataUrl) return;
+    if (!dataUrl || coverPickedRef.current) return;
     let cancelled = false;
     void fetch(dataUrl)
       .then((res) => res.blob())
       .then((blob) => {
-        if (cancelled) return;
+        if (cancelled || coverPickedRef.current) return;
         const name = restored.coverName || pastedName(blob.type || "image/png");
         const file = new File([blob], name, { type: blob.type || "image/png" });
         const input = coverRef.current;
@@ -474,10 +479,12 @@ export function ShareSheet({
           void (async () => {
             const body = submitted;
             body.set("tree_text", treeText);
-            const chosen =
-              cover instanceof File && cover.size > 0
-                ? cover
-                : await captureNodeCanvas();
+            const fromForm = cover instanceof File && cover.size > 0 ? cover : null;
+            const selected = coverFileRef.current ?? fromForm;
+            if (!selected && (coverName || coverPreview)) {
+              throw new Error("That cover didn’t stay attached. Choose the image again, then publish.");
+            }
+            const chosen = selected ?? (await captureNodeCanvas());
             const fitted = await fitCoverFile(
               chosen,
               coverByteBudget(new Blob([treeText]).size),
@@ -548,7 +555,10 @@ export function ShareSheet({
                 type="file"
                 accept={COVER_TYPES.join(",")}
                 aria-describedby="cover-name"
-                onChange={(event) => showCover(event.target.files?.[0] ?? null)}
+                onChange={(event) => {
+                  coverPickedRef.current = true;
+                  showCover(event.target.files?.[0] ?? null);
+                }}
               />
             </span>
             <span

@@ -1,5 +1,23 @@
 import type { UploadKind } from "@/lib/blobUpload"
 
+/** Browser network failures surface as TypeError "Failed to fetch", including the first Azure PUT while CORS settles. */
+async function send(url: string, init: RequestInit): Promise<Response> {
+  let last: unknown
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      return await fetch(url, init)
+    } catch (err) {
+      last = err
+      if (!(err instanceof TypeError) || attempt === 2) break
+      await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)))
+    }
+  }
+  if (last instanceof TypeError) {
+    throw new Error("Could not reach storage. Check your connection and publish again.")
+  }
+  throw last
+}
+
 /**
  * Uploads a file straight to Azure.
  * Null means this server is still accepting the file in the form.
@@ -7,7 +25,7 @@ import type { UploadKind } from "@/lib/blobUpload"
  */
 export async function putBlob(kind: UploadKind, file: File): Promise<string | null> {
   const contentType = file.type || (kind === "blend" ? "application/octet-stream" : "")
-  const res = await fetch(`/api/uploads/${kind}`, {
+  const res = await send(`/api/uploads/${kind}`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ contentType, byteSize: file.size, filename: file.name }),
@@ -22,7 +40,7 @@ export async function putBlob(kind: UploadKind, file: File): Promise<string | nu
   if (!res.ok || !body?.uploadUrl || !body.token || !body.contentType) {
     throw new Error(body?.error || "Could not start the upload.")
   }
-  const put = await fetch(body.uploadUrl, {
+  const put = await send(body.uploadUrl, {
     method: "PUT",
     body: file,
     headers: {
