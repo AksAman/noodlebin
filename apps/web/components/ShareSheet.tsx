@@ -5,6 +5,7 @@ import { publishPost } from "@/lib/publishPost";
 import { serializeCopy, treeTypeLabel } from "@/lib/ingest";
 import type { NodeVaultPayload } from "@/interchange";
 import { Dialog } from "@/components/Dialog";
+import { MarkdownField } from "@/components/MarkdownField";
 import { SignInButtons } from "@/components/SignInButtons";
 import { TagPills } from "@/components/TagPills";
 import { Kbd, useModKey } from "@/components/Keys";
@@ -512,18 +513,17 @@ export function ShareSheet({
           />
         </div>
       )}
-      <label className={label}>
-        <span>
-          Note <span className="font-normal text-subtle">(optional)</span>
-        </span>
-        <textarea
-          className={cn(field, "resize-y")}
+      <div className={label}>
+        <label htmlFor="post-description">
+          Note <span className="font-normal text-subtle">(optional, markdown)</span>
+        </label>
+        <MarkdownField
+          id="post-description"
           name="description"
-          rows={3}
           defaultValue={restored?.description ?? ""}
           placeholder="What should someone know before they paste this?"
         />
-      </label>
+      </div>
       <div className={label}>
         <span>
           Tags <span className="font-normal text-subtle">(optional)</span>

@@ -1,4 +1,5 @@
 import { AuthorCredit } from "@/components/AuthorCredit"
+import { MarkdownNote } from "@/components/MarkdownNote"
 import { PostEmbeds } from "@/components/PostEmbeds"
 import { PostGraph } from "@/components/PostGraph"
 import { ShaderCover } from "@/components/ShaderCover"
@@ -6,6 +7,7 @@ import { SharePost } from "@/components/SharePost"
 import { resolveCatalog } from "@/catalog"
 import { shippedCatalogs } from "@/lib/catalogs"
 import { treeTypeLabel } from "@/lib/ingest"
+import { markdownPlain } from "@/lib/markdownText"
 import { getPublicPost } from "@/lib/store"
 import { cn, page, docShell } from "@/lib/ui"
 import type { Metadata } from "next"
@@ -19,12 +21,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!post) return { title: "Not found" }
   const title = `${post.title} · NodeVault`
   const image = post.card_url ?? `/p/${post.slug}/opengraph-image`
+  const description = post.description ? markdownPlain(post.description) || undefined : undefined
   return {
     title,
-    description: post.description ?? undefined,
+    description,
     openGraph: {
       title: post.title,
-      description: post.description ?? undefined,
+      description,
       images: [{ url: image, width: 1200, height: 630 }],
     },
     twitter: {
@@ -55,7 +58,7 @@ export default async function PostRoute({ params }: { params: Promise<{ slug: st
               {" · "}
               {treeTypeLabel(post.tree_type)} · Blender {post.blender_version_string}
             </p>
-            {post.description ? <p className="mt-5 max-w-[60ch] leading-relaxed text-muted">{post.description}</p> : null}
+            {post.description ? <MarkdownNote className="note-markdown mt-5 max-w-[60ch]" source={post.description} /> : null}
             <div className="mt-6">
               <SharePost slug={post.slug} />
             </div>

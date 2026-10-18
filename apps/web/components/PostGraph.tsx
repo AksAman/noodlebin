@@ -1,6 +1,7 @@
 "use client"
 
 import { AuthorCredit } from "@/components/AuthorCredit"
+import { MarkdownNote } from "@/components/MarkdownNote"
 import { NodeView } from "@/node-view"
 import { serializeCopy, treeTypeLabel } from "@/lib/ingest"
 import type { Catalog } from "@/catalog"
@@ -80,7 +81,7 @@ export function PostGraph({
           </p>
         </div>
 
-        {post.description ? <p className="m-0 max-w-[60ch] text-[15px] leading-relaxed text-muted">{post.description}</p> : null}
+        {post.description ? <MarkdownNote className="note-markdown max-w-[60ch]" source={post.description} /> : null}
 
         <PostEmbeds youtubeUrl={post.youtube_url} tweetUrl={post.tweet_url} title={post.title} />
 

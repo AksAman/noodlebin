@@ -228,6 +228,64 @@ html[data-paste-restoring] [data-paste-copy] {
   }
 }
 
+/* The markdown library paints a GitHub canvas. Sit the published note in the page instead. */
+.note-markdown.wmde-markdown {
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.note-markdown.wmde-markdown > :first-child {
+  margin-top: 0;
+}
+
+.note-markdown.wmde-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.note-markdown.wmde-markdown :is(h1, h2, h3, h4) {
+  color: var(--fg);
+  font-family: var(--font-display), ui-sans-serif, sans-serif;
+  line-height: 1.2;
+}
+
+.note-markdown.wmde-markdown h1 {
+  border-bottom: 0;
+  padding-bottom: 0;
+  font-size: 1.35em;
+}
+
+.note-markdown.wmde-markdown :is(code, pre, tt, kbd) {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+/* Tailwind's reset removes markers. The markdown stylesheet only sets nested list types. */
+.note-markdown.wmde-markdown ul {
+  list-style: disc;
+}
+
+.note-markdown.wmde-markdown ol {
+  list-style: decimal;
+}
+
+.markdown-field .w-md-editor {
+  --md-editor-font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --md-editor-background-color: var(--surface);
+  --md-editor-box-shadow-color: var(--line-strong);
+  border: 1px solid var(--line-strong);
+  border-radius: 0.375rem;
+  background: var(--surface);
+  box-shadow: none;
+  color: var(--fg);
+  font-family: inherit;
+}
+
+.markdown-field .w-md-editor-toolbar {
+  border-radius: 0.375rem 0.375rem 0 0;
+}
+
 /* Loaders: the mark's link draws socket to socket; one 1.6s cycle drives every part. */
 /* --len is the path's geometric length; pathLength isn't applied to CSS dash values everywhere. */
 .noodle-link {
