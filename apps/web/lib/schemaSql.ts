@@ -36,6 +36,8 @@ export const schemaStatements = [
     "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT now()
   )`,
   `CREATE UNIQUE INDEX IF NOT EXISTS account_provider_unique ON account ("providerId", "accountId")`,
+  `CREATE INDEX IF NOT EXISTS session_user_id_idx ON session ("userId")`,
+  `CREATE INDEX IF NOT EXISTS account_user_id_idx ON account ("userId")`,
   `CREATE TABLE IF NOT EXISTS verification (
     id TEXT PRIMARY KEY,
     identifier TEXT NOT NULL,
@@ -44,6 +46,7 @@ export const schemaStatements = [
     "createdAt" TIMESTAMPTZ NOT NULL DEFAULT now(),
     "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT now()
   )`,
+  `CREATE INDEX IF NOT EXISTS verification_identifier_idx ON verification (identifier)`,
   `ALTER TABLE "user" ADD COLUMN IF NOT EXISTS handle TEXT`,
   `CREATE UNIQUE INDEX IF NOT EXISTS user_handle_unique ON "user" (handle)`,
   `CREATE TABLE IF NOT EXISTS posts (

@@ -33,6 +33,7 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId], map: "session_user_id_idx")
   @@map("session")
 }
 
@@ -53,6 +54,7 @@ model Account {
   updatedAt             DateTime  @updatedAt
 
   @@unique([providerId, accountId], map: "account_provider_unique")
+  @@index([userId], map: "account_user_id_idx")
   @@map("account")
 }
 
@@ -64,6 +66,7 @@ model Verification {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  @@index([identifier], map: "verification_identifier_idx")
   @@map("verification")
 }
 

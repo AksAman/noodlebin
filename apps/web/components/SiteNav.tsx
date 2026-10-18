@@ -1,6 +1,6 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
+import { useServerSession } from "@/components/SessionProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/ui";
 import Link from "next/link";
@@ -24,7 +24,7 @@ export function Mark() {
 
 export function SiteNav() {
   const pathname = usePathname();
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session } = useServerSession();
   const handle = session?.user.handle;
   const onGallery =
     pathname === "/" ||
@@ -66,12 +66,7 @@ export function SiteNav() {
         </Link>
         <div className="ml-3 hidden items-center md:flex">{renderLinks()}</div>
         <div className="ml-auto flex min-w-0 items-center gap-2">
-          {isPending ? (
-            <span
-              aria-hidden="true"
-              className="h-[34px] w-[68px] shrink-0 rounded-md bg-sunken"
-            />
-          ) : handle ? (
+          {handle ? (
             <Link
               className={cn(
                 "min-w-0 max-w-[6.5rem] truncate no-underline sm:max-w-[10rem] md:max-w-[14rem]",

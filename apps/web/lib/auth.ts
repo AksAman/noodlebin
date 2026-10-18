@@ -7,6 +7,8 @@ import { ensureSchema, getPrisma } from "@/lib/prisma";
 import { siteOrigin } from "@/lib/site";
 import { usesPostgres } from "@/lib/db";
 import { dash } from "@better-auth/infra";
+import { headers } from "next/headers";
+import { cache } from "react";
 
 let cached: any = null;
 let ready: Promise<void> | null = null;
@@ -34,6 +36,15 @@ export function getAuth() {
     baseURL: env.BETTER_AUTH_URL || siteOrigin(),
     trustedOrigins: [siteOrigin(), env.NEXT_PUBLIC_BASE_URL],
     database: prismaAdapter(getPrisma(), { provider: "postgresql" }),
+    session: {
+      // Signed cookie so the layout can read the session without a database round trip.
+      // A revoked session can linger until maxAge; publish bypasses this cache.
+      cookieCache: {
+        enabled: true,
+        maxAge: 5 * 60,
+      },
+      deferSessionRefresh: true,
+    },
     emailAndPassword: {
       enabled: true,
       autoSignIn: true,
@@ -103,7 +114,8 @@ export function getAuth() {
         },
       },
     },
-    plugins: [nextCookies(), dash()],
+    // nextCookies has to be last so it can see every Set-Cookie header.
+    plugins: [dash(), nextCookies()],
   });
   return cached;
 }
@@ -126,12 +138,28 @@ export async function ensureAuthReady(): Promise<void> {
 
 export type SessionAuthor = { id: string; name: string; handle: string };
 
+/**
+ * The request session, read on the server from the auth cookie.
+ * Null when auth is off (disk-mode tests) or nobody is signed in.
+ * Cached for the request so the layout and pages share one lookup.
+ */
+export const getRequestSession = cache(async () => {
+  if (!usesPostgres() || !authConfigured()) return null;
+  await ensureAuthReady();
+  const session = await getAuth().api.getSession({ headers: await headers() });
+  if (!session?.user) return null;
+  // Dates and undefined fields cannot cross into a client component as-is.
+  return JSON.parse(JSON.stringify(session));
+});
+
 /** The signed-in person, when Postgres auth is configured. Disk-mode tests stay anonymous. */
 export async function sessionAuthor(): Promise<SessionAuthor | null> {
   if (!usesPostgres() || !authConfigured()) return null;
   await ensureAuthReady();
-  const { headers } = await import("next/headers");
-  const session = await getAuth().api.getSession({ headers: await headers() });
+  const session = await getAuth().api.getSession({
+    headers: await headers(),
+    query: { disableCookieCache: true },
+  });
   const user = session?.user as
     | { id?: string; name?: string; handle?: string | null }
     | undefined;

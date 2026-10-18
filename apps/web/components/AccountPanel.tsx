@@ -1,6 +1,7 @@
 "use client"
 
 import { PageLoader } from "@/components/Loader"
+import { useServerSession } from "@/components/SessionProvider"
 import { SignInButtons } from "@/components/SignInButtons"
 import { authClient } from "@/lib/auth-client"
 import { btnGhost, docShell, page } from "@/lib/ui"
@@ -12,7 +13,7 @@ type Account = { providerId: string }
 
 export function AccountPanel() {
   const router = useRouter()
-  const { data: session, isPending } = authClient.useSession()
+  const { data: session, isPending } = useServerSession()
   const [accounts, setAccounts] = useState<Account[]>([])
 
   useEffect(() => {
@@ -27,10 +28,10 @@ export function AccountPanel() {
     })
   }, [session])
 
-  if (isPending || !session?.user) {
+  if (!session?.user) {
     return (
       <div className={docShell}>
-        <PageLoader className="min-h-[60vh]" label={isPending ? "Checking sign-in" : "Taking you to sign in"} />
+        <PageLoader className="min-h-[60vh]" label="Taking you to sign in" />
       </div>
     )
   }
