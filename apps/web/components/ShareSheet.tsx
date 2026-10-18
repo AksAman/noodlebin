@@ -1,6 +1,6 @@
 "use client";
 
-import { InlineLoader } from "@/components/Loader"
+import { InlineLoader } from "@/components/Loader";
 import { publishPost } from "@/lib/publishPost";
 import { serializeCopy, treeTypeLabel } from "@/lib/ingest";
 import type { NodeVaultPayload } from "@/interchange";
@@ -65,7 +65,13 @@ function linkIsValid(spec: LinkSpec, raw: string): boolean {
   return !raw.trim() || spec.parse(raw) !== null;
 }
 
-function LinkField({ spec, defaultValue = "" }: { spec: LinkSpec; defaultValue?: string }) {
+function LinkField({
+  spec,
+  defaultValue = "",
+}: {
+  spec: LinkSpec;
+  defaultValue?: string;
+}) {
   const [invalid, setInvalid] = useState(false);
   const hintId = `${spec.name}-hint`;
   return (
@@ -230,12 +236,20 @@ export function ShareSheet({
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [coverError, setCoverError] = useState<string | null>(null);
   const [shaderProblem, setShaderProblem] = useState<string | null>(null);
+  const [signInOpen, setSignInOpen] = useState(false);
+  const [signInPresent, setSignInPresent] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
   const coverRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const mod = useModKey();
   const { data: session } = useServerSession();
   const handle = session?.user.handle;
+
+  useEffect(() => {
+    if (signInOpen) return;
+    const id = window.setTimeout(() => setSignInPresent(false), 200);
+    return () => window.clearTimeout(id);
+  }, [signInOpen]);
 
   const showCover = useCallback((file: File | null) => {
     setCoverError(null);
@@ -331,255 +345,326 @@ export function ShareSheet({
       title="Share this graph"
       subtitle={
         <span className="inline-flex flex-wrap items-center gap-x-2 tabular-nums">
-          <span className={treeDotClass(payload.tree_type)} aria-hidden="true" />
-          {typeLabel} · Blender {payload.blender_version_string} · {count} node{count === 1 ? "" : "s"}
+          <span
+            className={treeDotClass(payload.tree_type)}
+            aria-hidden="true"
+          />
+          {typeLabel} · Blender {payload.blender_version_string} · {count} node
+          {count === 1 ? "" : "s"}
         </span>
       }
       onClose={() => onClose()}
       wide
     >
-    <form
-      ref={formRef}
-      className="flex min-h-0 flex-1 flex-col"
-      onKeyDown={(event) => {
-        if (event.key !== "Enter") return;
-        const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-        if (target.tagName === "TEXTAREA") return;
-        if (target instanceof HTMLButtonElement && target.type === "submit") return;
-        event.preventDefault();
-      }}
-      onSubmit={(event) => {
-        event.preventDefault();
-        const form = event.currentTarget;
-        const submitted = new FormData(form);
-        const pending = form.querySelector<HTMLInputElement>("[data-tag-draft]");
-        submitted.set("tags", addTag(tags, pending?.value ?? "").join(","));
-        const badLink = LINKS.find(
-          (l) => !linkIsValid(l, String(submitted.get(l.name) ?? "")),
-        );
-        if (badLink) {
-          setError(badLink.invalid);
-          form
-            .querySelector<HTMLInputElement>(`[name="${badLink.name}"]`)
-            ?.focus();
-          return;
-        }
-        if (shaderProblem) {
-          setError(`The cover shader has a problem: ${shaderProblem}`);
-          form
-            .querySelector<HTMLTextAreaElement>('[name="cover_shader"]')
-            ?.focus();
-          return;
-        }
-        const treeText = serializeCopy(payload);
-        const cover = submitted.get("cover");
-        setBusy(true);
-        setError(null);
-        void (async () => {
-          const body = submitted;
-          body.set("tree_text", treeText);
-          const chosen =
-            cover instanceof File && cover.size > 0
-              ? cover
-              : await captureNodeCanvas();
-          body.set(
-            "cover",
-            await fitCoverFile(
-              chosen,
-              coverByteBudget(new Blob([treeText]).size),
-            ),
+      <form
+        ref={formRef}
+        className="flex min-h-0 flex-1 flex-col"
+        onKeyDown={(event) => {
+          if (event.key !== "Enter") return;
+          const target = event.target;
+          if (!(target instanceof HTMLElement)) return;
+          if (target.tagName === "TEXTAREA") return;
+          if (target instanceof HTMLButtonElement && target.type === "submit")
+            return;
+          event.preventDefault();
+        }}
+        onSubmit={(event) => {
+          console.log("onSubmit");
+          event.preventDefault();
+          const form = event.currentTarget;
+          const submitted = new FormData(form);
+          const pending =
+            form.querySelector<HTMLInputElement>("[data-tag-draft]");
+          submitted.set("tags", addTag(tags, pending?.value ?? "").join(","));
+          const badLink = LINKS.find(
+            (l) => !linkIsValid(l, String(submitted.get(l.name) ?? "")),
           );
-          const createdPost = await publishPost(body);
-          if ("error" in createdPost) {
-            setError(createdPost.error);
+          if (badLink) {
+            setError(badLink.invalid);
+            form
+              .querySelector<HTMLInputElement>(`[name="${badLink.name}"]`)
+              ?.focus();
             return;
           }
-          setCreated({ url: createdPost.url });
-        })()
-          .catch((err: unknown) => {
-            const message = err instanceof Error ? err.message : "";
-            setError(
-              publishFailureMessage(0, message) ??
-                (message ||
-                  "Could not reach the server. Check your connection and try again."),
-            );
-          })
-          .finally(() => setBusy(false));
-      }}
-    >
-      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-auto px-5 py-5">
-      <label className={label}>
-        Cover image
-        <span
-          className={cn(
-            "relative block overflow-hidden rounded-lg border border-dashed border-line-strong bg-sunken text-center text-[13px] font-normal text-muted transition-colors duration-150 has-[:focus-visible]:border-accent hover:border-subtle",
-            coverPreview ? "aspect-video" : "px-4 py-8",
-          )}
-        >
-          {coverPreview ? (
-            <img
-              src={coverPreview}
-              alt=""
-              className="absolute inset-0 size-full object-cover"
-            />
-          ) : (
-            <>
-              <span className="block text-fg">
-                Choose a render or screenshot
-              </span>
-              <span className="mt-1 block text-subtle">
-                or paste one with <Kbd>{`${mod} V`}</Kbd>. Skip it to use the
-                graph.
-              </span>
-            </>
-          )}
-          <input
-            ref={coverRef}
-            className="absolute inset-0 cursor-pointer opacity-0"
-            name="cover"
-            type="file"
-            accept={COVER_TYPES.join(",")}
-            aria-describedby="cover-name"
-            onChange={(event) => showCover(event.target.files?.[0] ?? null)}
-          />
-        </span>
-        <span
-          id="cover-name"
-          role={coverError ? "alert" : undefined}
-          className={cn(
-            "text-[12px] font-normal",
-            coverError ? "text-danger-fg" : "text-subtle",
-          )}
-        >
-          {coverError ??
-            (coverName
-              ? `${coverName} · paste another image to replace it`
-              : "Optional. Leave this empty and the node graph on screen is saved as the cover.")}
-        </span>
-      </label>
-
-      <ShaderField
-        poster={coverPreview}
-        onProblem={setShaderProblem}
-        initial={restored?.cover_shader ?? ""}
-      />
-
-      <label className={label}>
-        Title
-        <input
-          ref={titleRef}
-          className={field}
-          name="title"
-          required
-          maxLength={120}
-          defaultValue={restored?.title || defaultTitle}
-        />
-      </label>
-      {handle ? (
-        <p className="m-0 text-[13px] text-muted">
-          Posting as <span className="text-fg">@{handle}</span>
-        </p>
-      ) : (
-        <div className="flex flex-col gap-3 rounded-lg border border-line bg-bg p-3">
-          <p className="m-0 text-[13px] leading-relaxed text-muted">
-            This post stays anonymous. Sign in if you want it under your handle.
-          </p>
-          <SignInButtons
-            callbackURL="/paste"
-            onBefore={() => {
-              const form = formRef.current;
-              const value = (name: string) => {
-                const el = form?.elements.namedItem(name);
-                return el instanceof HTMLInputElement ||
-                  el instanceof HTMLTextAreaElement ||
-                  el instanceof HTMLSelectElement
-                  ? el.value
-                  : "";
-              };
-              const draft: ShareDraft = {
-                treeText: serializeCopy(payload),
-                title: value("title"),
-                author: "",
-                description: value("description"),
-                youtube_url: value("youtube_url"),
-                tweet_url: value("tweet_url"),
-                cover_shader: value("cover_shader"),
-                visibility,
-                tags: tags.join(","),
-              };
-              sessionStorage.setItem(SHARE_DRAFT_KEY, JSON.stringify(draft));
-            }}
-          />
-        </div>
-      )}
-      <div className={label}>
-        <label htmlFor="post-description">
-          Note <span className="font-normal text-subtle">(optional, markdown)</span>
-        </label>
-        <MarkdownField
-          id="post-description"
-          name="description"
-          defaultValue={restored?.description ?? ""}
-          placeholder="What should someone know before they paste this?"
-        />
-      </div>
-      <div className={label}>
-        <span>
-          Tags <span className="font-normal text-subtle">(optional)</span>
-        </span>
-        <input type="hidden" name="tags" value={tags.join(",")} />
-        <TagPills tags={tags} onChange={setTags} />
-        <span className="text-[12px] font-normal text-subtle">Press Enter to add a tag.</span>
-      </div>
-      <label className={label}>
-        Visibility
-        <select
-          className={field}
-          name="visibility"
-          value={visibility}
-          onChange={(event) =>
-            setVisibility(event.target.value === "unlisted" ? "unlisted" : "public")
+          if (shaderProblem) {
+            setError(`The cover shader has a problem: ${shaderProblem}`);
+            form
+              .querySelector<HTMLTextAreaElement>('[name="cover_shader"]')
+              ?.focus();
+            return;
           }
-        >
-          <option value="public">Public — listed in the gallery</option>
-          <option value="unlisted">Unlisted — only people with the link</option>
-        </select>
-      </label>
+          const treeText = serializeCopy(payload);
+          const cover = submitted.get("cover");
+          setBusy(true);
+          setError(null);
+          void (async () => {
+            const body = submitted;
+            body.set("tree_text", treeText);
+            const chosen =
+              cover instanceof File && cover.size > 0
+                ? cover
+                : await captureNodeCanvas();
+            body.set(
+              "cover",
+              await fitCoverFile(
+                chosen,
+                coverByteBudget(new Blob([treeText]).size),
+              ),
+            );
+            const payloadBytes = (await new Response(body).blob()).size;
+            console.log(payloadBytes / 1024 / 1024);
+            console.log(
+              [...body.entries()].map(([name, value]) => ({
+                name,
+                mb:
+                  (value instanceof Blob
+                    ? value.size
+                    : new Blob([String(value)]).size) /
+                  1024 /
+                  1024,
+                ...(value instanceof File
+                  ? { file: value.name, type: value.type }
+                  : { chars: String(value).length }),
+              })),
+            );
+            const createdPost = await publishPost(body);
+            if ("error" in createdPost) {
+              setError(createdPost.error);
+              return;
+            }
+            setCreated({ url: createdPost.url });
+          })()
+            .catch((err: unknown) => {
+              const message = err instanceof Error ? err.message : "";
+              setError(
+                publishFailureMessage(0, message) ??
+                  (message ||
+                    "Could not reach the server. Check your connection and try again."),
+              );
+            })
+            .finally(() => setBusy(false));
+        }}
+      >
+        <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-auto px-5 py-5">
+          <label className={label}>
+            Cover image
+            <span
+              className={cn(
+                "relative block overflow-hidden rounded-lg border border-dashed border-line-strong bg-sunken text-center text-[13px] font-normal text-muted transition-colors duration-150 has-[:focus-visible]:border-accent hover:border-subtle",
+                coverPreview ? "aspect-video" : "px-4 py-8",
+              )}
+            >
+              {coverPreview ? (
+                <img
+                  src={coverPreview}
+                  alt=""
+                  className="absolute inset-0 size-full object-cover"
+                />
+              ) : (
+                <>
+                  <span className="block text-fg">
+                    Choose a render or screenshot
+                  </span>
+                  <span className="mt-1 block text-subtle">
+                    or paste one with <Kbd>{`${mod} V`}</Kbd>. Skip it to use
+                    the graph.
+                  </span>
+                </>
+              )}
+              <input
+                ref={coverRef}
+                className="absolute inset-0 cursor-pointer opacity-0"
+                name="cover"
+                type="file"
+                accept={COVER_TYPES.join(",")}
+                aria-describedby="cover-name"
+                onChange={(event) => showCover(event.target.files?.[0] ?? null)}
+              />
+            </span>
+            <span
+              id="cover-name"
+              role={coverError ? "alert" : undefined}
+              className={cn(
+                "text-[12px] font-normal",
+                coverError ? "text-danger-fg" : "text-subtle",
+              )}
+            >
+              {coverError ??
+                (coverName
+                  ? `${coverName} · paste another image to replace it`
+                  : "Optional. Leave this empty and the node graph on screen is saved as the cover.")}
+            </span>
+          </label>
 
-      <fieldset className="m-0 flex flex-col gap-4 border-0 border-t border-line p-0 pt-5">
-        <legend className="float-left mb-1 w-full p-0 text-[13px] font-medium text-fg">
-          Links <span className="font-normal text-subtle">(optional)</span>
-          <span className="mt-1 block text-[12px] font-normal text-subtle">
-            A breakdown video or the post where you showed it off. Either, both,
-            or neither.
-          </span>
-        </legend>
-        {LINKS.map((spec) => (
-          <LinkField
-            key={spec.name}
-            spec={spec}
-            defaultValue={restored?.[spec.name] ?? ""}
+          <ShaderField
+            poster={coverPreview}
+            onProblem={setShaderProblem}
+            initial={restored?.cover_shader ?? ""}
           />
-        ))}
-      </fieldset>
 
-      {error ? (
-        <p role="alert" className={cn(errorBox, "m-0")}>
-          {error}
-        </p>
-      ) : null}
-      </div>
+          <label className={label}>
+            Title
+            <input
+              ref={titleRef}
+              className={field}
+              name="title"
+              required
+              maxLength={120}
+              defaultValue={restored?.title || defaultTitle}
+            />
+          </label>
+          {handle ? (
+            <p className="m-0 text-[13px] text-muted">
+              Posting as <span className="text-fg">@{handle}</span>
+            </p>
+          ) : (
+            <div className="rounded-lg border border-line bg-bg p-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="m-0 text-[13px] leading-relaxed text-muted">
+                  This post stays anonymous. Sign in if you want it under your
+                  handle.
+                </p>
+                <button
+                  type="button"
+                  className={cn(btn, "shrink-0")}
+                  aria-expanded={signInOpen}
+                  aria-controls="share-sign-in"
+                  onClick={() => {
+                    setSignInOpen((open) => !open);
+                    setSignInPresent(true);
+                  }}
+                >
+                  Sign in
+                </button>
+              </div>
+              <div
+                id="share-sign-in"
+                className={cn(
+                  "grid transition-[grid-template-rows] duration-200 ease-out-quart motion-reduce:transition-none",
+                  signInOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+                )}
+              >
+                <div
+                  className="min-h-0 overflow-hidden"
+                  inert={signInOpen ? undefined : true}
+                >
+                  {signInPresent ? (
+                    <div className="pt-3">
+                      <SignInButtons
+                        callbackURL="/paste"
+                        onBefore={() => {
+                          const form = formRef.current;
+                          const value = (name: string) => {
+                            const el = form?.elements.namedItem(name);
+                            return el instanceof HTMLInputElement ||
+                              el instanceof HTMLTextAreaElement ||
+                              el instanceof HTMLSelectElement
+                              ? el.value
+                              : "";
+                          };
+                          const draft: ShareDraft = {
+                            treeText: serializeCopy(payload),
+                            title: value("title"),
+                            author: "",
+                            description: value("description"),
+                            youtube_url: value("youtube_url"),
+                            tweet_url: value("tweet_url"),
+                            cover_shader: value("cover_shader"),
+                            visibility,
+                            tags: tags.join(","),
+                          };
+                          sessionStorage.setItem(
+                            SHARE_DRAFT_KEY,
+                            JSON.stringify(draft),
+                          );
+                        }}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          )}
+          <div className={label}>
+            <label htmlFor="post-description">
+              Note{" "}
+              <span className="font-normal text-subtle">
+                (optional, markdown)
+              </span>
+            </label>
+            <MarkdownField
+              id="post-description"
+              name="description"
+              defaultValue={restored?.description ?? ""}
+              placeholder="What should someone know before they paste this?"
+            />
+          </div>
+          <div className={label}>
+            <span>
+              Tags <span className="font-normal text-subtle">(optional)</span>
+            </span>
+            <input type="hidden" name="tags" value={tags.join(",")} />
+            <TagPills tags={tags} onChange={setTags} />
+            <span className="text-[12px] font-normal text-subtle">
+              Press Enter to add a tag.
+            </span>
+          </div>
+          <label className={label}>
+            Visibility
+            <select
+              className={field}
+              name="visibility"
+              value={visibility}
+              onChange={(event) =>
+                setVisibility(
+                  event.target.value === "unlisted" ? "unlisted" : "public",
+                )
+              }
+            >
+              <option value="public">Public — listed in the gallery</option>
+              <option value="unlisted">
+                Unlisted — only people with the link
+              </option>
+            </select>
+          </label>
 
-      <div className="flex justify-end gap-2 border-t border-line px-5 py-4">
-        <button type="button" className={btn} onClick={() => onClose()}>
-          Not now
-        </button>
-        <button type="submit" className={cn(btnAccent, "px-5")} disabled={busy}>
-          {busy ? <InlineLoader mono label="Publishing" /> : "Publish"}
-        </button>
-      </div>
-    </form>
+          <fieldset className="m-0 flex flex-col gap-4 border-0 border-t border-line p-0 pt-5">
+            <legend className="float-left mb-1 w-full p-0 text-[13px] font-medium text-fg">
+              Links <span className="font-normal text-subtle">(optional)</span>
+              <span className="mt-1 block text-[12px] font-normal text-subtle">
+                A breakdown video or the post where you showed it off. Either,
+                both, or neither.
+              </span>
+            </legend>
+            {LINKS.map((spec) => (
+              <LinkField
+                key={spec.name}
+                spec={spec}
+                defaultValue={restored?.[spec.name] ?? ""}
+              />
+            ))}
+          </fieldset>
+
+          {error ? (
+            <p role="alert" className={cn(errorBox, "m-0")}>
+              {error}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="flex justify-end gap-2 border-t border-line px-5 py-4">
+          <button type="button" className={btn} onClick={() => onClose()}>
+            Not now
+          </button>
+          <button
+            type="submit"
+            className={cn(btnAccent, "px-5")}
+            disabled={busy}
+          >
+            {busy ? <InlineLoader mono label="Publishing" /> : "Publish"}
+          </button>
+        </div>
+      </form>
     </Dialog>
   );
 }
