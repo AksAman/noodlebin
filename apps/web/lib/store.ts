@@ -150,7 +150,7 @@ async function loadPublicPosts(dir: string): Promise<VaultPost[]> {
 
 const cachedPublicPosts = unstable_cache(loadPublicPosts, ["public-posts"], {
   tags: [POSTS_TAG],
-  revalidate: false,
+  revalidate: env.NODEVAULT_POSTS_CACHE_TTL_SECONDS,
 });
 
 export async function allPublicPosts(dir = dataDir()): Promise<VaultPost[]> {

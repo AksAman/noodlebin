@@ -1,7 +1,7 @@
 import { invalidatePostLists } from "@/lib/store";
-import { notFound } from "next/navigation";
+import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   invalidatePostLists();
-  return notFound();
+  return NextResponse.json(null);
 }
