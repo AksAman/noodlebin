@@ -121,26 +121,34 @@ function TweetEmbed({ tweet }: { tweet: TweetLink }) {
   )
 }
 
-function InstagramEmbed({ link }: { link: InstagramLink }) {
-  const path = link.kind === "reel" ? "reel" : "p"
+function InstagramGlyph({ className }: { className?: string }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-line bg-surface">
-      <iframe
-        className="block w-full border-0"
-        src={`https://www.instagram.com/${path}/${link.code}/embed`}
-        title={link.kind === "reel" ? "Instagram reel" : "Instagram post"}
-        height={link.kind === "reel" ? 620 : 540}
-        loading="lazy"
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path
+        fill="currentColor"
+        d="M8 3h8a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8a5 5 0 0 1 5-5Zm8 1.8H8A3.2 3.2 0 0 0 4.8 8v8A3.2 3.2 0 0 0 8 19.2h8a3.2 3.2 0 0 0 3.2-3.2V8A3.2 3.2 0 0 0 16 4.8ZM12 8.2A3.8 3.8 0 1 1 8.2 12 3.8 3.8 0 0 1 12 8.2Zm0 1.6A2.2 2.2 0 1 0 14.2 12 2.2 2.2 0 0 0 12 9.8ZM17.15 6.7a1.05 1.05 0 1 1-1.05 1.05 1.05 1.05 0 0 1 1.05-1.05Z"
       />
-      <a
-        href={link.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block border-t border-line px-4 py-2.5 text-[13px] text-muted no-underline hover:text-fg"
-      >
-        Open on Instagram
-      </a>
-    </div>
+    </svg>
+  )
+}
+
+function InstagramEmbed({ link }: { link: InstagramLink }) {
+  return (
+    <a
+      href={link.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-3 rounded-lg border border-line bg-surface px-4 py-3.5 text-fg no-underline transition-colors duration-150 hover:border-line-strong"
+    >
+      <InstagramGlyph className="size-5 shrink-0" />
+      <span className="min-w-0 flex-1">
+        <span className="block text-[14px] font-medium">{link.kind === "reel" ? "Reel on Instagram" : "Post on Instagram"}</span>
+        <span className="block text-[12px] text-muted">Open on instagram.com</span>
+      </span>
+      <span aria-hidden="true" className="text-subtle">
+        ↗
+      </span>
+    </a>
   )
 }
 

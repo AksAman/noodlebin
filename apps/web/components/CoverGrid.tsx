@@ -23,7 +23,7 @@ export function CoverGrid({ posts, showAuthor = true }: { posts: VaultPost[]; sh
             <div className="relative overflow-hidden rounded-lg bg-canvas ring-1 ring-line">
               <div className="transition-transform duration-500 ease-out-quart group-hover:scale-[1.025]">
                 {post.cover_video && post.cover_url ? (
-                  <CoverMedia url={post.cover_url} video autoPlay className="block aspect-video w-full object-cover" />
+                  <CoverMedia url={post.cover_url} video className="block aspect-video w-full object-cover" />
                 ) : post.cover_shader ? (
                   <ShaderCover source={post.cover_shader} poster={post.cover_url} className={post.cover_url ? undefined : "aspect-[4/3]"} />
                 ) : post.cover_url ? (

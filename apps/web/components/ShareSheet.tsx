@@ -16,6 +16,7 @@ import { captureNodeCanvas } from "@/lib/captureCanvas";
 import { parseSocialPost, parseYouTube } from "@/lib/embeds";
 import { coverByteBudget, publishFailureMessage } from "@/lib/publishBody";
 import { checkShaderSource } from "@/lib/shaderCover";
+import { clearPasteSession } from "@/lib/pasteSession";
 import { clearShareDraft, writeShareDraft, type ShareDraft } from "@/lib/shareDraft";
 import { putBlob } from "@/lib/putBlob";
 import { addTag, tagToken } from "@/lib/tags";
@@ -513,6 +514,7 @@ export function ShareSheet({
               return;
             }
             publishedRef.current = true;
+            clearPasteSession(sessionStorage);
             capture("graph_published", {
               tree_type: payload.tree_type,
               node_count: payload.origin.node_count,

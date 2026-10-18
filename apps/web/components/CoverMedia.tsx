@@ -1,27 +1,24 @@
 import { cn } from "@/lib/ui"
 
-/** Still covers stay images. An MP4 cover plays in place, muted, so a gallery card can show motion. */
+/** Still covers stay images. An MP4 cover plays muted, with no player chrome. */
 export function CoverMedia({
   url,
   video = false,
   className,
-  autoPlay = false,
 }: {
   url: string
   video?: boolean
   className?: string
-  autoPlay?: boolean
 }) {
   if (video) {
     return (
       <video
-        className={cn("bg-sunken", className)}
+        className={cn("pointer-events-none bg-sunken", className)}
         src={url}
         muted
         playsInline
-        loop={autoPlay}
-        autoPlay={autoPlay}
-        controls={!autoPlay}
+        loop
+        autoPlay
         preload="metadata"
       />
     )

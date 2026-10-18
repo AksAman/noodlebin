@@ -252,6 +252,7 @@ export function PastePage() {
                 setShareOpen(false)
                 if (url) {
                   clearShareDraft(sessionStorage)
+                  clearPasteSession(sessionStorage)
                   setRestored(null)
                   setPublishedUrl(url)
                 }
