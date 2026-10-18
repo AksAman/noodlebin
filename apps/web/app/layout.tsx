@@ -1,5 +1,7 @@
+import { SessionProvider } from "@/components/SessionProvider"
 import { SiteFooter } from "@/components/SiteFooter"
 import { SiteNav } from "@/components/SiteNav"
+import { getRequestSession } from "@/lib/auth"
 import { siteOrigin } from "@/lib/site"
 import { pasteBootScript } from "@/lib/pasteSession"
 import { themeBootScript } from "@/lib/theme"
@@ -21,7 +23,9 @@ export const metadata = {
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const embed = (await headers()).get("x-nodevault-embed") === "1"
+  const headerList = await headers()
+  const embed = headerList.get("x-nodevault-embed") === "1"
+  const session = embed ? null : await getRequestSession()
   return (
     <html lang="en" className={`h-full ${display.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
@@ -29,9 +33,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: pasteBootScript }} />
       </head>
       <body className="m-0 flex h-full flex-col bg-bg font-sans text-[15px] text-fg">
-        {embed ? null : <SiteNav />}
-        {children}
-        {embed ? null : <SiteFooter />}
+        <SessionProvider session={session}>
+          {embed ? null : <SiteNav />}
+          {children}
+          {embed ? null : <SiteFooter />}
+        </SessionProvider>
       </body>
     </html>
   )

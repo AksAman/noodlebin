@@ -1,35 +1,7 @@
-"use client";
-
-import { PageLoader } from "@/components/Loader";
 import { SignInButtons } from "@/components/SignInButtons";
-import { authClient } from "@/lib/auth-client";
 import { cn, docShell } from "@/lib/ui";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 export function SignInPanel() {
-  const router = useRouter();
-  const { data: session, isPending } = authClient.useSession();
-
-  useEffect(() => {
-    if (session?.user) router.replace("/account");
-  }, [router, session]);
-
-  if (isPending || session?.user) {
-    return (
-      <div
-        className={cn(
-          docShell,
-          "min-h-[calc(100dvh-35rem)] md:min-h-[calc(100dvh-10rem)] w-full",
-        )}
-      >
-        <PageLoader
-          label={session?.user ? "Signed in. Taking you to your account" : "Checking sign-in"}
-        />
-      </div>
-    );
-  }
-
   return (
     <div
       className={cn(

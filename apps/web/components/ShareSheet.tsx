@@ -9,7 +9,7 @@ import { SignInButtons } from "@/components/SignInButtons";
 import { TagPills } from "@/components/TagPills";
 import { Kbd, useModKey } from "@/components/Keys";
 import { ShaderCover } from "@/components/ShaderCover";
-import { authClient } from "@/lib/auth-client";
+import { useServerSession } from "@/components/SessionProvider";
 import { captureNodeCanvas } from "@/lib/captureCanvas";
 import { parseTweet, parseYouTube } from "@/lib/embeds";
 import { coverByteBudget, publishFailureMessage } from "@/lib/publishBody";
@@ -233,7 +233,7 @@ export function ShareSheet({
   const coverRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const mod = useModKey();
-  const { data: session } = authClient.useSession();
+  const { data: session } = useServerSession();
   const handle = session?.user.handle;
 
   const showCover = useCallback((file: File | null) => {

@@ -13,6 +13,8 @@ export const authClient = createAuthClient({
   ],
 })
 
+export type AuthSession = typeof authClient.$Infer.Session
+
 export type SocialProvider = "google" | "twitter" | "discord"
 
 export const SOCIALS: { id: SocialProvider; label: string }[] = [
