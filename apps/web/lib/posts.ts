@@ -19,6 +19,8 @@ export type VaultPost = {
   tree_type: TreeType;
   blender_version_string: string;
   cover_url: string | null;
+  /** True when the cover file is an MP4 rather than a still image. */
+  cover_video?: boolean;
   /** Shadertoy-style GLSL (a mainImage function) drawn live over the cover image. */
   cover_shader: string | null;
   video_url: string | null;

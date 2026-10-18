@@ -8,6 +8,11 @@ function startsWith(bytes: Uint8Array, sig: number[], offset = 0): boolean {
   return sig.every((b, i) => bytes[offset + i] === b)
 }
 
+export function sniffMp4(bytes: Uint8Array): boolean {
+  if (bytes.length < 12) return false
+  return bytes[4] === 0x66 && bytes[5] === 0x74 && bytes[6] === 0x79 && bytes[7] === 0x70
+}
+
 export function sniffCover(bytes: Uint8Array): { type: string; ext: string } | null {
   if (startsWith(bytes, PNG)) return { type: "image/png", ext: "png" }
   if (startsWith(bytes, JPEG)) return { type: "image/jpeg", ext: "jpg" }
@@ -22,12 +27,14 @@ export function sniffCover(bytes: Uint8Array): { type: string; ext: string } | n
   ) {
     return { type: "image/webp", ext: "webp" }
   }
+  if (sniffMp4(bytes)) return { type: "video/mp4", ext: "mp4" }
   return null
 }
 
-export function sniffMp4(bytes: Uint8Array): boolean {
-  if (bytes.length < 12) return false
-  return bytes[4] === 0x66 && bytes[5] === 0x74 && bytes[6] === 0x79 && bytes[7] === 0x70
+export function isMp4Name(value: string | null | undefined): boolean {
+  if (!value) return false
+  const path = value.split(/[?#]/)[0] ?? ""
+  return path.toLowerCase().endsWith(".mp4")
 }
 
 export function sniffBlend(bytes: Uint8Array): boolean {

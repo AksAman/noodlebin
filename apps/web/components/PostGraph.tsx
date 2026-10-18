@@ -1,6 +1,7 @@
 "use client"
 
 import { AuthorCredit } from "@/components/AuthorCredit"
+import { CoverMedia } from "@/components/CoverMedia"
 import { MarkdownNote } from "@/components/MarkdownNote"
 import { NodeView } from "@/node-view"
 import { capture } from "@/lib/analytics"
@@ -61,8 +62,14 @@ export function PostGraph({
           <video
             className="block w-full rounded-lg bg-sunken ring-1 ring-line"
             controls
-            poster={post.cover_url ?? undefined}
+            poster={post.cover_video ? undefined : (post.cover_url ?? undefined)}
             src={post.video_url}
+          />
+        ) : post.cover_video && post.cover_url ? (
+          <CoverMedia
+            url={post.cover_url}
+            video
+            className="block max-h-56 w-full rounded-lg object-cover ring-1 ring-line md:max-h-72"
           />
         ) : post.cover_shader ? (
           <ShaderCover
@@ -71,7 +78,7 @@ export function PostGraph({
             className={cn("rounded-lg ring-1 ring-line", post.cover_url ? "max-h-56 md:max-h-72" : "aspect-[4/3]")}
           />
         ) : post.cover_url ? (
-          <img className="block max-h-56 w-full rounded-lg object-cover ring-1 ring-line md:max-h-72" src={post.cover_url} alt="" />
+          <CoverMedia url={post.cover_url} className="block max-h-56 w-full rounded-lg object-cover ring-1 ring-line md:max-h-72" />
         ) : null}
 
         <div>

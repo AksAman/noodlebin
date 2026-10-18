@@ -17,6 +17,7 @@ describe("blob upload tokens", () => {
 
   test("names stay inside the kind prefix", () => {
     expect(isBlobName("cover", cover)).toBe(true)
+    expect(isBlobName("cover", cover.replace(/\.png$/, ".mp4"))).toBe(true)
     expect(isBlobName("cover", video)).toBe(false)
     expect(isBlobName("video", video)).toBe(true)
     expect(isBlobName("blend", blend)).toBe(true)

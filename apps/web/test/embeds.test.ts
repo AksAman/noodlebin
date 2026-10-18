@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { parseTweet, parseYouTube, youTubeEmbedSrc } from "@/lib/embeds"
+import { parseInstagram, parseSocialPost, parseTweet, parseYouTube, youTubeEmbedSrc } from "@/lib/embeds"
 
 describe("parseYouTube", () => {
   test.each([
@@ -50,4 +50,31 @@ describe("parseTweet", () => {
       expect(parseTweet(raw)).toBeNull()
     },
   )
+})
+
+describe("parseInstagram", () => {
+  test("normalizes a post and a reel", () => {
+    expect(parseInstagram("https://www.instagram.com/p/Abcdefghij1/?img_index=1")).toEqual({
+      kind: "post",
+      code: "Abcdefghij1",
+      url: "https://www.instagram.com/p/Abcdefghij1/",
+    })
+    expect(parseInstagram("instagram.com/reel/Abcdefghij1")).toEqual({
+      kind: "reel",
+      code: "Abcdefghij1",
+      url: "https://www.instagram.com/reel/Abcdefghij1/",
+    })
+    expect(parseSocialPost("https://www.instagram.com/reels/Abcdefghij1/")?.url).toBe(
+      "https://www.instagram.com/reel/Abcdefghij1/",
+    )
+  })
+
+  test.each([
+    "https://www.instagram.com/blender",
+    "https://www.instagram.com/p/",
+    "https://www.instagram.com/stories/blender/123",
+    "https://x.com/blender/status/1790000000000000000",
+  ])("rejects %s", (raw) => {
+    expect(parseInstagram(raw)).toBeNull()
+  })
 })

@@ -13,7 +13,7 @@ import { Kbd, useModKey } from "@/components/Keys";
 import { ShaderCover } from "@/components/ShaderCover";
 import { useServerSession } from "@/components/SessionProvider";
 import { captureNodeCanvas } from "@/lib/captureCanvas";
-import { parseTweet, parseYouTube } from "@/lib/embeds";
+import { parseSocialPost, parseYouTube } from "@/lib/embeds";
 import { coverByteBudget, publishFailureMessage } from "@/lib/publishBody";
 import { checkShaderSource } from "@/lib/shaderCover";
 import { clearShareDraft, writeShareDraft, type ShareDraft } from "@/lib/shareDraft";
@@ -31,11 +31,17 @@ import {
 } from "@/lib/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const COVER_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const COVER_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4"];
+const COVER_VIDEO_MAX = 10 * 1024 * 1024;
 
 function pastedName(type: string): string {
+  if (type === "video/mp4") return "pasted-video.mp4";
   const ext = type === "image/jpeg" ? "jpg" : type.slice("image/".length);
   return `pasted-image.${ext}`;
+}
+
+function isVideoCover(file: File): boolean {
+  return file.type === "video/mp4" || file.name.toLowerCase().endsWith(".mp4");
 }
 
 type LinkSpec = {
@@ -56,10 +62,10 @@ const LINKS: LinkSpec[] = [
   },
   {
     name: "tweet_url",
-    label: "X post",
-    placeholder: "x.com/you/status/…",
-    invalid: "That isn’t a link to a single post on x.com or twitter.com.",
-    parse: parseTweet,
+    label: "X / Instagram",
+    placeholder: "x.com/you/status/… or instagram.com/p/…",
+    invalid: "That isn’t a link to a single post on X or Instagram.",
+    parse: parseSocialPost,
   },
 ];
 
@@ -235,6 +241,7 @@ export function ShareSheet({
     (restored?.tags ?? "").split(",").map(tagToken).filter(Boolean),
   );
   const [coverName, setCoverName] = useState<string | null>(null);
+  const [coverVideo, setCoverVideo] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [coverError, setCoverError] = useState<string | null>(null);
   const [shaderProblem, setShaderProblem] = useState<string | null>(null);
@@ -263,6 +270,7 @@ export function ShareSheet({
     coverFileRef.current = chosen;
     setCoverError(null);
     setCoverName(chosen?.name ?? null);
+    setCoverVideo(chosen ? isVideoCover(chosen) : false);
     setCoverPreview(chosen ? URL.createObjectURL(chosen) : null);
     if (!chosen) {
       setCoverDataUrl("");
@@ -281,22 +289,20 @@ export function ShareSheet({
     const onPaste = (event: ClipboardEvent) => {
       const data = event.clipboardData;
       if (!data || created) return;
-      const image = [...data.files].find((f) => f.type.startsWith("image/"));
+      const image = [...data.files].find((f) => COVER_TYPES.includes(f.type));
       if (!image) return;
       if (isTextField(event.target) && data.getData("text/plain").trim())
         return;
       event.preventDefault();
       event.stopPropagation();
       const input = coverRef.current;
-      if (!COVER_TYPES.includes(image.type) || !input) {
-        setCoverError(
-          "That image type can’t be used. Paste a JPEG, PNG, WebP, or GIF.",
-        );
+      if (!input) {
+        setCoverError("That file can’t be used. Paste a JPEG, PNG, WebP, GIF, or MP4.");
         return;
       }
       const named = new File(
         [image],
-        image.name && image.name !== "image.png"
+        image.name && image.name !== "image.png" && image.name !== "image.mp4"
           ? image.name
           : pastedName(image.type),
         {
@@ -485,10 +491,15 @@ export function ShareSheet({
               throw new Error("That cover didn’t stay attached. Choose the image again, then publish.");
             }
             const chosen = selected ?? (await captureNodeCanvas());
-            const fitted = await fitCoverFile(
-              chosen,
-              coverByteBudget(new Blob([treeText]).size),
-            );
+            let fitted = chosen;
+            if (isVideoCover(chosen)) {
+              if (chosen.size > COVER_VIDEO_MAX) throw new Error("Cover video is larger than 10 MB.");
+              if (chosen.type !== "video/mp4") {
+                fitted = new File([chosen], chosen.name || "cover.mp4", { type: "video/mp4" });
+              }
+            } else {
+              fitted = await fitCoverFile(chosen, coverByteBudget(new Blob([treeText]).size));
+            }
             const coverToken = await putBlob("cover", fitted);
             if (coverToken) {
               body.delete("cover");
@@ -524,14 +535,23 @@ export function ShareSheet({
       >
         <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-auto px-5 py-5">
           <label className={label}>
-            Cover image
+            Cover
             <span
               className={cn(
                 "relative block overflow-hidden rounded-lg border border-dashed border-line-strong bg-sunken text-center text-[13px] font-normal text-muted transition-colors duration-150 has-[:focus-visible]:border-accent hover:border-subtle",
                 coverPreview ? "aspect-video" : "px-4 py-8",
               )}
             >
-              {coverPreview ? (
+              {coverPreview && coverVideo ? (
+                <video
+                  src={coverPreview}
+                  className="absolute inset-0 size-full object-cover"
+                  muted
+                  playsInline
+                  autoPlay
+                  loop
+                />
+              ) : coverPreview ? (
                 <img
                   src={coverPreview}
                   alt=""
@@ -540,11 +560,11 @@ export function ShareSheet({
               ) : (
                 <>
                   <span className="block text-fg">
-                    Choose a render or screenshot
+                    Choose a render, screenshot, or MP4
                   </span>
                   <span className="mt-1 block text-subtle">
-                    or paste one with <Kbd>{`${mod} V`}</Kbd>. Skip it to use
-                    the graph.
+                    or paste one with <Kbd>{`${mod} V`}</Kbd>. An MP4 can be up
+                    to 10 MB.
                   </span>
                 </>
               )}
@@ -571,13 +591,13 @@ export function ShareSheet({
             >
               {coverError ??
                 (coverName
-                  ? `${coverName} · paste another image to replace it`
+                  ? `${coverName} · paste another file to replace it`
                   : "Optional. Leave this empty and the node graph on screen is saved as the cover.")}
             </span>
           </label>
 
           <ShaderField
-            poster={coverPreview}
+            poster={coverVideo ? null : coverPreview}
             onProblem={setShaderProblem}
             initial={restored?.cover_shader ?? ""}
           />

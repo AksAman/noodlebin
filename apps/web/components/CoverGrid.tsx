@@ -1,3 +1,4 @@
+import { CoverMedia } from "@/components/CoverMedia"
 import { GraphThumb } from "@/components/GraphThumb"
 import { ShaderCover } from "@/components/ShaderCover"
 import { treeTypeLabel } from "@/lib/ingest"
@@ -21,10 +22,12 @@ export function CoverGrid({ posts, showAuthor = true }: { posts: VaultPost[]; sh
           <Link className="group block rounded-lg text-inherit no-underline" href={`/p/${post.slug}`}>
             <div className="relative overflow-hidden rounded-lg bg-canvas ring-1 ring-line">
               <div className="transition-transform duration-500 ease-out-quart group-hover:scale-[1.025]">
-                {post.cover_shader ? (
+                {post.cover_video && post.cover_url ? (
+                  <CoverMedia url={post.cover_url} video autoPlay className="block aspect-video w-full object-cover" />
+                ) : post.cover_shader ? (
                   <ShaderCover source={post.cover_shader} poster={post.cover_url} className={post.cover_url ? undefined : "aspect-[4/3]"} />
                 ) : post.cover_url ? (
-                  <img className="block h-auto w-full" src={post.cover_url} alt="" loading="lazy" />
+                  <CoverMedia url={post.cover_url} className="block h-auto w-full" />
                 ) : post.tree ? (
                   <GraphThumb payload={post.tree} id={post.slug} />
                 ) : (

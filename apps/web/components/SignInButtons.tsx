@@ -9,6 +9,9 @@ import { useState, type ReactNode } from "react"
 const socialButton =
   "inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-line-strong bg-bg px-3 text-[13px] font-medium text-fg transition-colors duration-150 hover:border-fg disabled:cursor-default disabled:opacity-55"
 
+const linkRow =
+  "flex h-11 w-full cursor-pointer items-center justify-between gap-3 rounded-md border border-line-strong bg-bg px-3.5 text-[14px] text-fg transition-colors duration-150 hover:border-fg disabled:cursor-default"
+
 export function SignInButtons({
   callbackURL,
   onBefore,
@@ -78,12 +81,19 @@ export function SignInButtons({
           <button
             key={social.id}
             type="button"
-            className={socialButton}
+            className={mode === "link" ? linkRow : socialButton}
             disabled={pending !== null || already}
             onClick={() => void go(social.id)}
           >
-            {pending === social.id ? <Noodle size="sm" mono /> : <ProviderMark id={social.id} />}
-            {already ? `${social.label} connected` : mode === "link" ? `Connect ${social.label}` : `Continue with ${social.label}`}
+            <span className="inline-flex min-w-0 items-center gap-2.5 font-medium">
+              {pending === social.id ? <Noodle size="sm" mono /> : <ProviderMark id={social.id} />}
+              {mode === "link" ? social.label : `Continue with ${social.label}`}
+            </span>
+            {mode === "link" ? (
+              <span className={cn("shrink-0 text-[13px] font-normal", already ? "text-muted" : "text-accent-fg")}>
+                {already ? "Connected" : "Connect"}
+              </span>
+            ) : null}
           </button>
         )
       })}

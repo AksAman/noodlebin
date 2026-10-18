@@ -1,7 +1,7 @@
 "use client"
 
 import { InlineLoader } from "@/components/Loader"
-import { parseTweet, parseYouTube, youTubeEmbedSrc, type TweetLink } from "@/lib/embeds"
+import { parseInstagram, parseTweet, parseYouTube, youTubeEmbedSrc, type InstagramLink, type TweetLink } from "@/lib/embeds"
 import { cn } from "@/lib/ui"
 import { useEffect, useRef, useState } from "react"
 
@@ -121,10 +121,34 @@ function TweetEmbed({ tweet }: { tweet: TweetLink }) {
   )
 }
 
+function InstagramEmbed({ link }: { link: InstagramLink }) {
+  const path = link.kind === "reel" ? "reel" : "p"
+  return (
+    <div className="overflow-hidden rounded-lg border border-line bg-surface">
+      <iframe
+        className="block w-full border-0"
+        src={`https://www.instagram.com/${path}/${link.code}/embed`}
+        title={link.kind === "reel" ? "Instagram reel" : "Instagram post"}
+        height={link.kind === "reel" ? 620 : 540}
+        loading="lazy"
+      />
+      <a
+        href={link.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block border-t border-line px-4 py-2.5 text-[13px] text-muted no-underline hover:text-fg"
+      >
+        Open on Instagram
+      </a>
+    </div>
+  )
+}
+
 export function PostEmbeds({ youtubeUrl, tweetUrl, title }: { youtubeUrl: string | null; tweetUrl: string | null; title: string }) {
   const video = youtubeUrl ? parseYouTube(youtubeUrl) : null
   const tweet = tweetUrl ? parseTweet(tweetUrl) : null
-  if (!video && !tweet) return null
+  const instagram = !tweet && tweetUrl ? parseInstagram(tweetUrl) : null
+  if (!video && !tweet && !instagram) return null
   return (
     <div className="flex flex-col gap-4">
       {video ? (
@@ -141,6 +165,7 @@ export function PostEmbeds({ youtubeUrl, tweetUrl, title }: { youtubeUrl: string
         </div>
       ) : null}
       {tweet ? <TweetEmbed tweet={tweet} /> : null}
+      {instagram ? <InstagramEmbed link={instagram} /> : null}
     </div>
   )
 }

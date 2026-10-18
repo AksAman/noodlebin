@@ -13,6 +13,7 @@ import {
 } from "@/lib/db";
 import { AZURE_STORED_PREFIX } from "@/lib/blobUpload";
 import { isSafeSlug, mediaUrl, readMediaBytes, writeMedia } from "@/lib/media";
+import { isMp4Name } from "@/lib/sniff";
 import { buildSearchText } from "@/lib/search";
 import {
   posts as seedPosts,
@@ -57,6 +58,7 @@ function publicOf(post: StoredPost): VaultPost {
     tree_type: post.tree_type,
     blender_version_string: post.blender_version_string,
     cover_url: mediaUrl(post.slug, "cover", post.cover_file) ?? post.cover_url,
+    cover_video: isMp4Name(post.cover_file) || isMp4Name(post.cover_url),
     cover_shader: post.cover_shader ?? null,
     video_url: mediaUrl(post.slug, "video", post.video_file) ?? post.video_url,
     youtube_url: post.youtube_url ?? null,

@@ -15,9 +15,9 @@ export default async function OpengraphImage({ params }: { params: Promise<{ slu
   }
 
   let coverSrc: string | null = null
-  if (!post.seeded) {
+  if (!post.seeded && !post.cover_video) {
     const cover = await readMediaFile(slug, "cover", dataDir())
-    if (cover) coverSrc = `data:${cover.type};base64,${cover.bytes.toString("base64")}`
+    if (cover?.type.startsWith("image/")) coverSrc = `data:${cover.type};base64,${cover.bytes.toString("base64")}`
   }
 
   const typeLabel = treeTypeLabel(post.tree_type)

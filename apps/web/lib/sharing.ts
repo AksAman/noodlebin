@@ -1,6 +1,6 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto"
 import { TREE_TYPES, type NodeVaultPayload, type TreeType } from "@/interchange"
-import { parseTweet, parseYouTube } from "@/lib/embeds"
+import { parseSocialPost, parseYouTube } from "@/lib/embeds"
 import { checkShaderSource } from "@/lib/shaderCover"
 import { sniffBlend, sniffCover, sniffMp4 } from "@/lib/sniff"
 import { env } from "@/env"
@@ -17,7 +17,7 @@ export function requestUploadMax(pidMax: number): number {
   return env.VERCEL ? Math.min(pidMax, VERCEL_BODY_MAX) : pidMax
 }
 
-export const COVER_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"])
+export const COVER_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4"])
 
 export type SharingError = {
   ok: false
@@ -72,9 +72,9 @@ export function parseLinkFields(form: FormData): PostLinks | SharingError {
   }
   if (form.has("tweet_url")) {
     const raw = String(form.get("tweet_url") ?? "").trim()
-    if (raw.length > 500) return { ok: false, status: 400, error: "X post link is too long." }
-    const parsed = raw ? parseTweet(raw) : null
-    if (raw && !parsed) return { ok: false, status: 400, error: "X post link must point to a single post on x.com or twitter.com." }
+    if (raw.length > 500) return { ok: false, status: 400, error: "X or Instagram link is too long." }
+    const parsed = raw ? parseSocialPost(raw) : null
+    if (raw && !parsed) return { ok: false, status: 400, error: "X or Instagram link must point to a single post." }
     links.tweet_url = parsed?.url ?? null
   }
   if (form.has("cover_shader")) {
@@ -193,7 +193,7 @@ export async function readCover(file: File | null): Promise<StoredFile | Sharing
   const bytes = new Uint8Array(await file.arrayBuffer())
   const sniffed = sniffCover(bytes)
   if (!sniffed || !COVER_TYPES.has(sniffed.type)) {
-    return { ok: false, status: 400, error: "Cover must be jpeg, png, webp, or gif." }
+    return { ok: false, status: 400, error: "Cover must be jpeg, png, webp, gif, or mp4." }
   }
   return { bytes, type: sniffed.type, ext: sniffed.ext }
 }

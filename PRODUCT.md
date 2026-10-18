@@ -34,3 +34,4 @@ Curated, exacting, tactile. The work is the hero, the way an image-first collect
 ## Accessibility & Inclusion
 
 WCAG 2.2 AA. Full keyboard navigation with visible focus. Respect `prefers-reduced-motion` and `prefers-color-scheme`; users can override the theme (light, dark, system). Never rely on node or tree-type color alone to carry meaning; pair it with a text label.
+

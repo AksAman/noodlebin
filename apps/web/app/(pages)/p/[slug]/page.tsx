@@ -1,4 +1,5 @@
 import { AuthorCredit } from "@/components/AuthorCredit"
+import { CoverMedia } from "@/components/CoverMedia"
 import { MarkdownNote } from "@/components/MarkdownNote"
 import { PostEmbeds } from "@/components/PostEmbeds"
 import { PostGraph } from "@/components/PostGraph"
@@ -67,14 +68,16 @@ export default async function PostRoute({ params }: { params: Promise<{ slug: st
             </p>
           </header>
           <div className="flex flex-col gap-6">
-            {post.cover_shader ? (
+            {post.cover_video && post.cover_url ? (
+              <CoverMedia url={post.cover_url} video className="block w-full rounded-lg ring-1 ring-line" />
+            ) : post.cover_shader ? (
               <ShaderCover
                 source={post.cover_shader}
                 poster={post.cover_url}
                 className={cn("rounded-lg ring-1 ring-line", !post.cover_url && "aspect-[4/3]")}
               />
             ) : post.cover_url ? (
-              <img className="block w-full rounded-lg ring-1 ring-line" src={post.cover_url} alt="" />
+              <CoverMedia url={post.cover_url} className="block w-full rounded-lg ring-1 ring-line" />
             ) : null}
             <PostEmbeds youtubeUrl={post.youtube_url} tweetUrl={post.tweet_url} title={post.title} />
           </div>

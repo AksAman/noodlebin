@@ -21,6 +21,7 @@ describe("sniff", () => {
     mp4[7] = 0x70
     expect(sniffMp4(mp4)).toBe(true)
     expect(sniffMp4(png)).toBe(false)
+    expect(sniffCover(mp4)).toEqual({ type: "video/mp4", ext: "mp4" })
   })
 
   test("blend magic", () => {
