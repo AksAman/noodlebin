@@ -6,7 +6,7 @@ const appDir = dirname(fileURLToPath(import.meta.url))
 const repo = resolve(appDir, "../..")
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["@prisma/client", "pg"],
+  serverExternalPackages: ["@prisma/client", "pg", "@azure/storage-blob"],
   transpilePackages: ["@nodevault/node-view", "@nodevault/catalog", "@nodevault/interchange"],
   turbopack: {
     root: repo,
@@ -25,6 +25,24 @@ const nextConfig: NextConfig = {
       "@/interchange": resolve(repo, "packages/interchange/src/index.ts"),
     }
     return config
+  },
+  // PostHog capture uses trailing slashes (/e/). A redirect would drop the body.
+  skipTrailingSlashRedirect: true,
+  async rewrites() {
+    return [
+      {
+        source: "/api/v1/static/:path*",
+        destination: "https://us-assets.i.posthog.com/static/:path*",
+      },
+      {
+        source: "/api/v1/array/:path*",
+        destination: "https://us-assets.i.posthog.com/array/:path*",
+      },
+      {
+        source: "/api/v1/:path*",
+        destination: "https://us.i.posthog.com/:path*",
+      },
+    ]
   },
   async headers() {
     return [

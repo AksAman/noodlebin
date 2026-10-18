@@ -1,3 +1,4 @@
+import { azurePublicUrl } from "@/lib/blobUpload"
 import { isSafeSlug, isVercelBlobUrl } from "@/lib/media"
 import { dataDir, getStoredPost, readMediaFile } from "@/lib/store"
 import { NextResponse } from "next/server"
@@ -15,6 +16,8 @@ export async function GET(
   }
   const post = await getStoredPost(slug, dataDir())
   const stored = kind === "cover" ? post?.cover_file : kind === "video" ? post?.video_file : post?.blend_file
+  const direct = stored ? azurePublicUrl(stored) : null
+  if (direct) return NextResponse.redirect(direct, 302)
   if (stored && isVercelBlobUrl(stored)) {
     return NextResponse.redirect(stored, 302)
   }

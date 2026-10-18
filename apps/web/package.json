@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@azure/storage-blob": "^12.34.0",
     "@better-auth/infra": "^0.4.20",
     "@nodevault/catalog": "workspace:*",
     "@nodevault/interchange": "workspace:*",
@@ -29,6 +30,7 @@
     "next": "16.4.2",
     "pg": "^8.23.1",
     "postcss": "^8.5.30",
+    "posthog-js": "^1.438.12",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "react-markdown": "10.1.0",

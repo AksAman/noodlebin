@@ -1,6 +1,7 @@
 "use client";
 
 import { InlineLoader } from "@/components/Loader";
+import { capture } from "@/lib/analytics";
 import { publishPost } from "@/lib/publishPost";
 import { serializeCopy, treeTypeLabel } from "@/lib/ingest";
 import type { NodeVaultPayload } from "@/interchange";
@@ -15,7 +16,8 @@ import { captureNodeCanvas } from "@/lib/captureCanvas";
 import { parseTweet, parseYouTube } from "@/lib/embeds";
 import { coverByteBudget, publishFailureMessage } from "@/lib/publishBody";
 import { checkShaderSource } from "@/lib/shaderCover";
-import { SHARE_DRAFT_KEY, type ShareDraft } from "@/lib/shareDraft";
+import { clearShareDraft, writeShareDraft, type ShareDraft } from "@/lib/shareDraft";
+import { putBlob } from "@/lib/putBlob";
 import { addTag, tagToken } from "@/lib/tags";
 import { fitCoverFile } from "@/lib/shrinkCover";
 import {
@@ -238,9 +240,12 @@ export function ShareSheet({
   const [shaderProblem, setShaderProblem] = useState<string | null>(null);
   const [signInOpen, setSignInOpen] = useState(false);
   const [signInPresent, setSignInPresent] = useState(false);
+  const [coverDataUrl, setCoverDataUrl] = useState(restored?.coverDataUrl ?? "");
+  const [draftRev, setDraftRev] = useState(0);
   const titleRef = useRef<HTMLInputElement>(null);
   const coverRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const publishedRef = useRef(false);
   const mod = useModKey();
   const { data: session } = useServerSession();
   const handle = session?.user.handle;
@@ -255,7 +260,18 @@ export function ShareSheet({
     setCoverError(null);
     setCoverName(file?.name ?? null);
     setCoverPreview(file ? URL.createObjectURL(file) : null);
+    if (!file) {
+      setCoverDataUrl("");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCoverDataUrl(typeof reader.result === "string" ? reader.result : "");
+    };
+    reader.readAsDataURL(file);
   }, []);
+
+  const touchDraft = useCallback(() => setDraftRev((n) => n + 1), []);
 
   useEffect(() => {
     const onPaste = (event: ClipboardEvent) => {
@@ -300,6 +316,64 @@ export function ShareSheet({
   useEffect(() => {
     titleRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    const dataUrl = restored?.coverDataUrl;
+    if (!dataUrl) return;
+    let cancelled = false;
+    void fetch(dataUrl)
+      .then((res) => res.blob())
+      .then((blob) => {
+        if (cancelled) return;
+        const name = restored.coverName || pastedName(blob.type || "image/png");
+        const file = new File([blob], name, { type: blob.type || "image/png" });
+        const input = coverRef.current;
+        if (input) {
+          const transfer = new DataTransfer();
+          transfer.items.add(file);
+          input.files = transfer.files;
+        }
+        showCover(file);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [restored, showCover]);
+
+  useEffect(() => {
+    if (created || publishedRef.current) return;
+    const write = () => {
+      if (publishedRef.current) return;
+      const form = formRef.current;
+      const value = (name: string) => {
+        const el = form?.elements.namedItem(name);
+        return el instanceof HTMLInputElement ||
+          el instanceof HTMLTextAreaElement ||
+          el instanceof HTMLSelectElement
+          ? el.value
+          : "";
+      };
+      writeShareDraft(sessionStorage, {
+        treeText: serializeCopy(payload),
+        title: value("title"),
+        author: "",
+        description: value("description"),
+        youtube_url: value("youtube_url"),
+        tweet_url: value("tweet_url"),
+        cover_shader: value("cover_shader"),
+        visibility,
+        tags: tags.join(","),
+        coverName: coverName ?? "",
+        coverDataUrl,
+      });
+    };
+    const id = window.setTimeout(write, 200);
+    return () => {
+      window.clearTimeout(id);
+      if (!publishedRef.current) write();
+    };
+  }, [coverDataUrl, coverName, created, draftRev, payload, tags, visibility]);
 
   useEffect(() => {
     return () => {
@@ -368,8 +442,8 @@ export function ShareSheet({
             return;
           event.preventDefault();
         }}
+        onChange={touchDraft}
         onSubmit={(event) => {
-          console.log("onSubmit");
           event.preventDefault();
           const form = event.currentTarget;
           const submitted = new FormData(form);
@@ -404,34 +478,30 @@ export function ShareSheet({
               cover instanceof File && cover.size > 0
                 ? cover
                 : await captureNodeCanvas();
-            body.set(
-              "cover",
-              await fitCoverFile(
-                chosen,
-                coverByteBudget(new Blob([treeText]).size),
-              ),
+            const fitted = await fitCoverFile(
+              chosen,
+              coverByteBudget(new Blob([treeText]).size),
             );
-            const payloadBytes = (await new Response(body).blob()).size;
-            console.log(payloadBytes / 1024 / 1024);
-            console.log(
-              [...body.entries()].map(([name, value]) => ({
-                name,
-                mb:
-                  (value instanceof Blob
-                    ? value.size
-                    : new Blob([String(value)]).size) /
-                  1024 /
-                  1024,
-                ...(value instanceof File
-                  ? { file: value.name, type: value.type }
-                  : { chars: String(value).length }),
-              })),
-            );
+            const coverToken = await putBlob("cover", fitted);
+            if (coverToken) {
+              body.delete("cover");
+              body.set("cover_blob", coverToken);
+            } else {
+              body.set("cover", fitted);
+            }
             const createdPost = await publishPost(body);
             if ("error" in createdPost) {
               setError(createdPost.error);
               return;
             }
+            publishedRef.current = true;
+            capture("graph_published", {
+              tree_type: payload.tree_type,
+              node_count: payload.origin.node_count,
+              visibility,
+              signed_in: Boolean(session?.user),
+            });
+            clearShareDraft(sessionStorage);
             setCreated({ url: createdPost.url });
           })()
             .catch((err: unknown) => {
@@ -518,7 +588,7 @@ export function ShareSheet({
               Posting as <span className="text-fg">@{handle}</span>
             </p>
           ) : (
-            <div className="rounded-lg border border-line bg-bg p-3">
+            <div className="rounded-lg border border-line bg-bg p-3" data-keep-draft>
               <div className="flex items-center justify-between gap-3">
                 <p className="m-0 text-[13px] leading-relaxed text-muted">
                   This post stays anonymous. Sign in if you want it under your
@@ -562,7 +632,7 @@ export function ShareSheet({
                               ? el.value
                               : "";
                           };
-                          const draft: ShareDraft = {
+                          writeShareDraft(sessionStorage, {
                             treeText: serializeCopy(payload),
                             title: value("title"),
                             author: "",
@@ -572,11 +642,9 @@ export function ShareSheet({
                             cover_shader: value("cover_shader"),
                             visibility,
                             tags: tags.join(","),
-                          };
-                          sessionStorage.setItem(
-                            SHARE_DRAFT_KEY,
-                            JSON.stringify(draft),
-                          );
+                            coverName: coverName ?? "",
+                            coverDataUrl,
+                          });
                         }}
                       />
                     </div>
@@ -597,6 +665,7 @@ export function ShareSheet({
               name="description"
               defaultValue={restored?.description ?? ""}
               placeholder="What should someone know before they paste this?"
+              onChange={touchDraft}
             />
           </div>
           <div className={label}>

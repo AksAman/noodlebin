@@ -4,6 +4,7 @@ import { dirname, join, resolve } from "node:path"
 import type { NodeVaultPayload } from "@/interchange"
 import { revalidateTag, unstable_cache } from "next/cache"
 import { pgGet, pgInsert, pgList, pgSlugs, pgUpdate, usesPostgres } from "@/lib/db"
+import { AZURE_STORED_PREFIX } from "@/lib/blobUpload"
 import { isSafeSlug, mediaUrl, readMediaBytes, writeMedia } from "@/lib/media"
 import { buildSearchText } from "@/lib/search"
 import { posts as seedPosts, type StoredPost, type VaultPost } from "@/lib/posts"
@@ -44,12 +45,12 @@ function publicOf(post: StoredPost): VaultPost {
     tree: post.tree,
     tree_type: post.tree_type,
     blender_version_string: post.blender_version_string,
-    cover_url: post.cover_url,
+    cover_url: mediaUrl(post.slug, "cover", post.cover_file) ?? post.cover_url,
     cover_shader: post.cover_shader ?? null,
-    video_url: post.video_url,
+    video_url: mediaUrl(post.slug, "video", post.video_file) ?? post.video_url,
     youtube_url: post.youtube_url ?? null,
     tweet_url: post.tweet_url ?? null,
-    blend_url: post.blend_url,
+    blend_url: mediaUrl(post.slug, "blend", post.blend_file) ?? post.blend_url,
     blend_filename: post.blend_filename,
     card_url: post.card_url,
     nodevember_day: post.nodevember_day,
@@ -115,8 +116,19 @@ export async function listStored(dir = dataDir()): Promise<StoredPost[]> {
 
 const POSTS_TAG = "posts"
 
+async function ensureAzureReads(posts: StoredPost[]): Promise<void> {
+  const hasAzure = posts.some((post) =>
+    [post.cover_file, post.video_file, post.blend_file].some((file) => file?.startsWith(AZURE_STORED_PREFIX)),
+  )
+  if (!hasAzure) return
+  const { ensurePublicReads } = await import("@/lib/azureBlob")
+  await ensurePublicReads()
+}
+
 async function loadPublicPosts(dir: string): Promise<VaultPost[]> {
-  const stored = (await listStored(dir)).map(publicOf)
+  const rows = await listStored(dir)
+  await ensureAzureReads(rows)
+  const stored = rows.map(publicOf)
   const bySlug = new Map<string, VaultPost>()
   for (const post of seedPosts) bySlug.set(post.slug, post)
   for (const post of stored) bySlug.set(post.slug, post)
@@ -153,7 +165,10 @@ function invalidatePostLists(): void {
 export async function getPublicPost(slug: string, dir = dataDir()): Promise<VaultPost | undefined> {
   if (!isSafeSlug(slug)) return undefined
   const stored = await getStoredPost(slug, dir)
-  if (stored) return publicOf(stored)
+  if (stored) {
+    await ensureAzureReads([stored])
+    return publicOf(stored)
+  }
   return seedPosts.find((p) => p.slug === slug)
 }
 
@@ -192,26 +207,31 @@ async function persistPatch(dir: string, stored: StoredPost): Promise<void> {
   invalidatePostLists()
 }
 
+async function placeMedia(
+  dir: string,
+  rel: string,
+  file: { bytes: Uint8Array; type: string; storedPath?: string },
+): Promise<string> {
+  return file.storedPath ?? writeMedia(dir, rel, file.bytes, file.type)
+}
+
 async function buildStored(
   input: NewPostInput,
   slug: string,
   token: string,
   dir: string,
 ): Promise<StoredPost> {
-  const coverRel = join("files", slug, `cover.${input.files.cover.ext}`)
-  const coverStored = await writeMedia(dir, coverRel, input.files.cover.bytes, input.files.cover.type)
+  const coverStored = await placeMedia(dir, join("files", slug, `cover.${input.files.cover.ext}`), input.files.cover)
 
   let video_file: string | null = null
   if (input.files.video) {
-    const videoRel = join("files", slug, `video.${input.files.video.ext}`)
-    video_file = await writeMedia(dir, videoRel, input.files.video.bytes, input.files.video.type)
+    video_file = await placeMedia(dir, join("files", slug, `video.${input.files.video.ext}`), input.files.video)
   }
 
   let blend_file: string | null = null
   let blend_filename: string | null = null
   if (input.files.blend) {
-    const blendRel = join("files", slug, "graph.blend")
-    blend_file = await writeMedia(dir, blendRel, input.files.blend.bytes, "application/octet-stream")
+    blend_file = await placeMedia(dir, join("files", slug, "graph.blend"), input.files.blend)
     blend_filename = input.files.blend.filename ?? "graph.blend"
   }
 
@@ -294,18 +314,15 @@ export async function patchStoredPost(
       }
     }
     if (patch.cover) {
-      const coverRel = join("files", slug, `cover.${patch.cover.ext}`)
-      current.cover_file = await writeMedia(dir, coverRel, patch.cover.bytes, patch.cover.type)
+      current.cover_file = await placeMedia(dir, join("files", slug, `cover.${patch.cover.ext}`), patch.cover)
       current.cover_url = mediaUrl(slug, "cover", current.cover_file)
     }
     if (patch.video) {
-      const videoRel = join("files", slug, `video.${patch.video.ext}`)
-      current.video_file = await writeMedia(dir, videoRel, patch.video.bytes, patch.video.type)
+      current.video_file = await placeMedia(dir, join("files", slug, `video.${patch.video.ext}`), patch.video)
       current.video_url = mediaUrl(slug, "video", current.video_file)
     }
     if (patch.blend) {
-      const blendRel = join("files", slug, "graph.blend")
-      current.blend_file = await writeMedia(dir, blendRel, patch.blend.bytes, "application/octet-stream")
+      current.blend_file = await placeMedia(dir, join("files", slug, "graph.blend"), patch.blend)
       current.blend_url = mediaUrl(slug, "blend", current.blend_file)
       current.blend_filename = patch.blend.filename ?? "graph.blend"
     }

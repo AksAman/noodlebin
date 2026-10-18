@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises"
 import { env } from "@/env"
 import { dirname, join, relative, resolve, sep } from "node:path"
+import { AZURE_STORED_PREFIX, azurePublicUrl } from "@/lib/blobUpload"
 import { put } from "@vercel/blob"
 
 export const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
@@ -65,6 +66,10 @@ export async function readMediaBytes(
   dir: string,
   stored: string,
 ): Promise<Buffer | null> {
+  if (stored.startsWith(AZURE_STORED_PREFIX)) {
+    const { readAzureBlob } = await import("@/lib/azureBlob")
+    return readAzureBlob(stored.slice(AZURE_STORED_PREFIX.length))
+  }
   if (stored.startsWith("https://")) {
     if (!isVercelBlobUrl(stored)) return null
     const res = await fetch(stored)
@@ -83,5 +88,7 @@ export async function readMediaBytes(
 export function mediaUrl(slug: string, kind: "cover" | "video" | "blend", stored: string | null): string | null {
   if (!stored) return null
   if (stored.startsWith("https://")) return stored
+  const direct = azurePublicUrl(stored)
+  if (direct) return direct
   return `/api/media/${slug}/${kind}`
 }

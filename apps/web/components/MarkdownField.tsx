@@ -21,11 +21,13 @@ export function MarkdownField({
   name,
   defaultValue = "",
   placeholder,
+  onChange,
 }: {
   id: string
   name: string
   defaultValue?: string
   placeholder?: string
+  onChange?: (value: string) => void
 }) {
   const [value, setValue] = useState(defaultValue)
   const mode = useColorMode()
@@ -36,7 +38,11 @@ export function MarkdownField({
       <input type="hidden" name={name} value={value} />
       <MDEditor
         value={value}
-        onChange={(next) => setValue((next ?? "").slice(0, DESCRIPTION_MAX))}
+        onChange={(next) => {
+          const value = (next ?? "").slice(0, DESCRIPTION_MAX)
+          setValue(value)
+          onChange?.(value)
+        }}
         preview="edit"
         height={220}
         minHeight={140}

@@ -30,6 +30,8 @@ export type StoredFile = {
   type: string
   ext: string
   filename?: string
+  /** Set when the bytes are already in blob storage and must not be written again. */
+  storedPath?: string
 }
 
 export type NewPostFiles = {
@@ -156,6 +158,24 @@ export function parseNodevemberDay(value: string | null): number | null | Sharin
   return n
 }
 
+type UploadKindName = "cover" | "video" | "blend"
+
+/** A signed upload wins. Otherwise the file is read from the form, which is how tests and local disk mode publish. */
+async function uploadedOrFile(
+  form: FormData,
+  kind: UploadKindName,
+  read: (file: File | null) => Promise<StoredFile | SharingError | undefined>,
+): Promise<StoredFile | SharingError | undefined> {
+  const token = String(form.get(`${kind}_blob`) ?? "").trim()
+  if (!token) {
+    const field = form.get(kind)
+    return read(field instanceof File ? field : null)
+  }
+  const { verifyUploaded } = await import("@/lib/azureBlob")
+  const filename = String(form.get(`${kind}_filename`) ?? "").trim()
+  return verifyUploaded(kind, token, filename || undefined)
+}
+
 export function isSharingError(value: unknown): value is SharingError {
   return typeof value === "object" && value !== null && "ok" in value && (value as SharingError).ok === false
 }
@@ -254,16 +274,13 @@ export async function parseCreateForm(
   if (descriptionRaw.length > 4000) return { ok: false, status: 400, error: "Description is too long." }
   const description = descriptionRaw ? descriptionRaw : null
 
-  const coverField = form.get("cover")
-  const cover = await readCover(coverField instanceof File ? coverField : null)
-  if (isSharingError(cover)) return cover
+  const cover = await uploadedOrFile(form, "cover", readCover)
+  if (!cover || isSharingError(cover)) return cover ?? { ok: false, status: 400, error: "A cover image is required." }
 
-  const videoField = form.get("video")
-  const video = await readVideo(videoField instanceof File ? videoField : null)
+  const video = await uploadedOrFile(form, "video", readVideo)
   if (isSharingError(video)) return video
 
-  const blendField = form.get("blend")
-  const blend = await readBlend(blendField instanceof File ? blendField : null)
+  const blend = await uploadedOrFile(form, "blend", readBlend)
   if (isSharingError(blend)) return blend
 
   const treeField = form.get("tree")

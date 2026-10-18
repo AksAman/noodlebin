@@ -1,5 +1,6 @@
 "use client"
 
+import { capture } from "@/lib/analytics"
 import { InlineLoader, Noodle } from "@/components/Loader"
 import { SOCIALS, authClient, type SocialProvider } from "@/lib/auth-client"
 import { btnAccent, cn, errorBox, field } from "@/lib/ui"
@@ -29,6 +30,7 @@ export function SignInButtons({
     setError(null)
     setPending(provider)
     onBefore?.()
+    capture("signed_in", { method: provider, action: mode === "link" ? "link" : "sign_in" }, true)
     try {
       const result =
         mode === "link"
@@ -59,6 +61,7 @@ export function SignInButtons({
         setError(result.error.message || "Could not sign in.")
         return
       }
+      capture("signed_in", { method: "email", action: creating ? "sign_up" : "sign_in" }, true)
       if (window.location.pathname !== callbackURL) window.location.assign(callbackURL)
       else setPending(null)
     } catch (err) {

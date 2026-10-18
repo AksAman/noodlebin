@@ -2,6 +2,7 @@
 
 import { Kbd, useModKey } from "@/components/Keys"
 import { PayloadFallback } from "@/components/PayloadFallback"
+import { Dialog } from "@/components/Dialog"
 import { ShareSheet } from "@/components/ShareSheet"
 import { NodeView } from "@/node-view"
 import { shippedCatalogs } from "@/lib/catalogs"
@@ -9,9 +10,11 @@ import { ingestText, serializeCopy, treeTypeLabel } from "@/lib/ingest"
 import type { CatalogResolution } from "@/catalog"
 import type { NodeVaultPayload } from "@/interchange"
 import { btn, btnAccent, btnGhost, cn, errorBox, notice as noticeClass, shell, treeDotClass } from "@/lib/ui"
+import { capture } from "@/lib/analytics"
 import { clearPasteRestoring, clearPasteSession, readPasteSession, writePasteSession } from "@/lib/pasteSession"
-import { readShareDraft, SHARE_DRAFT_KEY, type ShareDraft } from "@/lib/shareDraft"
+import { clearShareDraft, readShareDraft, SHARE_DRAFT_KEY, type ShareDraft } from "@/lib/shareDraft"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 
 function isTextField(target: EventTarget | null): boolean {
@@ -31,15 +34,28 @@ export function PastePage() {
   const [shareOpen, setShareOpen] = useState(false)
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null)
   const [restored, setRestored] = useState<ShareDraft | null>(null)
+  const [leaveTo, setLeaveTo] = useState<string | null>(null)
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const router = useRouter()
 
-  const applyText = useCallback((text: string, options?: { openShare?: boolean }) => {
+  const applyText = useCallback((text: string, options?: { openShare?: boolean; keepDraft?: boolean; source?: "paste" | "drop" }) => {
     const result = ingestText(text, shippedCatalogs)
     if (!result.ok) {
       setError(result.error.message)
       return false
     }
+    if (options?.source) {
+      capture("graph_pasted", {
+        source: options.source,
+        tree_type: result.payload.tree_type,
+        node_count: result.payload.origin.node_count,
+      })
+    }
     writePasteSession(sessionStorage, text)
+    if (!options?.keepDraft) {
+      clearShareDraft(sessionStorage)
+      setRestored(null)
+    }
     setError(null)
     setPayload(result.payload)
     setResolution(result.catalog)
@@ -56,7 +72,7 @@ export function PastePage() {
       const text = event.clipboardData?.getData("text/plain") ?? ""
       if (!text.trim()) return
       event.preventDefault()
-      applyText(text)
+      applyText(text, { source: "paste" })
     }
     const onDrop = (event: DragEvent) => {
       event.preventDefault()
@@ -64,7 +80,7 @@ export function PastePage() {
       if (!file) return
       const name = file.name.toLowerCase()
       if (!name.endsWith(".json") && !name.endsWith(".nodevault.json")) return
-      void file.text().then(applyText)
+      void file.text().then((text) => applyText(text, { source: "drop" }))
     }
     const onDragOver = (event: DragEvent) => {
       event.preventDefault()
@@ -82,9 +98,8 @@ export function PastePage() {
   useLayoutEffect(() => {
     const draft = readShareDraft(sessionStorage.getItem(SHARE_DRAFT_KEY))
     if (draft) {
-      sessionStorage.removeItem(SHARE_DRAFT_KEY)
       setRestored(draft)
-      applyText(draft.treeText)
+      applyText(draft.treeText, { keepDraft: true })
       clearPasteRestoring()
       return
     }
@@ -97,11 +112,38 @@ export function PastePage() {
     clearPasteRestoring()
   }, [applyText])
 
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0) return
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+      const anchor = (event.target as Element | null)?.closest("a")
+      if (!(anchor instanceof HTMLAnchorElement)) return
+      if (anchor.target === "_blank" || anchor.hasAttribute("download")) return
+      if (anchor.closest("[data-keep-draft]")) return
+      if (!readShareDraft(sessionStorage.getItem(SHARE_DRAFT_KEY))) return
+      let url: URL
+      try {
+        url = new URL(anchor.href, location.href)
+      } catch {
+        return
+      }
+      const here = `${location.pathname}${location.search}`
+      const next = url.origin === location.origin ? `${url.pathname}${url.search}${url.hash}` : url.href
+      if (url.origin === location.origin && `${url.pathname}${url.search}` === here) return
+      event.preventDefault()
+      event.stopPropagation()
+      setLeaveTo(next)
+    }
+    document.addEventListener("click", onClick, true)
+    return () => document.removeEventListener("click", onClick, true)
+  }, [])
+
   const onCopy = useCallback(async () => {
     if (!payload) return
     const text = serializeCopy(payload)
     try {
       await navigator.clipboard.writeText(text)
+      capture("graph_copied", { surface: "paste", tree_type: payload.tree_type })
       setCopied(true)
       setFallbackText(null)
       if (copiedTimer.current) clearTimeout(copiedTimer.current)
@@ -172,7 +214,14 @@ export function PastePage() {
                 {copied ? "Copied" : "Copy for Blender"}
               </button>
               {!publishedUrl ? (
-                <button type="button" className={btnAccent} onClick={() => setShareOpen(true)}>
+                <button
+                  type="button"
+                  className={btnAccent}
+                  onClick={() => {
+                    setRestored(readShareDraft(sessionStorage.getItem(SHARE_DRAFT_KEY)))
+                    setShareOpen(true)
+                  }}
+                >
                   Share
                 </button>
               ) : null}
@@ -201,7 +250,11 @@ export function PastePage() {
               restored={restored}
               onClose={(url) => {
                 setShareOpen(false)
-                if (url) setPublishedUrl(url)
+                if (url) {
+                  clearShareDraft(sessionStorage)
+                  setRestored(null)
+                  setPublishedUrl(url)
+                }
               }}
             />
           ) : null}
@@ -209,6 +262,34 @@ export function PastePage() {
       ) : (
         <EmptyState error={error} />
       )}
+      {leaveTo ? (
+        <Dialog title="Discard this share?" onClose={() => setLeaveTo(null)}>
+          <div className="flex flex-col gap-4 px-5 py-5">
+            <p className="m-0 text-[15px] leading-relaxed text-muted">
+              The title, cover, and other fields in the share form will be discarded. The graph stays in this tab.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button type="button" className={btn} onClick={() => setLeaveTo(null)}>
+                Stay
+              </button>
+              <button
+                type="button"
+                className={btnAccent}
+                onClick={() => {
+                  const href = leaveTo
+                  clearShareDraft(sessionStorage)
+                  setRestored(null)
+                  setLeaveTo(null)
+                  if (href.startsWith("http")) location.assign(href)
+                  else router.push(href)
+                }}
+              >
+                Leave
+              </button>
+            </div>
+          </div>
+        </Dialog>
+      ) : null}
     </div>
   )
 }

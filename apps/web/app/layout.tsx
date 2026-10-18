@@ -1,3 +1,4 @@
+import { BootScript } from "@/components/BootScript"
 import { SessionProvider } from "@/components/SessionProvider"
 import { SiteFooter } from "@/components/SiteFooter"
 import { SiteNav } from "@/components/SiteNav"
@@ -29,8 +30,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang="en" className={`h-full ${display.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
-        <script dangerouslySetInnerHTML={{ __html: pasteBootScript }} />
+        <BootScript html={themeBootScript} />
+        <BootScript html={pasteBootScript} />
       </head>
       <body className="m-0 flex h-full flex-col bg-bg font-sans text-[15px] text-fg">
         <SessionProvider session={session}>

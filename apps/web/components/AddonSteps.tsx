@@ -1,6 +1,16 @@
 "use client"
 
+import { capture } from "@/lib/analytics"
 import { Kbd, useModKey } from "@/components/Keys"
+import type { ReactNode } from "react"
+
+export function AddonDownload({ className, href, children }: { className: string; href: string; children: ReactNode }) {
+  return (
+    <a className={className} href={href} target="_blank" rel="noopener noreferrer" onClick={() => capture("addon_downloaded")}>
+      {children}
+    </a>
+  )
+}
 
 export function AddonSteps() {
   const mod = useModKey()

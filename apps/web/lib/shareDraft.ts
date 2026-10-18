@@ -10,6 +10,8 @@ export type ShareDraft = {
   cover_shader: string
   visibility: "public" | "unlisted"
   tags: string
+  coverName: string
+  coverDataUrl: string
 }
 
 export function readShareDraft(raw: string | null): ShareDraft | null {
@@ -27,8 +29,33 @@ export function readShareDraft(raw: string | null): ShareDraft | null {
       cover_shader: parsed.cover_shader ?? "",
       visibility: parsed.visibility === "unlisted" ? "unlisted" : "public",
       tags: parsed.tags ?? "",
+      coverName: parsed.coverName ?? "",
+      coverDataUrl: parsed.coverDataUrl ?? "",
     }
   } catch {
     return null
+  }
+}
+
+type DraftStorage = Pick<Storage, "setItem" | "removeItem">
+
+export function writeShareDraft(storage: DraftStorage, draft: ShareDraft): void {
+  const json = JSON.stringify(draft)
+  try {
+    storage.setItem(SHARE_DRAFT_KEY, json)
+  } catch {
+    try {
+      storage.setItem(SHARE_DRAFT_KEY, JSON.stringify({ ...draft, coverDataUrl: "", coverName: draft.coverName }))
+    } catch {
+      // Session storage can be unavailable or over quota.
+    }
+  }
+}
+
+export function clearShareDraft(storage: DraftStorage): void {
+  try {
+    storage.removeItem(SHARE_DRAFT_KEY)
+  } catch {
+    // Ignore unavailable storage.
   }
 }

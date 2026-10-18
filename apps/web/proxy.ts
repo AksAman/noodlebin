@@ -3,6 +3,18 @@ import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
 export function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  // skipTrailingSlashRedirect is on for the PostHog proxy. Keep normal pages on one URL.
+  if (
+    pathname.length > 1 &&
+    pathname.endsWith("/") &&
+    !pathname.startsWith("/api/v1") &&
+    (request.method === "GET" || request.method === "HEAD")
+  ) {
+    const url = new URL(request.url)
+    url.pathname = pathname.replace(/\/+$/, "") || "/"
+    return NextResponse.redirect(url, 308)
+  }
   if (request.nextUrl.pathname.startsWith("/embed/")) {
     const requestHeaders = new Headers(request.headers)
     requestHeaders.set("x-nodevault-embed", "1")
@@ -20,5 +32,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/:path*",
+  // /api/v1 is the PostHog rewrite. The proxy must not handle those requests.
+  matcher: ["/((?!api/v1(?:/|$)).*)"],
 }

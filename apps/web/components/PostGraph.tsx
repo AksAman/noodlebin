@@ -3,6 +3,7 @@
 import { AuthorCredit } from "@/components/AuthorCredit"
 import { MarkdownNote } from "@/components/MarkdownNote"
 import { NodeView } from "@/node-view"
+import { capture } from "@/lib/analytics"
 import { serializeCopy, treeTypeLabel } from "@/lib/ingest"
 import type { Catalog } from "@/catalog"
 import type { VaultPost } from "@/lib/posts"
@@ -41,6 +42,7 @@ export function PostGraph({
     const text = serializeCopy(payload)
     try {
       await navigator.clipboard.writeText(text)
+      capture("graph_copied", { surface: "post", tree_type: payload.tree_type, slug: post.slug })
       setCopied(true)
       setFallbackText(null)
       if (copiedTimer.current) clearTimeout(copiedTimer.current)
@@ -48,7 +50,7 @@ export function PostGraph({
     } catch {
       setFallbackText(text)
     }
-  }, [payload])
+  }, [payload, post.slug])
 
   if (!root) return null
 

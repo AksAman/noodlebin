@@ -1,5 +1,6 @@
 "use client"
 
+import { capture } from "@/lib/analytics"
 import { Dialog } from "@/components/Dialog"
 import { btn, cn, field } from "@/lib/ui"
 import { useEffect, useState } from "react"
@@ -34,6 +35,7 @@ export function SharePost({ slug }: { slug: string }) {
       document.execCommand("copy")
       area.remove()
     }
+    capture("link_copied", { kind, slug })
     setCopied(kind)
   }
 

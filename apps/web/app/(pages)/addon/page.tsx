@@ -1,4 +1,4 @@
-import { AddonSteps } from "@/components/AddonSteps"
+import { AddonDownload, AddonSteps } from "@/components/AddonSteps"
 import { addon } from "@/lib/addon"
 import { btnAccent, cn, docShell, page } from "@/lib/ui"
 import type { Metadata } from "next"
@@ -21,14 +21,9 @@ export default function AddonRoute() {
           with their values, links, frames, and groups. Works in Blender {addon.minBlender} and newer.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-4">
-          <a
-            className={cn(btnAccent, "px-5 py-3 text-[15px]")}
-            href={addon.releasesUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <AddonDownload className={cn(btnAccent, "px-5 py-3 text-[15px]")} href={addon.releasesUrl}>
             Download from GitHub Releases
-          </a>
+          </AddonDownload>
           <span className="text-[13px] text-subtle">
             Grab the <span className="font-mono text-muted">nodevault-x.y.z.zip</span> under Assets.
           </span>
