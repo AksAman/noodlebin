@@ -48,7 +48,17 @@
   --nv-kbd-border: #5a5a5a;
   --nv-kbd-fg: #aaa;
   --nv-preview-bg: #111;
-  --nv-curve: #c7c7c7;
+  --nv-curve-plot: #4a4a4a;
+  --nv-curve-grid: rgba(0, 0, 0, 0.42);
+  --nv-curve-line: #1a1a1a;
+  --nv-curve-border: #2c2c2c;
+  --nv-curve-ch-on: #e6e6e6;
+  --nv-curve-ch-on-fg: #1c1c1c;
+  --nv-curve-r: #e05050;
+  --nv-curve-g: #49c15a;
+  --nv-curve-b: #5b8def;
+  --nv-curve-h: #e0a040;
+  --nv-curve-s: #c8c8c8;
 }
 
 /* Light page theme. A canvas marked data-theme="dark" (shared posts, embeds) stays on the defaults above. */
@@ -93,7 +103,17 @@
   --nv-kbd-border: var(--line-strong);
   --nv-kbd-fg: var(--muted);
   --nv-preview-bg: var(--sunken);
-  --nv-curve: var(--muted);
+  --nv-curve-plot: #d7d7d7;
+  --nv-curve-grid: rgba(0, 0, 0, 0.16);
+  --nv-curve-line: #1a1a1a;
+  --nv-curve-border: color-mix(in oklab, var(--fg) 28%, transparent);
+  --nv-curve-ch-on: #fff;
+  --nv-curve-ch-on-fg: #1c1c1c;
+  --nv-curve-r: #c43b3b;
+  --nv-curve-g: #2d8a3e;
+  --nv-curve-b: #3a5ec4;
+  --nv-curve-h: #b87a1a;
+  --nv-curve-s: #6e6e6e;
 }
 
 .nv-root .react-flow {
@@ -101,8 +121,117 @@
   height: 100%;
 }
 
-.nv-curve {
-  color: var(--nv-curve);
+.nv-curves {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 1px 0 2px;
+  container-type: inline-size;
+}
+
+.nv-curve-toolbar {
+  height: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.nv-curve-channels {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.nv-curve-ch {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--nv-widget);
+  border: 1px solid var(--nv-widget-border);
+  margin-left: -1px;
+  color: var(--nv-widget-fg);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.nv-curve-ch:first-child {
+  margin-left: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+.nv-curve-ch:last-child {
+  border-radius: 0 3px 3px 0;
+}
+
+.nv-curve-ch-on {
+  background: var(--nv-curve-ch-on);
+  color: var(--nv-curve-ch-on-fg);
+  border-color: var(--nv-curve-ch-on);
+  position: relative;
+  z-index: 1;
+}
+
+.nv-curve-tools {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.nv-curve-tool {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  background: var(--nv-widget);
+  border: 1px solid var(--nv-widget-border);
+  color: var(--nv-widget-fg);
+}
+
+.nv-curve-tool svg {
+  width: 13px;
+  height: 13px;
+  display: block;
+}
+
+.nv-curve-menu::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 3.5px solid transparent;
+  border-right: 3.5px solid transparent;
+  border-top: 4px solid var(--nv-widget-fg);
+}
+
+.nv-curve-plot {
+  height: 160px;
+  border-radius: 2px;
+  background: var(--nv-curve-plot);
+  border: 1px solid var(--nv-curve-border);
+  overflow: hidden;
+}
+
+.nv-curve-plot svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.nv-curve-grid {
+  stroke: var(--nv-curve-grid);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+@container (max-width: 148px) {
+  .nv-curve-tools {
+    display: none;
+  }
 }
 
 .nv-a11y {

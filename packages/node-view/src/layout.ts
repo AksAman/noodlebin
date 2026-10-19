@@ -46,7 +46,8 @@ export function estimatedHeight(
   const propCount = rec?.properties.filter((p) => p.identifier !== "warning_propagation").length ?? 0
   let extra = 0
   if (node.widgets.color_ramp) extra += 108
-  if (node.widgets.mapping) extra += 52 * node.widgets.mapping.curves.length
+  // One curve plot for every channel: 20px toolbar + 2px gap + 160px plot + 3px padding.
+  if (node.widgets.mapping) extra += 185
   if (node.widgets.image) extra += 20
   if (kind === "group") extra += 20
   if (

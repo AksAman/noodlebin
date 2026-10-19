@@ -9,7 +9,7 @@ import { ShowPreviewsContext } from "./preview-context"
 import { hasTexturePreview } from "./texture-preview"
 import {
   ColorRampBar,
-  CurveSparklines,
+  CurveMappingView,
   ImageCaption,
   PropertyRow,
   TexturePreview,
@@ -233,7 +233,9 @@ export function NvNode({ data }: NodeProps<Node<NvNodeData>>) {
         {!outsOnly && propertyRows.length > 0 ? <div className="nv-props">{propertyRows}</div> : null}
         {kind === "group" ? <div className="nv-caption">{groupTree?.name ?? node.name}</div> : null}
         {node.widgets.color_ramp ? <ColorRampBar widget={node.widgets.color_ramp} /> : null}
-        {node.widgets.mapping ? <CurveSparklines widget={node.widgets.mapping} /> : null}
+        {node.widgets.mapping ? (
+          <CurveMappingView widget={node.widgets.mapping} blIdname={node.bl_idname} />
+        ) : null}
         {node.widgets.image ? <ImageCaption widget={node.widgets.image} /> : null}
         <div className="nv-ins">
           {inputs.map((s) => (

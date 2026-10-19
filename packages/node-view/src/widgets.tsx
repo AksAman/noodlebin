@@ -8,6 +8,7 @@ import type {
   NodeVaultNode,
 } from "@nodevault/interchange"
 import { cssColor } from "./color"
+import { curveChannels, curvePathD, curveView, type CurveChannel } from "./curve"
 import { hasTexturePreview, paintTexturePreview, texturePreviewKey } from "./texture-preview"
 
 const SKIP_PROPS = new Set(["warning_propagation", "is_active_output"])
@@ -237,28 +238,104 @@ export function ColorRampBar({ widget }: { widget: ColorRampWidget }) {
   )
 }
 
-export function CurveSparklines({ widget }: { widget: CurveMappingWidget }) {
+const CURVE_STROKE: Record<CurveChannel["tone"], string> = {
+  c: "var(--nv-curve-line)",
+  r: "var(--nv-curve-r)",
+  g: "var(--nv-curve-g)",
+  b: "var(--nv-curve-b)",
+  h: "var(--nv-curve-h)",
+  s: "var(--nv-curve-s)",
+  v: "var(--nv-curve-line)",
+}
+
+function CurveTools() {
+  return (
+    <span className="nv-curve-tools" aria-hidden>
+      <span className="nv-curve-tool">
+        <svg viewBox="0 0 16 16">
+          <circle cx="7" cy="7" r="3.6" fill="none" stroke="currentColor" strokeWidth="1.4" />
+          <path d="M9.8 9.8 L13 13 M7 5.3 V8.7 M5.3 7 H8.7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+      </span>
+      <span className="nv-curve-tool">
+        <svg viewBox="0 0 16 16">
+          <circle cx="7" cy="7" r="3.6" fill="none" stroke="currentColor" strokeWidth="1.4" />
+          <path d="M9.8 9.8 L13 13 M5.3 7 H8.7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+      </span>
+      <span className="nv-curve-tool">
+        <svg viewBox="0 0 16 16">
+          <path d="M3.5 5.5 H10.5 V12.5 H3.5 Z M10.5 3.5 H12.5 V8.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+        </svg>
+      </span>
+      <span className="nv-curve-tool nv-curve-menu" />
+    </span>
+  )
+}
+
+export function CurveMappingView({
+  widget,
+  blIdname,
+}: {
+  widget: CurveMappingWidget
+  blIdname?: string
+}) {
+  const channels = curveChannels(widget.curves.length, blIdname)
+  const active = channels.find((channel) => channel.active)?.index ?? 0
+  const view = curveView(widget)
+  const toneAt = (index: number) => channels.find((channel) => channel.index === index)?.tone ?? "c"
+  const paths = widget.curves
+    .map((curve, index) => ({
+      index,
+      d: curvePathD(curve.points, widget.extend, view),
+      active: index === active,
+      tone: toneAt(index),
+    }))
+    .filter((curve) => curve.d)
+  const ordered = [...paths.filter((curve) => !curve.active), ...paths.filter((curve) => curve.active)]
+  const grid = [25, 50, 75]
+
   return (
     <div className="nv-curves">
-      {widget.curves.map((curve, i) => {
-        const pts = curve.points.map((p) => p.location)
-        const xs = pts.map((p) => p[0])
-        const ys = pts.map((p) => p[1])
-        const minX = widget.use_clip ? widget.clip_min_x : Math.min(...xs)
-        const maxX = widget.use_clip ? widget.clip_max_x : Math.max(...xs)
-        const minY = widget.use_clip ? widget.clip_min_y : Math.min(...ys)
-        const maxY = widget.use_clip ? widget.clip_max_y : Math.max(...ys)
-        const w = 140
-        const h = 48
-        const sx = (x: number) => ((x - minX) / (maxX - minX || 1)) * w
-        const sy = (y: number) => h - ((y - minY) / (maxY - minY || 1)) * h
-        const d = pts.map((p, j) => `${j === 0 ? "M" : "L"} ${sx(p[0])} ${sy(p[1])}`).join(" ")
-        return (
-          <svg key={i} className="nv-curve" width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
-            <path d={d} fill="none" stroke="currentColor" strokeWidth="1.5" />
-          </svg>
-        )
-      })}
+      <div className="nv-curve-toolbar">
+        {channels.length > 0 ? (
+          <div className="nv-curve-channels">
+            {channels.map((channel) => (
+              <span
+                key={channel.label}
+                className={channel.active ? "nv-curve-ch nv-curve-ch-on" : "nv-curve-ch"}
+              >
+                {channel.label}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <span />
+        )}
+        <CurveTools />
+      </div>
+      <div className="nv-curve-plot">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Curve">
+          {grid.map((at) => (
+            <g key={at}>
+              <line className="nv-curve-grid" x1={at} y1="0" x2={at} y2="100" />
+              <line className="nv-curve-grid" x1="0" y1={at} x2="100" y2={at} />
+            </g>
+          ))}
+          {ordered.map((curve) => (
+            <path
+              key={curve.index}
+              d={curve.d}
+              fill="none"
+              stroke={curve.active ? "var(--nv-curve-line)" : CURVE_STROKE[curve.tone]}
+              strokeWidth={curve.active ? 1.6 : 1.15}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
+        </svg>
+      </div>
     </div>
   )
 }
