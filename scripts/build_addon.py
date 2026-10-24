@@ -62,6 +62,15 @@ def build_zip(blender: Path, output: Path) -> None:
     subprocess.run(cmd, check=True)
 
 
+def manifest_version(manifest: Path = ADDON / "blender_manifest.toml") -> str:
+    for line in manifest.read_text(encoding="utf-8").splitlines():
+        if line.startswith("version"):
+            value = line.split("=", 1)[1].strip().strip('"')
+            if value:
+                return value
+    raise ValueError(f"no version in {manifest}")
+
+
 def default_blender() -> Path:
     import os
 
@@ -97,7 +106,7 @@ def main() -> int:
     parser.add_argument(
         "--output",
         type=Path,
-        default=DIST / "nodevault-0.1.0.zip",
+        default=DIST / f"nodevault-{manifest_version()}.zip",
     )
     ns = parser.parse_args()
     copied = vendor_catalogs(CATALOG_SRC, CATALOG_DST)

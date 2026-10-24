@@ -11,6 +11,7 @@ import type { VaultPost } from "@/lib/posts"
 import type { NodeVaultPayload } from "@/interchange"
 import { Kbd, useModKey } from "@/components/Keys"
 import { PayloadFallback } from "@/components/PayloadFallback"
+import { PostOwnerActions } from "@/components/PostOwnerActions"
 import { SharePost } from "@/components/SharePost"
 import { PostEmbeds, XGlyph } from "@/components/PostEmbeds"
 import { ShaderCover } from "@/components/ShaderCover"
@@ -24,11 +25,13 @@ export function PostGraph({
   payload,
   catalog,
   notice,
+  canManage = false,
 }: {
   post: VaultPost
   payload: NodeVaultPayload
   catalog: Catalog | null
   notice: string | null
+  canManage?: boolean
 }) {
   const [copied, setCopied] = useState(false)
   const [fallbackText, setFallbackText] = useState<string | null>(null)
@@ -151,6 +154,7 @@ export function PostGraph({
             </a>
           ) : null}
           <SharePost slug={post.slug} />
+          {canManage ? <PostOwnerActions post={post} /> : null}
         </div>
 
         <a

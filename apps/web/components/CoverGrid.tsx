@@ -39,6 +39,11 @@ export function CoverGrid({ posts, showAuthor = true }: { posts: VaultPost[]; sh
                   GLSL
                 </span>
               ) : null}
+              {post.visibility === "unlisted" ? (
+                <span className="absolute right-2.5 top-2.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] tracking-wide text-white/85 backdrop-blur-sm">
+                  Unlisted
+                </span>
+              ) : null}
             </div>
             <h2 className="mt-3.5 font-display text-[18px] font-medium leading-snug tracking-[-0.01em] text-fg decoration-line-strong underline-offset-4 group-hover:underline">
               {post.title}

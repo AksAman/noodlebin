@@ -1,4 +1,5 @@
 import { AuthorCredit } from "@/components/AuthorCredit"
+import { PostOwnerActions } from "@/components/PostOwnerActions"
 import { CoverMedia } from "@/components/CoverMedia"
 import { MarkdownNote } from "@/components/MarkdownNote"
 import { PostEmbeds } from "@/components/PostEmbeds"
@@ -9,7 +10,8 @@ import { resolveCatalog } from "@/catalog"
 import { shippedCatalogs } from "@/lib/catalogs"
 import { treeTypeLabel } from "@/lib/ingest"
 import { markdownPlain } from "@/lib/markdownText"
-import { getPublicPost } from "@/lib/store"
+import { getRequestSession } from "@/lib/auth"
+import { getPublicPost, getStoredPost } from "@/lib/store"
 import { cn, page, docShell } from "@/lib/ui"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
@@ -43,6 +45,8 @@ export default async function PostRoute({ params }: { params: Promise<{ slug: st
   const { slug } = await params
   const post = await getPublicPost(slug)
   if (!post) notFound()
+  const [session, stored] = await Promise.all([getRequestSession(), getStoredPost(slug)])
+  const canManage = Boolean(session?.user?.id && stored?.user_id && session.user.id === stored.user_id)
 
   const resolution = post.tree ? resolveCatalog(shippedCatalogs, post.tree.blender_version) : null
 
@@ -60,8 +64,9 @@ export default async function PostRoute({ params }: { params: Promise<{ slug: st
               {treeTypeLabel(post.tree_type)} · Blender {post.blender_version_string}
             </p>
             {post.description ? <MarkdownNote className="note-markdown mt-5 max-w-[60ch]" source={post.description} /> : null}
-            <div className="mt-6">
+            <div className="mt-6 flex flex-col items-start gap-3">
               <SharePost slug={post.slug} />
+              {canManage ? <PostOwnerActions post={post} /> : null}
             </div>
             <p className="mt-8 border-t border-line pt-5 text-[14px] text-muted">
               No graph is attached to this post yet, so there is nothing to copy.
@@ -86,5 +91,5 @@ export default async function PostRoute({ params }: { params: Promise<{ slug: st
     )
   }
 
-  return <PostGraph post={post} payload={post.tree} catalog={resolution.catalog} notice={resolution.notice} />
+  return <PostGraph post={post} payload={post.tree} catalog={resolution.catalog} notice={resolution.notice} canManage={canManage} />
 }

@@ -19,8 +19,8 @@ export function AddonSteps() {
       title: "Install",
       body: (
         <>
-          Drag the zip into any Blender window. Or open Edit › Preferences › Get Extensions, use the ⌄ menu in the top right,
-          and pick Install from Disk.
+          Open Edit › Preferences › Get Extensions, search for NodeVault, and install it. Blender offers newer versions
+          from that same repository. A zip from GitHub is only a manual install.
         </>
       ),
     },

@@ -33,6 +33,11 @@ class VendorCatalogsTest(unittest.TestCase):
                 self.assertTrue(path.is_file())
                 self.assertGreater(path.stat().st_size, 100)
 
+    def test_zip_name_follows_manifest_version(self):
+        build = _load_build_addon()
+        self.assertEqual(build.manifest_version(), "0.1.0")
+        self.assertEqual(build.DIST.joinpath("nodevault-0.1.0.zip").name, f"nodevault-{build.manifest_version()}.zip")
+
     def test_missing_source_raises(self):
         build = _load_build_addon()
         with tempfile.TemporaryDirectory() as tmp:

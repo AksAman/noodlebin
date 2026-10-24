@@ -108,3 +108,8 @@ export async function pgUpdate(post: StoredPost): Promise<void> {
   void createdAt
   await prisma.post.update({ where: { slug }, data: rest })
 }
+
+export async function pgDelete(slug: string): Promise<void> {
+  const prisma = await ensureSchema()
+  await prisma.post.delete({ where: { slug } })
+}

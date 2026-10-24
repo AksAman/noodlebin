@@ -77,19 +77,22 @@ jobs:
           "${{ steps.blender.outputs.b52 }}" --background --factory-startup --python addon/tests/blender_capture_test.py
           "${{ steps.blender.outputs.b52 }}" --background --factory-startup --python addon/tests/blender_paste_test.py
 
+      - name: Validate extension
+        run: |
+          "${{ steps.blender.outputs.b52 }}" --command extension validate --source-dir addon
+
       - name: Package extension
         run: |
           python3 scripts/build_addon.py \
-            --blender "${{ steps.blender.outputs.b52 }}" \
-            --output dist/nodevault-0.1.0.zip
+            --blender "${{ steps.blender.outputs.b52 }}"
 
       - uses: actions/upload-artifact@v4
         with:
           name: nodevault-addon
-          path: dist/nodevault-0.1.0.zip
+          path: dist/nodevault-*.zip
 
       - name: Attach zip to GitHub Release
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" dist/nodevault-0.1.0.zip --clobber
+        run: gh release upload "${{ github.event.release.tag_name }}" dist/nodevault-*.zip --clobber

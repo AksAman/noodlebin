@@ -338,6 +338,90 @@ export async function parseCreateForm(
   }
 }
 
+export type OwnedPostUpdate = {
+  title: string
+  description: string | null
+  visibility: "public" | "unlisted"
+  tags: string[]
+  youtube_url?: string | null
+  tweet_url?: string | null
+  cover_shader?: string | null
+  /** Set only when the form includes a replacement tree. Absent keeps the current graph. */
+  tree?: NodeVaultPayload
+  files: {
+    cover?: StoredFile
+    video?: StoredFile
+    blend?: StoredFile
+  }
+}
+
+/** Edit form for a post the signed-in author already owns. Cover and tree are optional. */
+export async function parseUpdateForm(
+  form: FormData,
+  parsePayload: (text: string) => NodeVaultPayload,
+): Promise<OwnedPostUpdate | SharingError> {
+  const title = String(form.get("title") ?? "").trim()
+  if (!title) return { ok: false, status: 400, error: "Title is required." }
+  if (title.length > 120) return { ok: false, status: 400, error: "Title is too long." }
+
+  const visibility = parseVisibility(String(form.get("visibility") ?? ""))
+  if (typeof visibility !== "string") return visibility
+  const tags = parseTags(String(form.get("tags") ?? ""))
+  if (!Array.isArray(tags)) return tags
+  const descriptionRaw = String(form.get("description") ?? "").trim()
+  if (descriptionRaw.length > 4000) return { ok: false, status: 400, error: "Description is too long." }
+
+  const links = parseLinkFields(form)
+  if (isSharingError(links)) return links
+
+  const cover = await optionalUpload(form, "cover", readCover)
+  if (isSharingError(cover)) return cover
+  const video = await optionalUpload(form, "video", readVideo)
+  if (isSharingError(video)) return video
+  const blend = await optionalUpload(form, "blend", readBlend)
+  if (isSharingError(blend)) return blend
+
+  const treeField = form.get("tree")
+  const treeFile = treeField instanceof File && treeField.size > 0 ? treeField : null
+  const treeText = treeFile ? "" : String(form.get("tree_text") ?? "")
+  let tree: NodeVaultPayload | undefined
+  if (treeFile || treeText.trim()) {
+    const parsed = await readPayload(treeFile, treeText || null, parsePayload)
+    if (isSharingError(parsed)) return parsed
+    if (parsed) tree = parsed
+  }
+
+  const files: OwnedPostUpdate["files"] = {}
+  if (cover) files.cover = cover
+  if (video) files.video = video
+  if (blend) files.blend = blend
+
+  return {
+    title,
+    description: descriptionRaw ? descriptionRaw : null,
+    visibility,
+    tags,
+    ...links,
+    ...(tree ? { tree } : {}),
+    files,
+  }
+}
+
+async function optionalUpload(
+  form: FormData,
+  kind: UploadKindName,
+  read: (file: File | null) => Promise<StoredFile | SharingError | undefined>,
+): Promise<StoredFile | SharingError | undefined> {
+  const token = String(form.get(`${kind}_blob`) ?? "").trim()
+  const field = form.get(kind)
+  const file = field instanceof File && field.size > 0 ? field : null
+  if (!token && !file) return undefined
+  return uploadedOrFile(form, kind, async (incoming) => {
+    if (!incoming || incoming.size === 0) return undefined
+    return read(incoming)
+  })
+}
+
 export function editTokenFromRequest(request: Request, form: FormData | null): string | null {
   const header = request.headers.get("authorization")
   if (header?.toLowerCase().startsWith("bearer ")) {
