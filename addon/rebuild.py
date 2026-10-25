@@ -1,4 +1,4 @@
-"""Rebuild a nodevault.tree payload into a live node tree.
+"""Rebuild a noodlebin.tree payload into a live node tree.
 
 Owned by docs/pid/04-paste-in-blender.md. Uses bpy. The operator is paste_nodes.py.
 """

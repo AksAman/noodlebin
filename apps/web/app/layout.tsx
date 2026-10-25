@@ -4,6 +4,7 @@ import { SiteFooter } from "@/components/SiteFooter"
 import { SiteNav } from "@/components/SiteNav"
 import { getRequestSession } from "@/lib/auth"
 import { siteOrigin } from "@/lib/site"
+import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand"
 import { pasteBootScript } from "@/lib/pasteSession"
 import { themeBootScript } from "@/lib/theme"
 import { Funnel_Display, Funnel_Sans, Geist_Mono } from "next/font/google"
@@ -19,13 +20,13 @@ const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", dis
 
 export const metadata = {
   metadataBase: new URL(siteOrigin()),
-  title: "NodeVault",
-  description: "Copy Blender nodes to the browser and paste them back",
+  title: BRAND_NAME,
+  description: BRAND_TAGLINE,
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const headerList = await headers()
-  const embed = headerList.get("x-nodevault-embed") === "1"
+  const embed = headerList.get("x-noodlebin-embed") === "1"
   const session = embed ? null : await getRequestSession()
   return (
     <html lang="en" className={`h-full ${display.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>

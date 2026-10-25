@@ -29,7 +29,7 @@ export function checkShaderSource(raw: string): { ok: true; source: string } | {
     return { ok: false, error: "Shader cover is larger than 32 KB." }
   }
   if (/^\s*#\s*version\b/m.test(source)) {
-    return { ok: false, error: "Leave out #version; NodeVault adds the WebGL 2 header itself." }
+    return { ok: false, error: "Leave out #version; NoodleBin adds the WebGL 2 header itself." }
   }
   if (/\bvoid\s+main\s*\(/.test(source)) {
     return { ok: false, error: "Write a mainImage(out vec4 fragColor, in vec2 fragCoord) function instead of main()." }

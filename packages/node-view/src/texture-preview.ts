@@ -1,4 +1,4 @@
-import type { NodeVaultNode } from "@nodevault/interchange"
+import type { NoodleBinNode } from "@noodlebin/interchange"
 import { linearToSrgb } from "./color"
 import {
   hashFloatToFloat,
@@ -67,7 +67,7 @@ type VoronoiParams = {
 
 type PreviewParams = NoiseParams | VoronoiParams
 
-function socketNum(node: NodeVaultNode, id: string, fallback: number): number {
+function socketNum(node: NoodleBinNode, id: string, fallback: number): number {
   const value = node.sockets.inputs.find((s) => s.identifier === id)?.default_value
   return typeof value === "number" && Number.isFinite(value) ? value : fallback
 }
@@ -77,7 +77,7 @@ function dimOf(value: string): Dim {
   return 3
 }
 
-function readParams(node: NodeVaultNode): PreviewParams | null {
+function readParams(node: NoodleBinNode): PreviewParams | null {
   if (node.bl_idname === "ShaderNodeTexNoise") {
     const type = node.properties.noise_type
     const noiseType: NoiseType =
@@ -139,7 +139,7 @@ function readParams(node: NodeVaultNode): PreviewParams | null {
   return null
 }
 
-export function texturePreviewKey(node: NodeVaultNode): string {
+export function texturePreviewKey(node: NoodleBinNode): string {
   return JSON.stringify(readParams(node))
 }
 
@@ -765,7 +765,7 @@ function render(params: PreviewParams, size: number): Uint8ClampedArray {
   return data
 }
 
-export function paintTexturePreview(node: NodeVaultNode, data: Uint8ClampedArray, size: number): boolean {
+export function paintTexturePreview(node: NoodleBinNode, data: Uint8ClampedArray, size: number): boolean {
   const params = readParams(node)
   if (!params || size < 2 || data.length < size * size * 4) return false
   const key = `${texturePreviewKey(node)}@${size}`

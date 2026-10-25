@@ -1,26 +1,26 @@
 import { resolveCatalog, type CatalogIndex, type CatalogResolution } from "@/catalog"
 import {
   canonicalJson,
-  parseNodeVaultText,
-  safeParseNodeVaultText,
-  type NodeVaultError,
-  type NodeVaultPayload,
+  parseNoodleBinText,
+  safeParseNoodleBinText,
+  type NoodleBinError,
+  type NoodleBinPayload,
 } from "@/interchange"
 
 export type IngestOk = {
   ok: true
-  payload: NodeVaultPayload
+  payload: NoodleBinPayload
   originalText: string
   catalog: CatalogResolution
 }
 
 export type IngestFail = {
   ok: false
-  error: NodeVaultError
+  error: NoodleBinError
 }
 
 export function ingestText(text: string, catalogs: CatalogIndex): IngestOk | IngestFail {
-  const parsed = safeParseNodeVaultText(text)
+  const parsed = safeParseNoodleBinText(text)
   if (!parsed.ok) return parsed
   return {
     ok: true,
@@ -32,7 +32,7 @@ export function ingestText(text: string, catalogs: CatalogIndex): IngestOk | Ing
 
 export function looksLikeAttempt(text: string): boolean {
   const body = text.replace(/^\uFEFF/, "").trim()
-  return body.startsWith("{") && body.includes("nodevault.tree")
+  return body.startsWith("{") && body.includes("noodlebin.tree")
 }
 
 export function treeTypeLabel(treeType: string): string {
@@ -42,10 +42,10 @@ export function treeTypeLabel(treeType: string): string {
   return treeType
 }
 
-export function serializeCopy(payload: NodeVaultPayload): string {
+export function serializeCopy(payload: NoodleBinPayload): string {
   return canonicalJson(payload)
 }
 
-export function parseAttempt(text: string): ReturnType<typeof parseNodeVaultText> {
-  return parseNodeVaultText(text)
+export function parseAttempt(text: string): ReturnType<typeof parseNoodleBinText> {
+  return parseNoodleBinText(text)
 }

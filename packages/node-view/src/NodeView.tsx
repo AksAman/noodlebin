@@ -9,8 +9,8 @@ import {
   type Node,
   type NodeChange,
 } from "@xyflow/react";
-import type { Catalog } from "@nodevault/catalog";
-import type { NodeVaultTree } from "@nodevault/interchange";
+import type { Catalog } from "@noodlebin/catalog";
+import type { NoodleBinTree } from "@noodlebin/interchange";
 import {
   useCallback,
   useEffect,
@@ -89,12 +89,12 @@ function useCanvasTheme(ref: RefObject<HTMLElement | null>): CanvasTheme {
 }
 
 export type NodeViewProps = {
-  tree: NodeVaultTree;
+  tree: NoodleBinTree;
   catalog: Catalog | null;
   readOnly: true;
   onCopy?: () => void;
   /** All payload trees; used to open groups. Defaults to `[tree]`. */
-  trees?: NodeVaultTree[];
+  trees?: NoodleBinTree[];
   blenderVersion?: string;
   showMinimap?: boolean;
 };
@@ -108,7 +108,7 @@ function NodeViewInner({
   showMinimap = true,
 }: NodeViewProps) {
   const allTrees = useMemo(() => trees ?? [tree], [trees, tree]);
-  const [stack, setStack] = useState<NodeVaultTree[]>([tree]);
+  const [stack, setStack] = useState<NoodleBinTree[]>([tree]);
   const current = stack[stack.length - 1] ?? tree;
   const { fitView } = useReactFlow();
   const wrapRef = useRef<HTMLDivElement>(null);

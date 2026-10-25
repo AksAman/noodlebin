@@ -3,7 +3,8 @@
 import { NodeView } from "@/node-view"
 import { serializeCopy, treeTypeLabel } from "@/lib/ingest"
 import type { Catalog } from "@/catalog"
-import type { VaultPost } from "@/lib/posts"
+import type { NoodleBinPost } from "@/lib/posts"
+import { BRAND_NAME } from "@/lib/brand"
 import { btnGhost, canvas, cn, treeDotClass } from "@/lib/ui"
 import Link from "next/link"
 import { useCallback, useState } from "react"
@@ -13,7 +14,7 @@ export function EmbedFrame({
   catalog,
   allowCopy,
 }: {
-  post: VaultPost
+  post: NoodleBinPost
   catalog: Catalog | null
   allowCopy: boolean
 }) {
@@ -37,7 +38,7 @@ export function EmbedFrame({
         <span>{treeTypeLabel(post.tree_type)}</span>
         <span className="tabular-nums">Blender {post.blender_version_string}</span>
         <Link className="ml-auto text-accent-fg underline-offset-4 hover:underline" href={`/p/${post.slug}`} target="_blank">
-          Open in NodeVault
+          Open in {BRAND_NAME}
         </Link>
         {allowCopy ? (
           <button type="button" className={btnGhost} onClick={() => void onCopy()}>

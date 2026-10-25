@@ -2,7 +2,7 @@ import { CoverMedia } from "@/components/CoverMedia"
 import { GraphThumb } from "@/components/GraphThumb"
 import { ShaderCover } from "@/components/ShaderCover"
 import { treeTypeLabel } from "@/lib/ingest"
-import type { VaultPost } from "@/lib/posts"
+import type { NoodleBinPost } from "@/lib/posts"
 import { treeDotClass } from "@/lib/ui"
 import Link from "next/link"
 
@@ -10,7 +10,7 @@ function shortVersion(version: string): string {
   return version.replace(/_LTS$/i, " LTS")
 }
 
-export function CoverGrid({ posts, showAuthor = true }: { posts: VaultPost[]; showAuthor?: boolean }) {
+export function CoverGrid({ posts, showAuthor = true }: { posts: NoodleBinPost[]; showAuthor?: boolean }) {
   return (
     <ul className="m-0 list-none columns-1 gap-x-6 p-0 sm:columns-2 lg:columns-3">
       {posts.map((post, i) => (
@@ -37,6 +37,11 @@ export function CoverGrid({ posts, showAuthor = true }: { posts: VaultPost[]; sh
               {post.cover_shader ? (
                 <span className="absolute left-2.5 top-2.5 rounded bg-black/60 px-1.5 py-0.5 font-mono text-[10px] tracking-wide text-white/85 backdrop-blur-sm">
                   GLSL
+                </span>
+              ) : null}
+              {post.visibility === "unlisted" ? (
+                <span className="absolute right-2.5 top-2.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] tracking-wide text-white/85 backdrop-blur-sm">
+                  Unlisted
                 </span>
               ) : null}
             </div>

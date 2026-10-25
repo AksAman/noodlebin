@@ -1,12 +1,13 @@
 import { SignInPanel } from "@/components/SignInPanel"
 import { getRequestSession } from "@/lib/auth"
+import { BRAND_NAME } from "@/lib/brand"
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
-  title: "Sign in · NodeVault",
+  title: `Sign in · ${BRAND_NAME}`,
   description: "Sign in to credit graphs to your handle.",
 }
 

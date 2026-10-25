@@ -223,7 +223,7 @@ export function canonicalize<T>(payload: T): T {
 
 /**
  * Canonical JSON text: ordered keys, 2-space indent, trailing newline.
- * This is the clipboard text and the `.nodevault.json` file content.
+ * This is the clipboard text and the `.noodlebin.json` file content.
  */
 export function canonicalJson(payload: unknown): string {
   return JSON.stringify(canonicalize(payload), null, 2) + "\n";

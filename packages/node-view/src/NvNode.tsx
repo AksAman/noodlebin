@@ -1,7 +1,7 @@
 import { useContext, type CSSProperties } from "react"
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react"
-import { headerColor, lookupNode, socketColor } from "@nodevault/catalog"
-import type { InterfaceItem, JsonValue, NodeSocket, NodeVaultNode } from "@nodevault/interchange"
+import { headerColor, lookupNode, socketColor } from "@noodlebin/catalog"
+import type { InterfaceItem, JsonValue, NodeSocket, NoodleBinNode } from "@noodlebin/interchange"
 import { cssColor, cssThemeColor } from "./color"
 import { handleId, nodeTitle, nodeWidth, visibleSockets } from "./layout"
 import type { NvNodeData } from "./types"
@@ -25,7 +25,7 @@ function zoneCaption(bl_idname: string): string {
   return "Zone"
 }
 
-function headerFill(node: NodeVaultNode, catalog: NvNodeData["catalog"], kind: string): string {
+function headerFill(node: NoodleBinNode, catalog: NvNodeData["catalog"], kind: string): string {
   if (node.use_custom_color && node.color && node.color.length >= 3) {
     return cssColor(node.color)
   }

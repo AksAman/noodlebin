@@ -1,7 +1,7 @@
-import homepageNoise from "@/fixtures/handwritten/homepage-noise.nodevault.json";
+import homepageNoise from "@/fixtures/handwritten/homepage-noise.noodlebin.json";
 import {
-  parseNodeVaultText,
-  type NodeVaultPayload,
+  parseNoodleBinText,
+  type NoodleBinPayload,
   type TreeType,
 } from "@/interchange";
 import { halftoneCoverSource } from "@/lib/halftone";
@@ -9,13 +9,13 @@ import { buildSearchText, searchScore } from "@/lib/search";
 
 export type Visibility = "public" | "unlisted";
 
-export type VaultPost = {
+export type NoodleBinPost = {
   slug: string;
   title: string;
   author_name: string;
   author_slug: string | null;
   description: string | null;
-  tree: NodeVaultPayload | null;
+  tree: NoodleBinPayload | null;
   tree_type: TreeType;
   blender_version_string: string;
   cover_url: string | null;
@@ -37,7 +37,7 @@ export type VaultPost = {
   search_text: string;
 };
 
-export type StoredPost = VaultPost & {
+export type StoredPost = NoodleBinPost & {
   edit_token_hash: string;
   cover_file: string | null;
   video_file: string | null;
@@ -45,27 +45,27 @@ export type StoredPost = VaultPost & {
   user_id: string | null;
 };
 
-export type StaticPost = VaultPost;
+export type StaticPost = NoodleBinPost;
 
 export const HOMEPAGE_NOISE_SLUG = "homepage-background";
 
-function fromJson(value: unknown): NodeVaultPayload {
-  return parseNodeVaultText(JSON.stringify(value));
+function fromJson(value: unknown): NoodleBinPayload {
+  return parseNoodleBinText(JSON.stringify(value));
 }
 
 function seed(
   slug: string,
   title: string,
-  tree: NodeVaultPayload,
+  tree: NoodleBinPayload,
   description: string,
   created_at: string,
   cover_shader: string | null = null,
-): VaultPost {
+): NoodleBinPost {
   const post = {
     slug,
     title,
-    author_name: "NodeVault",
-    author_slug: "nodevault",
+    author_name: "NoodleBin",
+    author_slug: "noodlebin",
     description,
     tree,
     tree_type: tree.tree_type,
@@ -87,50 +87,50 @@ function seed(
   return { ...post, search_text: buildSearchText(post) };
 }
 
-export const posts: VaultPost[] = [
+export const posts: NoodleBinPost[] = [
   seed(
     HOMEPAGE_NOISE_SLUG,
     "The homepage background",
     fromJson(homepageNoise),
-    "The halftone shader behind the NodeVault homepage: a Noise Texture sampled once per grid cell, with each dot sized by how bright the Color Ramp makes it. Paste it onto a plane and Blender renders the same dots the homepage shows. Switch the view transform to Standard for matching colors.",
+    "The halftone shader behind the NoodleBin homepage: a Noise Texture sampled once per grid cell, with each dot sized by how bright the Color Ramp makes it. Paste it onto a plane and Blender renders the same dots the homepage shows. Switch the view transform to Standard for matching colors.",
     "2026-01-05T00:00:00.000Z",
     halftoneCoverSource(),
   ),
 ];
 
-export function toPublicPost(post: VaultPost): VaultPost {
+export function toPublicPost(post: NoodleBinPost): NoodleBinPost {
   return post;
 }
 
-export function postBySlug(slug: string): VaultPost | undefined {
+export function postBySlug(slug: string): NoodleBinPost | undefined {
   return posts.find((p) => p.slug === slug);
 }
 
-export function postsByAuthor(author_slug: string): VaultPost[] {
+export function postsByAuthor(author_slug: string): NoodleBinPost[] {
   return posts.filter((p) => p.author_slug === author_slug);
 }
 
-export function postsFiltered(treeType: string | null): VaultPost[] {
+export function postsFiltered(treeType: string | null): NoodleBinPost[] {
   if (!treeType) return posts;
   return posts.filter((p) => p.tree_type === treeType);
 }
 
 export function filterPosts(
-  list: VaultPost[],
+  list: NoodleBinPost[],
   query: {
     author?: string | null;
     tree_type?: string | null;
     q?: string | null;
     tag?: string | null;
   },
-): VaultPost[] {
+): NoodleBinPost[] {
   let out = list.filter((post) => post.visibility !== "unlisted");
   if (query.author) out = out.filter((p) => p.author_slug === query.author);
   if (query.tree_type) out = out.filter((p) => p.tree_type === query.tree_type);
   const tag = query.tag?.trim().toLowerCase();
   if (tag) out = out.filter((p) => p.tags.includes(tag));
   const q = query.q?.trim() ?? "";
-  const byDate = (a: VaultPost, b: VaultPost) =>
+  const byDate = (a: NoodleBinPost, b: NoodleBinPost) =>
     a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0;
   if (!q) return [...out].sort(byDate);
   return out
@@ -140,6 +140,6 @@ export function filterPosts(
     .map((row) => row.post);
 }
 
-export function takenSlugs(list: VaultPost[]): Set<string> {
+export function takenSlugs(list: NoodleBinPost[]): Set<string> {
   return new Set(list.map((p) => p.slug));
 }

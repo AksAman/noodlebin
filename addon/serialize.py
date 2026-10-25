@@ -1,4 +1,4 @@
-"""Write side of the ``nodevault.tree`` interchange format.
+"""Write side of the ``noodlebin.tree`` interchange format.
 
 Canonical JSON, which is the clipboard text and the file content. Owned by
 ``docs/pid/05-interchange-format.md``. Used by Copy (``copy_nodes.py``) and
@@ -17,7 +17,7 @@ import math
 from decimal import Decimal
 from typing import Any, Callable, Mapping, Sequence
 
-FORMAT = "nodevault.tree"
+FORMAT = "noodlebin.tree"
 FORMAT_VERSION = 1
 TREE_TYPES = ("ShaderNodeTree", "GeometryNodeTree", "CompositorNodeTree")
 
@@ -341,6 +341,6 @@ def dumps_pretty(value: Any) -> str:
 def canonical_json(payload: Any) -> str:
     """Canonical JSON text: ordered keys, 2-space indent, trailing newline.
 
-    This is the clipboard text and the ``.nodevault.json`` file content.
+    This is the clipboard text and the ``.noodlebin.json`` file content.
     """
     return dumps_pretty(canonicalize(payload)) + "\n"

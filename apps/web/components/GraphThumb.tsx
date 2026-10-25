@@ -1,5 +1,5 @@
 import { headerColor, lookupNode, resolveCatalog, socketColor, widgetId, type Catalog } from "@/catalog"
-import type { NodeVaultNode, NodeVaultPayload } from "@/interchange"
+import type { NoodleBinNode, NoodleBinPayload } from "@/interchange"
 import { cssColor, cssThemeColor } from "@/node-view/color"
 import { HEADER_H, ROW_H, blenderToCanvas, bounds, estimatedHeight, visibleSockets } from "@/node-view/layout"
 import { shippedCatalogs } from "@/lib/catalogs"
@@ -9,7 +9,7 @@ const MAX_RATIO = 1.7
 const MIN_SPAN = 520
 
 type Box = {
-  node: NodeVaultNode
+  node: NoodleBinNode
   kind: string
   x: number
   y: number
@@ -19,7 +19,7 @@ type Box = {
   inY: Map<string, number>
 }
 
-function measure(node: NodeVaultNode, catalog: Catalog | null): Box {
+function measure(node: NoodleBinNode, catalog: Catalog | null): Box {
   const kind = widgetId(catalog, node)
   const { x, y } = blenderToCanvas(node.location_absolute)
   const w = kind === "reroute" ? 16 : kind === "frame" ? node.width : Math.max(140, node.width)
@@ -41,7 +41,7 @@ function measure(node: NodeVaultNode, catalog: Catalog | null): Box {
   return { node, kind, x, y, w, h, outY, inY }
 }
 
-function headerFill(node: NodeVaultNode, kind: string, catalog: Catalog | null): string {
+function headerFill(node: NoodleBinNode, kind: string, catalog: Catalog | null): string {
   if (node.use_custom_color && node.color && node.color.length >= 3) return cssColor(node.color)
   if (kind === "group" && catalog?.themes["group_node"]) return cssThemeColor(catalog.themes["group_node"])
   return cssThemeColor(headerColor(catalog, node.bl_idname))
@@ -52,7 +52,7 @@ function bodyPath(x: number, y: number, w: number, h: number, r: number): string
 }
 
 /** A static, non-interactive picture of a payload's root tree, drawn with catalog colors. */
-export function GraphThumb({ payload, id }: { payload: NodeVaultPayload; id: string }) {
+export function GraphThumb({ payload, id }: { payload: NoodleBinPayload; id: string }) {
   const root = payload.trees.find((t) => t.is_root) ?? payload.trees[0]
   if (!root) return null
   const catalog = resolveCatalog(shippedCatalogs, payload.blender_version).catalog ?? null

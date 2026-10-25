@@ -1,5 +1,6 @@
-/** The add-on ships as a zip attached to each GitHub release; "latest" keeps the link right across versions. */
+/** Installed from the Blender Extensions repository, Blender's own updater tracks new versions. */
 export const addon = {
-  releasesUrl: "https://github.com/AksAman/NodeVault/releases/latest",
+  extensionsUrl: "https://extensions.blender.org/add-ons/noodlebin/",
+  releasesUrl: "https://github.com/AksAman/NoodleBin/releases/latest",
   minBlender: "5.0",
 }

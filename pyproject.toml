@@ -1,5 +1,5 @@
 [project]
-name = "blender-nodevault"
+name = "blender-noodlebin"
 version = "0.1.0"
 description = "Node Sharing for Blender"
 readme = "README.md"

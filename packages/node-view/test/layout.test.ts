@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test"
 import { blenderToCanvas, cssColor, cssThemeColor, linearToSrgb } from "../src/index"
 import { nodeTitle } from "../src/layout"
-import { parseNodeVaultText } from "@nodevault/interchange"
+import { parseNoodleBinText } from "@noodlebin/interchange"
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { treeToFlow } from "../src/graph"
 
-const fixture = join(import.meta.dir, "../../../fixtures/handwritten/worked-example-shader.nodevault.json")
+const fixture = join(import.meta.dir, "../../../fixtures/handwritten/worked-example-shader.noodlebin.json")
 
 describe("coordinates", () => {
   test("flips blender Y", () => {
@@ -28,7 +28,7 @@ describe("coordinates", () => {
 
 describe("treeToFlow", () => {
   test("two-node fixture is two cards and one edge", () => {
-    const payload = parseNodeVaultText(readFileSync(fixture, "utf8"))
+    const payload = parseNoodleBinText(readFileSync(fixture, "utf8"))
     const root = payload.trees[0]!
     const { nodes, edges } = treeToFlow(root, null, payload.blender_version_string, payload.trees)
     const cards = nodes.filter((n) => n.data.kind !== "zone-bg")
@@ -44,8 +44,8 @@ describe("treeToFlow", () => {
   })
 
   test("ramp widget stays on the node", () => {
-    const payload = parseNodeVaultText(
-      readFileSync(join(import.meta.dir, "../../../fixtures/handwritten/three-stop-ramp.nodevault.json"), "utf8"),
+    const payload = parseNoodleBinText(
+      readFileSync(join(import.meta.dir, "../../../fixtures/handwritten/three-stop-ramp.noodlebin.json"), "utf8"),
     )
     const { nodes } = treeToFlow(payload.trees[0]!, null, "5.1.0", payload.trees)
     const ramp = nodes.find((n) => n.id === "n1")
@@ -53,8 +53,8 @@ describe("treeToFlow", () => {
   })
 
   test("frame sits behind its child, which moves with it", () => {
-    const payload = parseNodeVaultText(
-      readFileSync(join(import.meta.dir, "../../../fixtures/handwritten/frame-child.nodevault.json"), "utf8"),
+    const payload = parseNoodleBinText(
+      readFileSync(join(import.meta.dir, "../../../fixtures/handwritten/frame-child.noodlebin.json"), "utf8"),
     )
     const { nodes } = treeToFlow(payload.trees[0]!, null, "5.1.0", payload.trees)
     const frame = nodes.find((n) => n.id === "n1")
@@ -71,8 +71,8 @@ describe("treeToFlow", () => {
   })
 
   test("group node points at the inner tree", () => {
-    const payload = parseNodeVaultText(
-      readFileSync(join(import.meta.dir, "../../../fixtures/handwritten/group-inner.nodevault.json"), "utf8"),
+    const payload = parseNoodleBinText(
+      readFileSync(join(import.meta.dir, "../../../fixtures/handwritten/group-inner.noodlebin.json"), "utf8"),
     )
     const { nodes } = treeToFlow(payload.trees[0]!, null, "5.1.0", payload.trees)
     expect(nodes.find((n) => n.id === "n1")?.data.kind).toBe("group")

@@ -1,4 +1,4 @@
-import { parseNodeVaultText } from "@/interchange"
+import { parseNoodleBinText } from "@/interchange"
 import { treeTypeLabel } from "@/lib/ingest"
 import { requireDurableStore } from "@/lib/publish"
 import {
@@ -56,7 +56,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ sl
   const blend = await readBlend(blendField instanceof File ? blendField : null)
   if (isSharingError(blend)) return fail(blend.status, blend.error)
   if (blend) patch.blend = blend
-  const tree = await readPayload(treeFile, treeText || null, parseNodeVaultText)
+  const tree = await readPayload(treeFile, treeText || null, parseNoodleBinText)
   if (isSharingError(tree)) return fail(tree.status, tree.error)
   if (tree) patch.tree = tree
   const links = parseLinkFields(form)

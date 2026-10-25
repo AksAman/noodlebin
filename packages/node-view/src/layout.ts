@@ -1,6 +1,6 @@
-import type { Catalog } from "@nodevault/catalog"
-import { lookupNode, widgetId } from "@nodevault/catalog"
-import type { NodeVaultNode, NodeVaultTree } from "@nodevault/interchange"
+import type { Catalog } from "@noodlebin/catalog"
+import { lookupNode, widgetId } from "@noodlebin/catalog"
+import type { NoodleBinNode, NoodleBinTree } from "@noodlebin/interchange"
 
 export const HEADER_H = 24
 export const ROW_H = 24
@@ -11,14 +11,14 @@ export function blenderToCanvas(location_absolute: readonly [number, number]): {
   return { x: location_absolute[0], y: -location_absolute[1] }
 }
 
-export function visibleSockets(node: NodeVaultNode): { inputs: typeof node.sockets.inputs; outputs: typeof node.sockets.outputs } {
+export function visibleSockets(node: NoodleBinNode): { inputs: typeof node.sockets.inputs; outputs: typeof node.sockets.outputs } {
   return {
     inputs: node.sockets.inputs.filter((s) => !s.hide && s.enabled),
     outputs: node.sockets.outputs.filter((s) => !s.hide && s.enabled),
   }
 }
 
-export function linkedInputIds(tree: NodeVaultTree, nodeId: string): Set<string> {
+export function linkedInputIds(tree: NoodleBinTree, nodeId: string): Set<string> {
   const ids = new Set<string>()
   for (const link of tree.links) {
     if (link.to_node === nodeId) ids.add(link.to_socket.identifier)
@@ -26,7 +26,7 @@ export function linkedInputIds(tree: NodeVaultTree, nodeId: string): Set<string>
   return ids
 }
 
-export function nodeTitle(node: NodeVaultNode, catalog: Catalog | null): string {
+export function nodeTitle(node: NoodleBinNode, catalog: Catalog | null): string {
   if (node.label) return node.label
   const rec = lookupNode(catalog, node.bl_idname)
   if (rec?.label) return rec.label
@@ -34,7 +34,7 @@ export function nodeTitle(node: NodeVaultNode, catalog: Catalog | null): string 
 }
 
 export function estimatedHeight(
-  node: NodeVaultNode,
+  node: NoodleBinNode,
   catalog: Catalog | null,
   options?: { texturePreview?: boolean },
 ): number {
@@ -63,12 +63,12 @@ export function estimatedHeight(
   return HEADER_H + 8 + propCount * ROW_H + socketRows * ROW_H + extra
 }
 
-export function nodeWidth(node: NodeVaultNode): number {
+export function nodeWidth(node: NoodleBinNode): number {
   if (widgetId(null, node) === "reroute") return 16
   return Math.max(MIN_WIDTH, node.width)
 }
 
-export function bounds(tree: NodeVaultTree, catalog: Catalog | null): { x: number; y: number; width: number; height: number } {
+export function bounds(tree: NoodleBinTree, catalog: Catalog | null): { x: number; y: number; width: number; height: number } {
   let minX = Infinity
   let minY = Infinity
   let maxX = -Infinity

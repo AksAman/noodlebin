@@ -65,7 +65,7 @@ function HomeHero() {
       >
         <div>
           <h1 className="m-0 max-w-[14ch] font-display text-[clamp(2.75rem,1.6rem+4.4vw,5.25rem)] font-semibold leading-[0.95] tracking-[-0.035em] text-fg">
-            Steal these graphs.
+            Pull a noodle from the bin.
           </h1>
           <p className="mt-5 max-w-[46ch] text-[17px] leading-relaxed text-muted">
             Every graph here copies straight back into Blender with its
@@ -79,9 +79,9 @@ function HomeHero() {
               className={treeDotClass("ShaderNodeTree")}
               aria-hidden="true"
             />
-            The dots behind this are a Blender shader.
+            The dots behind this are a Blender shader node graph.
             <span className="text-accent-fg underline-offset-4 group-hover:underline">
-              Copy the nodes
+              Pull the nodes
             </span>
           </Link>
         </div>

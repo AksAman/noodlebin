@@ -3,7 +3,7 @@
  * live here so the graph view does not hardcode fallbacks.
  */
 
-import type { NodeVaultNode } from "@nodevault/interchange"
+import type { NoodleBinNode } from "@noodlebin/interchange"
 import {
   MISSING_THEME_HEADER,
   UNKNOWN_NODE_HEADER,
@@ -38,7 +38,7 @@ export function socketColor(catalog: Catalog | null, socket_bl_idname: string): 
  * Widget id the generic view branches on. Unknown strings stay as-is; the
  * visualizer treats anything it does not know as generic.
  */
-export function widgetId(catalog: Catalog | null, node: NodeVaultNode): string {
+export function widgetId(catalog: Catalog | null, node: NoodleBinNode): string {
   if (node.bl_idname === "NodeFrame") return "frame"
   if (node.bl_idname === "NodeReroute") return "reroute"
   if (node.group_tree_id) return "group"

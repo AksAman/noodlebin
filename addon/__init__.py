@@ -1,4 +1,4 @@
-"""NodeVault Blender extension. Register is the only bpy import at load time.
+"""NoodleBin Blender extension. Register is the only bpy import at load time.
 
 Plain python3 tests import serialize/deserialize as submodules without calling
 register(), so they do not need bpy.
@@ -48,17 +48,17 @@ def register():
             {"ctrl": True, "shift": True, "oskey": False},
             {"ctrl": False, "shift": True, "oskey": True},
         ):
-            kmi = km.keymap_items.new("nodevault.copy_nodes", "C", "PRESS", **keys)
+            kmi = km.keymap_items.new("noodlebin.copy_nodes", "C", "PRESS", **keys)
             addon_keymaps.append((km, kmi))
-            kmi = km.keymap_items.new("nodevault.paste_nodes", "V", "PRESS", **keys)
+            kmi = km.keymap_items.new("noodlebin.paste_nodes", "V", "PRESS", **keys)
             addon_keymaps.append((km, kmi))
         for keys in (
             {"ctrl": True, "shift": True, "alt": True, "oskey": False},
             {"ctrl": False, "shift": True, "alt": True, "oskey": True},
         ):
-            kmi = km.keymap_items.new("nodevault.copy_all_nodes", "C", "PRESS", **keys)
+            kmi = km.keymap_items.new("noodlebin.copy_all_nodes", "C", "PRESS", **keys)
             addon_keymaps.append((km, kmi))
-            kmi = km.keymap_items.new("nodevault.paste_replace_nodes", "V", "PRESS", **keys)
+            kmi = km.keymap_items.new("noodlebin.paste_replace_nodes", "V", "PRESS", **keys)
             addon_keymaps.append((km, kmi))
 
 

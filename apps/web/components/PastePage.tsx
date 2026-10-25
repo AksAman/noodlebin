@@ -1,6 +1,7 @@
 "use client"
 
 import { Kbd, useModKey } from "@/components/Keys"
+import { BRAND_NAME } from "@/lib/brand"
 import { PayloadFallback } from "@/components/PayloadFallback"
 import { Dialog } from "@/components/Dialog"
 import { ShareSheet } from "@/components/ShareSheet"
@@ -8,7 +9,7 @@ import { NodeView } from "@/node-view"
 import { shippedCatalogs } from "@/lib/catalogs"
 import { ingestText, serializeCopy, treeTypeLabel } from "@/lib/ingest"
 import type { CatalogResolution } from "@/catalog"
-import type { NodeVaultPayload } from "@/interchange"
+import type { NoodleBinPayload } from "@/interchange"
 import { btn, btnAccent, btnGhost, cn, errorBox, notice as noticeClass, shell, treeDotClass } from "@/lib/ui"
 import { capture } from "@/lib/analytics"
 import { clearPasteRestoring, clearPasteSession, readPasteSession, writePasteSession } from "@/lib/pasteSession"
@@ -24,7 +25,7 @@ function isTextField(target: EventTarget | null): boolean {
 }
 
 export function PastePage() {
-  const [payload, setPayload] = useState<NodeVaultPayload | null>(null)
+  const [payload, setPayload] = useState<NoodleBinPayload | null>(null)
   const [resolution, setResolution] = useState<CatalogResolution | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
@@ -79,7 +80,7 @@ export function PastePage() {
       const file = event.dataTransfer?.files[0]
       if (!file) return
       const name = file.name.toLowerCase()
-      if (!name.endsWith(".json") && !name.endsWith(".nodevault.json")) return
+      if (!name.endsWith(".json") && !name.endsWith(".noodlebin.json")) return
       void file.text().then((text) => applyText(text, { source: "drop" }))
     }
     const onDragOver = (event: DragEvent) => {
@@ -302,7 +303,7 @@ function EmptyState({ error }: { error: string | null }) {
     <>
       Press <Kbd>{`${mod} ⇧ C`}</Kbd> to copy them with the{" "}
       <Link className="text-accent-fg underline-offset-4 hover:underline" href="/addon">
-        NodeVault add-on
+        {BRAND_NAME} add-on
       </Link>
       .
     </>,

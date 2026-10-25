@@ -12,7 +12,7 @@ from pathlib import Path
 
 from addon import deserialize, serialize
 from addon.deserialize import (
-    NodeVaultError,
+    NoodleBinError,
     parse_clipboard_text,
     validate_payload,
 )
@@ -26,7 +26,7 @@ FIXTURE_PATH = (
     Path(__file__).resolve().parents[2]
     / "fixtures"
     / "handwritten"
-    / "worked-example-shader.nodevault.json"
+    / "worked-example-shader.noodlebin.json"
 )
 FIXTURE_TEXT = FIXTURE_PATH.read_text(encoding="utf-8")
 
@@ -42,8 +42,8 @@ def parse_object(obj) -> dict:
 class ErrorAssertions(unittest.TestCase):
     def assert_error(
         self, fn, code: str, message_part: str | None = None
-    ) -> NodeVaultError:
-        with self.assertRaises(NodeVaultError) as ctx:
+    ) -> NoodleBinError:
+        with self.assertRaises(NoodleBinError) as ctx:
             fn()
         self.assertEqual(ctx.exception.code, code)
         if message_part:
@@ -68,40 +68,40 @@ class TextTests(ErrorAssertions):
 
     def test_legacy_magic_line_not_accepted(self):
         self.assert_error(
-            lambda: parse_clipboard_text(f"nodevault 1\n{FIXTURE_TEXT}"), "not_nodevault"
+            lambda: parse_clipboard_text(f"noodlebin 1\n{FIXTURE_TEXT}"), "not_noodlebin"
         )
 
     def test_plain_text(self):
         self.assert_error(
             lambda: parse_clipboard_text("hello world"),
-            "not_nodevault",
-            "Clipboard is not a NodeVault node tree",
+            "not_noodlebin",
+            "Clipboard is not a NoodleBin node tree",
         )
 
     def test_bare_json_other_format(self):
         self.assert_error(
             lambda: parse_clipboard_text('{"format": "something.else"}'),
-            "not_nodevault",
+            "not_noodlebin",
         )
-        self.assert_error(lambda: parse_clipboard_text("[1, 2, 3]"), "not_nodevault")
+        self.assert_error(lambda: parse_clipboard_text("[1, 2, 3]"), "not_noodlebin")
 
     def test_bad_json_when_clearly_meant_as_a_tree(self):
         truncated = FIXTURE_TEXT[: len(FIXTURE_TEXT) // 2]
         self.assert_error(lambda: parse_clipboard_text(truncated), "bad_json", "not valid JSON")
         # Broken JSON that never mentions the format is just not a node tree.
-        self.assert_error(lambda: parse_clipboard_text("{ not json"), "not_nodevault")
+        self.assert_error(lambda: parse_clipboard_text("{ not json"), "not_noodlebin")
 
     def test_looks_like(self):
-        self.assertTrue(deserialize.looks_like_nodevault(FIXTURE_TEXT))
-        self.assertTrue(deserialize.looks_like_nodevault(f"  \ufeff{FIXTURE_TEXT}"))
-        self.assertFalse(deserialize.looks_like_nodevault("some text"))
-        self.assertFalse(deserialize.looks_like_nodevault('{"a": 1}'))
+        self.assertTrue(deserialize.looks_like_noodlebin(FIXTURE_TEXT))
+        self.assertTrue(deserialize.looks_like_noodlebin(f"  \ufeff{FIXTURE_TEXT}"))
+        self.assertFalse(deserialize.looks_like_noodlebin("some text"))
+        self.assertFalse(deserialize.looks_like_noodlebin('{"a": 1}'))
 
 
 class ValidationTests(ErrorAssertions):
     def test_worked_example(self):
         p = fixture()
-        self.assertEqual(p["format"], "nodevault.tree")
+        self.assertEqual(p["format"], "noodlebin.tree")
         self.assertEqual(p["blender_version"], [5, 0, 1])
         self.assertEqual(
             [n["bl_idname"] for n in p["trees"][0]["nodes"]],
@@ -110,11 +110,11 @@ class ValidationTests(ErrorAssertions):
 
     def test_bad_format(self):
         p = fixture()
-        p["format"] = "nodevault.other"
+        p["format"] = "noodlebin.other"
         # At the text boundary a foreign format is simply not a node tree.
-        self.assert_error(lambda: parse_object(p), "not_nodevault")
+        self.assert_error(lambda: parse_object(p), "not_noodlebin")
         # The validator itself names the field.
-        self.assert_error(lambda: validate_payload(p), "bad_format", "nodevault.other")
+        self.assert_error(lambda: validate_payload(p), "bad_format", "noodlebin.other")
 
     def test_format_version_99(self):
         p = fixture()

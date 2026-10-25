@@ -2,22 +2,28 @@
 
 import { useServerSession } from "@/components/SessionProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { cn } from "@/lib/ui";
+import { cn } from "@/lib/ui"
+import { BRAND_NAME } from "@/lib/brand";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export function Mark() {
   return (
-    <svg viewBox="0 0 28 16" aria-hidden="true" className="h-4 w-7">
+    <svg viewBox="0 0 34 16" aria-hidden="true" className="h-4 w-[34px]">
+      {/* noodle link */}
       <path
-        d="M5 4.5C14 4.5 14 11.5 23 11.5"
+        d="M4.5 4.5C13 4.5 15 11.5 23 11.5"
         fill="none"
         stroke="var(--tree-shader)"
         strokeWidth="2"
         strokeLinecap="round"
       />
+      {/* output socket */}
       <circle cx="4.5" cy="4.5" r="3" fill="var(--accent)" />
-      <circle cx="23.5" cy="11.5" r="3" fill="var(--tree-geometry)" />
+      {/* bin body */}
+      <rect x="21" y="9.5" width="6" height="5" fill="none" stroke="var(--tree-geometry)" strokeWidth="1.5" strokeLinejoin="round" />
+      {/* bin rim */}
+      <line x1="20" y1="9.5" x2="29" y2="9.5" stroke="var(--tree-geometry)" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
 }
@@ -61,7 +67,7 @@ export function SiteNav() {
         >
           <Mark />
           <span className="font-display text-[17px] font-semibold tracking-[-0.02em] max-[23rem]:sr-only">
-            NodeVault
+            {BRAND_NAME}
           </span>
         </Link>
         <div className="ml-3 hidden items-center md:flex">{renderLinks()}</div>

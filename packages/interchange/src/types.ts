@@ -1,12 +1,12 @@
 /**
- * Types for the `nodevault.tree` clipboard payload.
+ * Types for the `noodlebin.tree` clipboard payload.
  * Source of truth: docs/pid/05-interchange-format.md.
  *
  * These describe the known fields. The canonical serializer preserves any
  * unknown keys at runtime; they are simply not typed here.
  */
 
-export const FORMAT = "nodevault.tree" as const;
+export const FORMAT = "noodlebin.tree" as const;
 export const FORMAT_VERSION = 1 as const;
 
 export const TREE_TYPES = [
@@ -119,7 +119,7 @@ export interface Widgets {
   image?: ImageWidget;
 }
 
-export interface NodeVaultNode {
+export interface NoodleBinNode {
   /** `n` plus a counter, unique per tree. Links use this id, never the Blender name. */
   id: string;
   bl_idname: string;
@@ -157,7 +157,7 @@ export interface SocketRef {
   index: number;
 }
 
-export interface NodeVaultLink {
+export interface NoodleBinLink {
   id: string;
   from_node: string;
   from_socket: SocketRef;
@@ -166,17 +166,17 @@ export interface NodeVaultLink {
   is_muted: boolean;
 }
 
-export interface NodeVaultTree {
+export interface NoodleBinTree {
   /** `root` for the copied selection, `group:<name>` for node groups. */
   id: string;
   name: string;
   is_root: boolean;
   interface: InterfaceItem[];
-  nodes: NodeVaultNode[];
-  links: NodeVaultLink[];
+  nodes: NoodleBinNode[];
+  links: NoodleBinLink[];
 }
 
-export interface NodeVaultPayload {
+export interface NoodleBinPayload {
   format: typeof FORMAT;
   format_version: typeof FORMAT_VERSION;
   blender_version: BlenderVersion;
@@ -186,5 +186,5 @@ export interface NodeVaultPayload {
   copied_at: string;
   origin: Origin;
   /** The root first, then referenced groups depth-first. */
-  trees: NodeVaultTree[];
+  trees: NoodleBinTree[];
 }

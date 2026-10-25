@@ -2,8 +2,8 @@
  * Named errors. Every failed parse or validation check raises one of these
  * codes. The Python side (addon/deserialize.py) uses the same code strings.
  */
-export type NodeVaultErrorCode =
-  | "not_nodevault"
+export type NoodleBinErrorCode =
+  | "not_noodlebin"
   | "bad_json"
   | "bad_format"
   | "bad_format_version"
@@ -19,19 +19,19 @@ export type NodeVaultErrorCode =
   | "dangling_link_node"
   | "dangling_link_socket";
 
-export class NodeVaultError extends Error {
-  readonly code: NodeVaultErrorCode;
+export class NoodleBinError extends Error {
+  readonly code: NoodleBinErrorCode;
   /** Dotted path into the payload when the failure is about one field. */
   readonly path: string | undefined;
 
-  constructor(code: NodeVaultErrorCode, message: string, path?: string) {
+  constructor(code: NoodleBinErrorCode, message: string, path?: string) {
     super(message);
-    this.name = "NodeVaultError";
+    this.name = "NoodleBinError";
     this.code = code;
     this.path = path;
   }
 }
 
-export function isNodeVaultError(value: unknown): value is NodeVaultError {
-  return value instanceof NodeVaultError;
+export function isNoodleBinError(value: unknown): value is NoodleBinError {
+  return value instanceof NoodleBinError;
 }

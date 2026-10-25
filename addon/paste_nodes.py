@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from bpy.types import Operator
 
-from .deserialize import NodeVaultError, parse_clipboard_text
+from .deserialize import NoodleBinError, parse_clipboard_text
 from .rebuild import TreeTypeMismatch, paste_payload
 from .serialize import TREE_TYPES
 
@@ -48,7 +48,7 @@ def _execute_paste(op: Operator, context, *, replace: bool) -> set[str]:
     text = context.window_manager.clipboard or ""
     try:
         payload = parse_clipboard_text(text)
-    except NodeVaultError as exc:
+    except NoodleBinError as exc:
         op.report({"ERROR"}, str(exc))
         return {"CANCELLED"}
 
@@ -74,10 +74,10 @@ def _execute_paste(op: Operator, context, *, replace: bool) -> set[str]:
     return _report_result(op, result)
 
 
-class NODEVAULT_OT_paste_nodes(Operator):
-    bl_idname = "nodevault.paste_nodes"
+class NOODLEBIN_OT_paste_nodes(Operator):
+    bl_idname = "noodlebin.paste_nodes"
     bl_label = "Paste Nodes"
-    bl_description = "Paste a NodeVault JSON clipboard into this node editor"
+    bl_description = "Paste a noodlebin JSON clipboard into this node editor"
     bl_options = {"REGISTER", "UNDO"}
 
     @classmethod
@@ -88,10 +88,10 @@ class NODEVAULT_OT_paste_nodes(Operator):
         return _execute_paste(self, context, replace=False)
 
 
-class NODEVAULT_OT_paste_replace_nodes(Operator):
-    bl_idname = "nodevault.paste_replace_nodes"
+class NOODLEBIN_OT_paste_replace_nodes(Operator):
+    bl_idname = "noodlebin.paste_replace_nodes"
     bl_label = "Paste and Replace Nodes"
-    bl_description = "Remove every node in this tree, then paste the NodeVault clipboard in place"
+    bl_description = "Remove every node in this tree, then paste the noodlebin clipboard in place"
     bl_options = {"REGISTER", "UNDO"}
 
     @classmethod
@@ -102,4 +102,4 @@ class NODEVAULT_OT_paste_replace_nodes(Operator):
         return _execute_paste(self, context, replace=True)
 
 
-classes = (NODEVAULT_OT_paste_nodes, NODEVAULT_OT_paste_replace_nodes)
+classes = (NOODLEBIN_OT_paste_nodes, NOODLEBIN_OT_paste_replace_nodes)

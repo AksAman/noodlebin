@@ -1,4 +1,4 @@
-"""Capture a node selection into a ``nodevault.tree`` payload dict.
+"""Capture a node selection into a ``noodlebin.tree`` payload dict.
 
 Owned by docs/pid/01-copy-from-blender.md. Uses ``bpy``. Call from the
 Copy operator or from ``blender --background --python`` tests. Canonical
@@ -48,7 +48,7 @@ _GROUP_BL_IDNAMES = frozenset(
     {"ShaderNodeGroup", "GeometryNodeGroup", "CompositorNodeGroup"}
 )
 _PAIR_PROPS = ("paired_output", "paired_input")
-_THROWAY = "_nodevault_capture"
+_THROWAY = "_noodlebin_capture"
 
 
 class CaptureError(Exception):

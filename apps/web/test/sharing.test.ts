@@ -4,14 +4,23 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { GET as getPost, PATCH } from "@/app/api/posts/[slug]/route";
 import { GET, POST } from "@/app/api/posts/route";
-import { parseNodeVaultText } from "@/interchange";
+import { parseNoodleBinText } from "@/interchange";
 import { publishPost } from "@/lib/publishPost";
 import {
   hashEditToken,
+  isSharingError,
+  parseCreateForm,
   slugify,
   tokenMatches,
   uniqueSlug,
 } from "@/lib/sharing";
+import {
+  authorGallery,
+  createStoredPost,
+  deleteOwnedPost,
+  getPublicPost,
+  updateOwnedPost,
+} from "@/lib/store";
 
 const png = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
@@ -20,20 +29,20 @@ const png = Buffer.from(
 
 const fixturePath = join(
   import.meta.dir,
-  "../../../fixtures/handwritten/three-stop-ramp.nodevault.json",
+  "../../../fixtures/handwritten/three-stop-ramp.noodlebin.json",
 );
 
 const dirs: string[] = [];
 
 function tempDir(): string {
-  const dir = mkdtempSync(join(tmpdir(), "nodevault-share-"));
+  const dir = mkdtempSync(join(tmpdir(), "noodlebin-share-"));
   dirs.push(dir);
-  process.env["NODEVAULT_DATA_DIR"] = dir;
+  process.env["NOODLEBIN_DATA_DIR"] = dir;
   return dir;
 }
 
 afterEach(() => {
-  delete process.env["NODEVAULT_DATA_DIR"];
+  delete process.env["NOODLEBIN_DATA_DIR"];
   delete process.env["PUBLISH_SECRET"];
   delete process.env["VERCEL"];
   for (const dir of dirs.splice(0))
@@ -147,7 +156,7 @@ describe("posts API", () => {
         blender_version_string: string;
       };
     };
-    const payload = parseNodeVaultText(readFileSync(fixturePath, "utf8"));
+    const payload = parseNoodleBinText(readFileSync(fixturePath, "utf8"));
     expect(body.post.tree_type).toBe(payload.tree_type);
     expect(body.post.blender_version_string).toBe(
       payload.blender_version_string,
@@ -172,7 +181,7 @@ describe("posts API", () => {
     const patch = new FormData();
     patch.set(
       "tree",
-      new File([readFileSync(fixturePath)], "three-stop-ramp.nodevault.json", {
+      new File([readFileSync(fixturePath)], "three-stop-ramp.noodlebin.json", {
         type: "application/json",
       }),
     );
@@ -188,9 +197,9 @@ describe("posts API", () => {
     const body = (await res.json()) as {
       post: { tree: { format: string }; blender_version_string: string };
     };
-    expect(body.post.tree.format).toBe("nodevault.tree");
+    expect(body.post.tree.format).toBe("noodlebin.tree");
     expect(body.post.blender_version_string).toBe(
-      parseNodeVaultText(readFileSync(fixturePath, "utf8"))
+      parseNoodleBinText(readFileSync(fixturePath, "utf8"))
         .blender_version_string,
     );
   });
@@ -517,5 +526,121 @@ describe("posts API", () => {
     );
     const tags = (await tagged.json()) as { posts: { slug: string }[] };
     expect(tags.posts.some((post) => post.slug === body.post.slug)).toBe(true);
+  });
+});
+
+const rampPath = join(
+  import.meta.dir,
+  "../../../fixtures/handwritten/three-stop-ramp.noodlebin.json",
+);
+const shaderPath = join(
+  import.meta.dir,
+  "../../../fixtures/handwritten/worked-example-shader.noodlebin.json",
+);
+
+async function makeOwned(userId: string | null, title = "Owned graph") {
+  const form = new FormData();
+  form.set("title", title);
+  form.set("author_name", "Aman");
+  form.set("tree_type", "ShaderNodeTree");
+  form.set("blender_version_string", "5.1.0");
+  form.set("cover", coverFile());
+  form.set("tree_text", readFileSync(rampPath, "utf8"));
+  const parsed = await parseCreateForm(form, parseNoodleBinText);
+  if (isSharingError(parsed)) throw new Error(parsed.error);
+  parsed.user_id = userId;
+  parsed.author_slug = userId ? "aman" : parsed.author_slug;
+  return createStoredPost(parsed);
+}
+
+describe("owned posts", () => {
+  test("the owner can rename, unlist, and replace the graph without changing the slug", async () => {
+    tempDir();
+    const created = await makeOwned("user-1");
+    const replacement = parseNoodleBinText(readFileSync(shaderPath, "utf8"));
+    const updated = await updateOwnedPost(created.post.slug, "user-1", {
+      title: "Renamed graph",
+      description: "A note",
+      visibility: "unlisted",
+      tags: ["ramp"],
+      tree: replacement,
+      files: {},
+    });
+    if (isSharingError(updated)) throw new Error(updated.error);
+    expect(updated.post.slug).toBe(created.post.slug);
+    expect(updated.post.title).toBe("Renamed graph");
+    expect(updated.post.description).toBe("A note");
+    expect(updated.post.visibility).toBe("unlisted");
+    expect(updated.post.tags).toEqual(["ramp"]);
+    expect(updated.post.tree?.blender_version_string).toBe(
+      replacement.blender_version_string,
+    );
+    expect(updated.post.tree?.tree_type).toBe(replacement.tree_type);
+
+    const listed = await GET(new Request("http://nv.test/api/posts"));
+    const list = (await listed.json()) as { posts: { slug: string }[] };
+    expect(list.posts.some((post) => post.slug === created.post.slug)).toBe(
+      false,
+    );
+    const mine = await authorGallery("aman", true);
+    expect(mine.some((post) => post.slug === created.post.slug)).toBe(true);
+  });
+
+  test("an update without a tree keeps the graph", async () => {
+    tempDir();
+    const created = await makeOwned("user-1");
+    const updated = await updateOwnedPost(created.post.slug, "user-1", {
+      title: "Same graph",
+      description: null,
+      visibility: "public",
+      tags: [],
+      files: {},
+    });
+    if (isSharingError(updated)) throw new Error(updated.error);
+    expect(updated.post.tree).toEqual(created.post.tree);
+    expect(updated.post.blender_version_string).toBe(
+      created.post.blender_version_string,
+    );
+  });
+
+  test("another user and an anonymous post cannot be changed", async () => {
+    tempDir();
+    const owned = await makeOwned("user-1");
+    const denied = await updateOwnedPost(owned.post.slug, "user-2", {
+      title: "Stolen",
+      description: null,
+      visibility: "public",
+      tags: [],
+      files: {},
+    });
+    expect(isSharingError(denied) && denied.status).toBe(403);
+    const still = await getPublicPost(owned.post.slug);
+    expect(still?.title).toBe("Owned graph");
+
+    const anon = await makeOwned(null, "Anonymous graph");
+    const anonDenied = await deleteOwnedPost(anon.post.slug, "user-1");
+    expect(isSharingError(anonDenied) && anonDenied.status).toBe(403);
+    expect(await getPublicPost(anon.post.slug)).toBeTruthy();
+  });
+
+  test("the owner can delete a post once", async () => {
+    tempDir();
+    const created = await makeOwned("user-1", "Going away");
+    const removed = await deleteOwnedPost(created.post.slug, "user-1");
+    expect(isSharingError(removed)).toBe(false);
+    expect(await getPublicPost(created.post.slug)).toBeUndefined();
+    const listed = await GET(new Request("http://nv.test/api/posts"));
+    const list = (await listed.json()) as { posts: { slug: string }[] };
+    expect(list.posts.some((post) => post.slug === created.post.slug)).toBe(
+      false,
+    );
+    const again = await deleteOwnedPost(created.post.slug, "user-1");
+    expect(isSharingError(again) && again.status).toBe(404);
+  });
+
+  test("fixture posts cannot be deleted", async () => {
+    tempDir();
+    const fixture = await deleteOwnedPost("homepage-background", "user-1");
+    expect(isSharingError(fixture) && fixture.status).toBe(403);
   });
 });

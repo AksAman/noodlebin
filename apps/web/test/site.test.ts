@@ -18,9 +18,9 @@ describe("site origin", () => {
   test("uses the production host ahead of the deployment host", () => {
     const previousProduction = process.env.VERCEL_PROJECT_PRODUCTION_URL;
     const previousUrl = process.env.VERCEL_URL;
-    process.env.VERCEL_PROJECT_PRODUCTION_URL = "nodevault-flame.vercel.app";
-    process.env.VERCEL_URL = "nodevault-preview.vercel.app";
-    expect(siteOrigin()).toBe("https://nodevault-flame.vercel.app");
+    process.env.VERCEL_PROJECT_PRODUCTION_URL = "noodlebin-flame.vercel.app";
+    process.env.VERCEL_URL = "noodlebin-preview.vercel.app";
+    expect(siteOrigin()).toBe("https://noodlebin-flame.vercel.app");
     if (previousProduction === undefined)
       delete process.env.VERCEL_PROJECT_PRODUCTION_URL;
     else process.env.VERCEL_PROJECT_PRODUCTION_URL = previousProduction;

@@ -35,22 +35,22 @@ def _tree_label(context) -> str:
     return names.get(tt, tt)
 
 
-class NODEVAULT_MT_menu(Menu):
-    bl_label = "NodeVault"
-    bl_idname = "NODEVAULT_MT_menu"
+class NOODLEBIN_MT_menu(Menu):
+    bl_label = "noodlebin"
+    bl_idname = "NOODLEBIN_MT_menu"
 
     def draw(self, context):
         layout = self.layout
-        layout.operator("nodevault.copy_nodes")
-        layout.operator("nodevault.copy_all_nodes")
-        layout.operator("nodevault.paste_nodes")
-        layout.operator("nodevault.paste_replace_nodes")
+        layout.operator("noodlebin.copy_nodes")
+        layout.operator("noodlebin.copy_all_nodes")
+        layout.operator("noodlebin.paste_nodes")
+        layout.operator("noodlebin.paste_replace_nodes")
         layout.separator()
-        layout.operator("nodevault.save_nodes")
+        layout.operator("noodlebin.save_nodes")
 
 
 def draw_header_menu(self, context):
-    self.layout.menu("NODEVAULT_MT_menu")
+    self.layout.menu("NOODLEBIN_MT_menu")
 
 
 def _reload_after_operator():
@@ -62,10 +62,10 @@ def _reload_after_operator():
     return None
 
 
-class NODEVAULT_OT_reload(Operator):
-    bl_idname = "nodevault.reload"
+class NOODLEBIN_OT_reload(Operator):
+    bl_idname = "noodlebin.reload"
     bl_label = "Reload Add-on"
-    bl_description = "Re-read NodeVault Python from disk"
+    bl_description = "Re-read noodlebin Python from disk"
     bl_options = {"INTERNAL"}
 
     def execute(self, context):
@@ -74,12 +74,12 @@ class NODEVAULT_OT_reload(Operator):
         return {"FINISHED"}
 
 
-class NODEVAULT_PT_panel(Panel):
-    bl_label = "NodeVault"
-    bl_idname = "NODEVAULT_PT_panel"
+class NOODLEBIN_PT_panel(Panel):
+    bl_label = "noodlebin"
+    bl_idname = "NOODLEBIN_PT_panel"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
-    bl_category = "NodeVault"
+    bl_category = "noodlebin"
 
     def draw(self, context):
         layout = self.layout
@@ -88,12 +88,12 @@ class NODEVAULT_PT_panel(Panel):
         if space and space.node_tree:
             count = sum(1 for n in space.node_tree.nodes if n.select)
             layout.label(text=f"{count} selected")
-        layout.operator("nodevault.copy_nodes")
-        layout.operator("nodevault.copy_all_nodes")
-        layout.operator("nodevault.paste_nodes")
-        layout.operator("nodevault.paste_replace_nodes")
-        layout.operator("nodevault.save_nodes")
-        layout.operator("nodevault.reload")
+        layout.operator("noodlebin.copy_nodes")
+        layout.operator("noodlebin.copy_all_nodes")
+        layout.operator("noodlebin.paste_nodes")
+        layout.operator("noodlebin.paste_replace_nodes")
+        layout.operator("noodlebin.save_nodes")
+        layout.operator("noodlebin.reload")
 
         if last_skips:
             box = layout.box()
@@ -104,11 +104,11 @@ class NODEVAULT_PT_panel(Panel):
         version = _addon_version()
         blender = bpy.app.version_string
         layout.separator()
-        layout.label(text=f"NodeVault {version} · Blender {blender}")
+        layout.label(text=f"noodlebin {version} · Blender {blender}")
         if load_affects_map(tuple(int(x) for x in bpy.app.version)) is None:
             layout.label(
                 text="No catalog for this Blender. Same-version paste still works. Browser colors will be missing until a catalog is extracted."
             )
 
 
-classes = (NODEVAULT_MT_menu, NODEVAULT_OT_reload, NODEVAULT_PT_panel)
+classes = (NOODLEBIN_MT_menu, NOODLEBIN_OT_reload, NOODLEBIN_PT_panel)

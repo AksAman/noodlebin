@@ -17,7 +17,7 @@ describe("search priority", () => {
     const buried = post({
       title: "53 shader nodes",
       tree: {
-        format: "nodevault.tree",
+        format: "noodlebin.tree",
         format_version: 1,
         blender_version: [5, 1, 0],
         blender_version_string: "5.1.0",

@@ -1,4 +1,4 @@
-export const SHARE_DRAFT_KEY = "nodevault.share-draft"
+export const SHARE_DRAFT_KEY = "noodlebin.share-draft"
 
 export type ShareDraft = {
   treeText: string

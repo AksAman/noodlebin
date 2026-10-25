@@ -1,4 +1,4 @@
-"""Read side of the ``nodevault.tree`` interchange format.
+"""Read side of the ``noodlebin.tree`` interchange format.
 
 Text parsing and validation. Owned by ``docs/pid/05-interchange-format.md``.
 Used by Paste (``paste_nodes.py``). No ``bpy`` and no UI imports.
@@ -14,11 +14,11 @@ from typing import Any
 
 from .serialize import FORMAT, FORMAT_VERSION, TREE_TYPES
 
-_NOT_A_TREE = "Clipboard is not a NodeVault node tree."
+_NOT_A_TREE = "Clipboard is not a noodlebin node tree."
 
 ERROR_CODES = frozenset(
     {
-        "not_nodevault",
+        "not_noodlebin",
         "bad_json",
         "bad_format",
         "bad_format_version",
@@ -37,7 +37,7 @@ ERROR_CODES = frozenset(
 )
 
 
-class NodeVaultError(ValueError):
+class NoodleBinError(ValueError):
     """A named parse or validation failure."""
 
     def __init__(self, code: str, message: str, path: str | None = None):
@@ -63,35 +63,35 @@ def _normalize(text: str) -> str:
         text = stripped
 
 
-def looks_like_nodevault(text: str) -> bool:
+def looks_like_noodlebin(text: str) -> bool:
     """Cheap pre-check before a full parse: a JSON object that mentions the format."""
     body = _normalize(text)
     return body.startswith("{") and FORMAT in body
 
 
 def parse_clipboard_text(text: str) -> dict:
-    """Parse clipboard or file text into a validated payload dict. Raises ``NodeVaultError``.
+    """Parse clipboard or file text into a validated payload dict. Raises ``NoodleBinError``.
 
     The text is one JSON object with no prefix. Text that does not look like a
-    NodeVault object is ``not_nodevault`` and is never parsed. Text that looks
+    NoodleBin object is ``not_noodlebin`` and is never parsed. Text that looks
     like one but fails to parse is ``bad_json``.
     """
     body = _normalize(text)
 
-    if not looks_like_nodevault(body):
-        raise NodeVaultError("not_nodevault", _NOT_A_TREE)
+    if not looks_like_noodlebin(body):
+        raise NoodleBinError("not_noodlebin", _NOT_A_TREE)
 
     try:
         value = json.loads(body)
     except ValueError as err:
-        raise NodeVaultError(
+        raise NoodleBinError(
             "bad_json",
-            f"The clipboard looks like a NodeVault node tree but is not valid JSON: {err}",
+            f"The clipboard looks like a noodlebin node tree but is not valid JSON: {err}",
         ) from err
 
     fmt = value.get("format") if isinstance(value, dict) else None
     if fmt != FORMAT:
-        raise NodeVaultError("not_nodevault", _NOT_A_TREE)
+        raise NoodleBinError("not_noodlebin", _NOT_A_TREE)
 
     validate_payload(value)
     return value
@@ -100,8 +100,8 @@ def parse_clipboard_text(text: str) -> dict:
 # --- validation -------------------------------------------------------------
 
 
-def _malformed(message: str, path: str) -> NodeVaultError:
-    return NodeVaultError("malformed", f"{message} ({path})", path)
+def _malformed(message: str, path: str) -> NoodleBinError:
+    return NoodleBinError("malformed", f"{message} ({path})", path)
 
 
 def _require_dict(value: Any, path: str) -> dict:
@@ -174,7 +174,7 @@ def _validate_tree(tree: dict, tree_path: str, tree_ids: set[str]) -> None:
         node_id = _require_str(node.get("id"), f"{node_path}.id")
         _require_str(node.get("bl_idname"), f"{node_path}.bl_idname")
         if node_id in index:
-            raise NodeVaultError(
+            raise NoodleBinError(
                 "duplicate_node_id",
                 f'Node id "{node_id}" appears more than once in tree "{tree_id}".',
                 f"{node_path}.id",
@@ -191,7 +191,7 @@ def _validate_tree(tree: dict, tree_path: str, tree_ids: set[str]) -> None:
 
         parent_id = _optional_id_ref(node.get("parent_id"), f"{node_path}.parent_id")
         if parent_id is not None and parent_id not in index:
-            raise NodeVaultError(
+            raise NoodleBinError(
                 "dangling_parent",
                 f'Node "{node_id}" in tree "{tree_id}" has parent_id "{parent_id}", '
                 "which is not a node in that tree.",
@@ -204,7 +204,7 @@ def _validate_tree(tree: dict, tree_path: str, tree_ids: set[str]) -> None:
         if group_tree_id is not None and (
             group_tree_id not in tree_ids or group_tree_id == tree_id
         ):
-            raise NodeVaultError(
+            raise NoodleBinError(
                 "dangling_group",
                 f'Node "{node_id}" in tree "{tree_id}" has group_tree_id "{group_tree_id}", '
                 "which is not another tree in this payload.",
@@ -215,7 +215,7 @@ def _validate_tree(tree: dict, tree_path: str, tree_ids: set[str]) -> None:
             node.get("zone_pair_id"), f"{node_path}.zone_pair_id"
         )
         if zone_pair_id is not None and zone_pair_id not in index:
-            raise NodeVaultError(
+            raise NoodleBinError(
                 "dangling_zone_pair",
                 f'Node "{node_id}" in tree "{tree_id}" has zone_pair_id "{zone_pair_id}", '
                 "which is not a node in that tree.",
@@ -231,7 +231,7 @@ def _validate_tree(tree: dict, tree_path: str, tree_ids: set[str]) -> None:
         to_node = _require_str(link.get("to_node"), f"{link_path}.to_node")
         for field, node_id in (("from_node", from_node), ("to_node", to_node)):
             if node_id not in index:
-                raise NodeVaultError(
+                raise NoodleBinError(
                     "dangling_link_node",
                     f'Link "{link_id}" in tree "{tree_id}" refers to {field} "{node_id}", '
                     "which is not a node in that tree.",
@@ -248,14 +248,14 @@ def _validate_tree(tree: dict, tree_path: str, tree_ids: set[str]) -> None:
         )
 
         if from_ident not in index[from_node][1]:
-            raise NodeVaultError(
+            raise NoodleBinError(
                 "dangling_link_socket",
                 f'Link "{link_id}" in tree "{tree_id}" starts at output "{from_ident}", '
                 f'which node "{from_node}" does not have.',
                 f"{link_path}.from_socket.identifier",
             )
         if to_ident not in index[to_node][0]:
-            raise NodeVaultError(
+            raise NoodleBinError(
                 "dangling_link_socket",
                 f'Link "{link_id}" in tree "{tree_id}" ends at input "{to_ident}", '
                 f'which node "{to_node}" does not have.',
@@ -264,11 +264,11 @@ def _validate_tree(tree: dict, tree_path: str, tree_ids: set[str]) -> None:
 
 
 def validate_payload(value: Any) -> None:
-    """Raise ``NodeVaultError`` unless ``value`` is an acceptable payload."""
+    """Raise ``NoodleBinError`` unless ``value`` is an acceptable payload."""
     payload = _require_dict(value, "$")
 
     if payload.get("format") != FORMAT:
-        raise NodeVaultError(
+        raise NoodleBinError(
             "bad_format",
             f'Expected format "{FORMAT}", found {json.dumps(payload.get("format"))}.',
             "$.format",
@@ -276,7 +276,7 @@ def validate_payload(value: Any) -> None:
 
     version = payload.get("format_version")
     if isinstance(version, bool) or version != FORMAT_VERSION:
-        raise NodeVaultError(
+        raise NoodleBinError(
             "bad_format_version",
             f"Unsupported format_version {json.dumps(version)}. This build reads {FORMAT_VERSION}.",
             "$.format_version",
@@ -284,7 +284,7 @@ def validate_payload(value: Any) -> None:
 
     tree_type = payload.get("tree_type")
     if not isinstance(tree_type, str) or tree_type not in TREE_TYPES:
-        raise NodeVaultError(
+        raise NoodleBinError(
             "bad_tree_type",
             f"Unsupported tree_type {json.dumps(tree_type)}. Expected one of {', '.join(TREE_TYPES)}.",
             "$.tree_type",
@@ -296,7 +296,7 @@ def validate_payload(value: Any) -> None:
         or len(bv) != 3
         or not all(_is_non_negative_int(x) for x in bv)
     ):
-        raise NodeVaultError(
+        raise NoodleBinError(
             "bad_blender_version",
             f"blender_version must be three non-negative integers, found {json.dumps(bv)}.",
             "$.blender_version",
@@ -332,7 +332,7 @@ def validate_payload(value: Any) -> None:
         _require_str(tree.get("name"), f"{tree_path}.name")
         is_root = _require_bool(tree.get("is_root"), f"{tree_path}.is_root")
         if tree_id in tree_ids:
-            raise NodeVaultError(
+            raise NoodleBinError(
                 "duplicate_tree_id",
                 f'Tree id "{tree_id}" appears more than once.',
                 f"{tree_path}.id",
@@ -343,13 +343,13 @@ def validate_payload(value: Any) -> None:
             root_has_root_id = tree_id == "root"
 
     if root_count != 1:
-        raise NodeVaultError(
+        raise NoodleBinError(
             "bad_root",
             f"Exactly one tree must have is_root true, found {root_count}.",
             "$.trees",
         )
     if not root_has_root_id:
-        raise NodeVaultError(
+        raise NoodleBinError(
             "bad_root", 'The root tree must have id "root".', "$.trees"
         )
 
@@ -360,6 +360,6 @@ def validate_payload(value: Any) -> None:
 def is_valid_payload(value: Any) -> bool:
     try:
         validate_payload(value)
-    except NodeVaultError:
+    except NoodleBinError:
         return False
     return True

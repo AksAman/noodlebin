@@ -1,4 +1,4 @@
-import type { CurveMappingWidget, CurvePoint } from "@nodevault/interchange"
+import type { CurveMappingWidget, CurvePoint } from "@noodlebin/interchange"
 
 /**
  * Blender stores an RGB mapping as R, G, B, then combined.

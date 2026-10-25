@@ -3,7 +3,7 @@
 
 Install from Disk wants a zip. This is the other way: one folder, both
 Blenders, no reinstall after edits. Blender still only reloads Python when
-you disable/enable NodeVault or restart. The symlink just means the files
+you disable/enable noodlebin or restart. The symlink just means the files
 it reloads are these ones.
 
     python3 scripts/link_dev_addon.py
@@ -16,7 +16,7 @@ import argparse
 import sys
 from pathlib import Path
 
-ADDON_ID = "nodevault"
+ADDON_ID = "noodlebin"
 VERSIONS = ("5.1", "5.2")
 REPO_ADDON = Path(__file__).resolve().parents[1] / "addon"
 USER_SUPPORT = Path.home() / "Library" / "Application Support" / "Blender"
@@ -59,8 +59,8 @@ def main() -> int:
         status |= link_one(version, unlink=ns.unlink)
     if not ns.unlink:
         print(
-            "\nIn each Blender: Edit → Preferences → Extensions, enable NodeVault.\n"
-            "After Python edits: NodeVault N-panel → Reload Add-on (or disable/enable).\n"
+            "\nIn each Blender: Edit → Preferences → Extensions, enable noodlebin.\n"
+            "After Python edits: noodlebin N-panel → Reload Add-on (or disable/enable).\n"
             "A running session that loaded an older register() still needs one restart."
         )
     return status

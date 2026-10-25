@@ -3,7 +3,7 @@
  * Source of truth: docs/pid/06-node-catalog.md.
  */
 
-import type { BlenderVersion, JsonValue, NodeSocket, TreeType } from "@nodevault/interchange"
+import type { BlenderVersion, JsonValue, NodeSocket, TreeType } from "@noodlebin/interchange"
 
 export type ThemeSource = "factory" | "binary" | "source"
 

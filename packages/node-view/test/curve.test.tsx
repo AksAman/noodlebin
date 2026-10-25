@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
 import { renderToStaticMarkup } from "react-dom/server"
-import type { CurveMappingWidget, CurvePoint, NodeVaultNode } from "@nodevault/interchange"
+import type { CurveMappingWidget, CurvePoint, NoodleBinNode } from "@noodlebin/interchange"
 import { curveChannels, curvePathD, curveView, evaluateCurve } from "../src/curve"
 import { estimatedHeight } from "../src/layout"
 import { CurveMappingView } from "../src/widgets"
@@ -23,7 +23,7 @@ function mapping(curves: CurvePoint[][]): CurveMappingWidget {
   }
 }
 
-function nodeWithCurves(count: number): NodeVaultNode {
+function nodeWithCurves(count: number): NoodleBinNode {
   return {
     id: "n1",
     bl_idname: "ShaderNodeRGBCurve",

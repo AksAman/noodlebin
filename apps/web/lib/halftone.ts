@@ -1,4 +1,4 @@
-import graph from "@/fixtures/handwritten/homepage-noise.nodevault.json"
+import graph from "@/fixtures/handwritten/homepage-noise.noodlebin.json"
 
 type Socket = { identifier: string; default_value?: unknown }
 type GraphNode = {

@@ -1,9 +1,10 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { env } from "@/env";
 import { dirname, join, resolve } from "node:path";
-import type { NodeVaultPayload } from "@/interchange";
+import type { NoodleBinPayload } from "@/interchange";
 import { revalidateTag, unstable_cache } from "next/cache";
 import {
+  pgDelete,
   pgGet,
   pgInsert,
   pgList,
@@ -16,9 +17,10 @@ import { isSafeSlug, mediaUrl, readMediaBytes, writeMedia } from "@/lib/media";
 import { isMp4Name } from "@/lib/sniff";
 import { buildSearchText } from "@/lib/search";
 import {
+  filterPosts,
   posts as seedPosts,
   type StoredPost,
-  type VaultPost,
+  type NoodleBinPost,
 } from "@/lib/posts";
 import {
   hashEditToken,
@@ -27,6 +29,7 @@ import {
   slugify,
   tokenMatches,
   type NewPostInput,
+  type OwnedPostUpdate,
   type PostLinks,
   type SharingError,
 } from "@/lib/sharing";
@@ -38,7 +41,7 @@ type DiskShape = { posts: StoredPost[] };
 const writeChain = new Map<string, Promise<unknown>>();
 
 export function dataDir(): string {
-  const fromEnv = env.NODEVAULT_DATA_DIR;
+  const fromEnv = env.NOODLEBIN_DATA_DIR;
   if (fromEnv) return resolve(fromEnv);
   return join(process.cwd(), ".data");
 }
@@ -47,7 +50,7 @@ function catalogPath(dir: string): string {
   return join(dir, "posts.json");
 }
 
-function publicOf(post: StoredPost): VaultPost {
+function publicOf(post: StoredPost): NoodleBinPost {
   return {
     slug: post.slug,
     title: post.title,
@@ -140,11 +143,11 @@ async function ensureAzureReads(posts: StoredPost[]): Promise<void> {
   await ensurePublicReads();
 }
 
-async function loadPublicPosts(dir: string): Promise<VaultPost[]> {
+async function loadPublicPosts(dir: string): Promise<NoodleBinPost[]> {
   const rows = await listStored(dir);
   await ensureAzureReads(rows);
   const stored = rows.map(publicOf);
-  const bySlug = new Map<string, VaultPost>();
+  const bySlug = new Map<string, NoodleBinPost>();
   for (const post of seedPosts) bySlug.set(post.slug, post);
   for (const post of stored) bySlug.set(post.slug, post);
   return [...bySlug.values()].filter((post) => post.visibility !== "unlisted");
@@ -152,10 +155,10 @@ async function loadPublicPosts(dir: string): Promise<VaultPost[]> {
 
 const cachedPublicPosts = unstable_cache(loadPublicPosts, ["public-posts"], {
   tags: [POSTS_TAG],
-  revalidate: env.NODEVAULT_POSTS_CACHE_TTL_SECONDS,
+  revalidate: env.NOODLEBIN_POSTS_CACHE_TTL_SECONDS,
 });
 
-export async function allPublicPosts(dir = dataDir()): Promise<VaultPost[]> {
+export async function allPublicPosts(dir = dataDir()): Promise<NoodleBinPost[]> {
   try {
     return await cachedPublicPosts(dir);
   } catch (err) {
@@ -187,7 +190,7 @@ export function invalidatePostLists(): void {
 export async function getPublicPost(
   slug: string,
   dir = dataDir(),
-): Promise<VaultPost | undefined> {
+): Promise<NoodleBinPost | undefined> {
   if (!isSafeSlug(slug)) return undefined;
   const stored = await getStoredPost(slug, dir);
   if (stored) {
@@ -313,7 +316,7 @@ async function buildStored(
 export async function createStoredPost(
   input: NewPostInput,
   dir = dataDir(),
-): Promise<{ post: VaultPost; edit_token: string; url: string }> {
+): Promise<{ post: NoodleBinPost; edit_token: string; url: string }> {
   const run = async () => {
     const slug = uniqueSlug(slugify(input.title), await takenSlugs(dir));
     const token = newEditToken();
@@ -328,14 +331,14 @@ export async function patchStoredPost(
   slug: string,
   token: string,
   patch: {
-    tree?: NodeVaultPayload | null;
+    tree?: NoodleBinPayload | null;
     cover?: NewPostInput["files"]["cover"];
     video?: NewPostInput["files"]["video"];
     blend?: NewPostInput["files"]["blend"];
   } & PostLinks,
   dir = dataDir(),
-): Promise<{ post: VaultPost } | SharingError> {
-  const run = async (): Promise<{ post: VaultPost } | SharingError> => {
+): Promise<{ post: NoodleBinPost } | SharingError> {
+  const run = async (): Promise<{ post: NoodleBinPost } | SharingError> => {
     if (!isSafeSlug(slug))
       return { ok: false, status: 404, error: "Post not found." };
     const current = await getStoredPost(slug, dir);
@@ -396,6 +399,132 @@ export async function patchStoredPost(
     return { post: publicOf(current) };
   };
   return usesPostgres() ? run() : withLock(dir, run);
+}
+
+function refuseUnlessOwner(
+  slug: string,
+  userId: string,
+  current: StoredPost | undefined,
+  verb: "edited" | "deleted",
+): SharingError | null {
+  if (!isSafeSlug(slug) || !current) {
+    if (seedPosts.some((p) => p.slug === slug)) {
+      return { ok: false, status: 403, error: `Fixture posts cannot be ${verb}.` };
+    }
+    return { ok: false, status: 404, error: "Post not found." };
+  }
+  if (!userId || current.user_id !== userId) {
+    return { ok: false, status: 403, error: "You can only change your own posts." };
+  }
+  return null;
+}
+
+async function applyOwnedFiles(
+  dir: string,
+  current: StoredPost,
+  files: OwnedPostUpdate["files"],
+): Promise<void> {
+  const slug = current.slug;
+  if (files.cover) {
+    current.cover_file = await placeMedia(
+      dir,
+      join("files", slug, `cover.${files.cover.ext}`),
+      files.cover,
+    );
+    current.cover_url = mediaUrl(slug, "cover", current.cover_file);
+  }
+  if (files.video) {
+    current.video_file = await placeMedia(
+      dir,
+      join("files", slug, `video.${files.video.ext}`),
+      files.video,
+    );
+    current.video_url = mediaUrl(slug, "video", current.video_file);
+  }
+  if (files.blend) {
+    current.blend_file = await placeMedia(
+      dir,
+      join("files", slug, "graph.blend"),
+      files.blend,
+    );
+    current.blend_url = mediaUrl(slug, "blend", current.blend_file);
+    current.blend_filename = files.blend.filename ?? "graph.blend";
+  }
+}
+
+export async function updateOwnedPost(
+  slug: string,
+  userId: string,
+  patch: OwnedPostUpdate,
+  dir = dataDir(),
+): Promise<{ post: NoodleBinPost } | SharingError> {
+  const run = async (): Promise<{ post: NoodleBinPost } | SharingError> => {
+    const current = isSafeSlug(slug) ? await getStoredPost(slug, dir) : undefined;
+    const refused = refuseUnlessOwner(slug, userId, current, "edited");
+    if (refused || !current) return refused ?? { ok: false, status: 404, error: "Post not found." };
+
+    current.title = patch.title;
+    current.description = patch.description;
+    current.visibility = patch.visibility;
+    current.tags = patch.tags;
+    if (patch.tree) {
+      current.tree = patch.tree;
+      current.tree_type = patch.tree.tree_type;
+      current.blender_version_string = patch.tree.blender_version_string;
+    }
+    if (patch.youtube_url !== undefined) current.youtube_url = patch.youtube_url;
+    if (patch.tweet_url !== undefined) current.tweet_url = patch.tweet_url;
+    if (patch.cover_shader !== undefined) current.cover_shader = patch.cover_shader;
+    await applyOwnedFiles(dir, current, patch.files);
+    current.search_text = buildSearchText(current);
+    await persistPatch(dir, current);
+    return { post: publicOf(current) };
+  };
+  return usesPostgres() ? run() : withLock(dir, run);
+}
+
+async function persistDelete(dir: string, slug: string): Promise<void> {
+  if (usesPostgres()) {
+    await pgDelete(slug);
+  } else {
+    const posts = await readDisk(dir);
+    await writeDisk(
+      dir,
+      posts.filter((post) => post.slug !== slug),
+    );
+    await rm(join(dir, "files", slug), { recursive: true, force: true });
+  }
+  invalidatePostLists();
+}
+
+export async function deleteOwnedPost(
+  slug: string,
+  userId: string,
+  dir = dataDir(),
+): Promise<{ ok: true } | SharingError> {
+  const run = async (): Promise<{ ok: true } | SharingError> => {
+    const current = isSafeSlug(slug) ? await getStoredPost(slug, dir) : undefined;
+    const refused = refuseUnlessOwner(slug, userId, current, "deleted");
+    if (refused) return refused;
+    await persistDelete(dir, slug);
+    return { ok: true };
+  };
+  return usesPostgres() ? run() : withLock(dir, run);
+}
+
+/** Public graphs for a handle. The owner view also includes their unlisted posts. */
+export async function authorGallery(
+  authorSlug: string,
+  includeUnlisted: boolean,
+  dir = dataDir(),
+): Promise<NoodleBinPost[]> {
+  if (!includeUnlisted) return filterPosts(await allPublicPosts(dir), { author: authorSlug });
+  const rows = await listStored(dir);
+  await ensureAzureReads(rows);
+  return rows
+    .map(publicOf)
+    .filter((post) => post.author_slug === authorSlug)
+    .sort((a, b) => (a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0));
 }
 
 export async function readMediaFile(

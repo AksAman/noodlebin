@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import type { JsonObject, NodeVaultNode } from "@nodevault/interchange"
+import type { JsonObject, NoodleBinNode } from "@noodlebin/interchange"
 import { estimatedHeight } from "../src/layout"
 import { paintTexturePreview } from "../src/texture-preview"
 
@@ -7,7 +7,7 @@ function previewNode(
   blIdname: string,
   properties: JsonObject = {},
   inputs: Record<string, number> = {},
-): NodeVaultNode {
+): NoodleBinNode {
   return {
     id: "n1",
     bl_idname: blIdname,
@@ -44,7 +44,7 @@ function previewNode(
   }
 }
 
-function paint(node: NodeVaultNode, size = 24): Uint8ClampedArray {
+function paint(node: NoodleBinNode, size = 24): Uint8ClampedArray {
   const data = new Uint8ClampedArray(size * size * 4)
   expect(paintTexturePreview(node, data, size)).toBe(true)
   return data

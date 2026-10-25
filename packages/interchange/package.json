@@ -1,9 +1,9 @@
 {
-  "name": "@nodevault/interchange",
+  "name": "@noodlebin/interchange",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "The nodevault.tree clipboard payload: types, parser, validator, canonical serializer.",
+  "description": "The noodlebin.tree clipboard payload: types, parser, validator, canonical serializer.",
   "exports": {
     ".": "./src/index.ts"
   },

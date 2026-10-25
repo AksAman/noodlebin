@@ -1,12 +1,12 @@
 import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react"
-import type { CatalogProperty } from "@nodevault/catalog"
+import type { CatalogProperty } from "@noodlebin/catalog"
 import type {
   ColorRampWidget,
   CurveMappingWidget,
   ImageWidget,
   JsonValue,
-  NodeVaultNode,
-} from "@nodevault/interchange"
+  NoodleBinNode,
+} from "@noodlebin/interchange"
 import { cssColor } from "./color"
 import { curveChannels, curvePathD, curveView, type CurveChannel } from "./curve"
 import { hasTexturePreview, paintTexturePreview, texturePreviewKey } from "./texture-preview"
@@ -346,7 +346,7 @@ export function ImageCaption({ widget }: { widget: ImageWidget }) {
 
 const PREVIEW_SIZE = 96
 
-export function TexturePreview({ node }: { node: NodeVaultNode }) {
+export function TexturePreview({ node }: { node: NoodleBinNode }) {
   const ref = useRef<HTMLCanvasElement>(null)
   const signature = texturePreviewKey(node)
   useLayoutEffect(() => {

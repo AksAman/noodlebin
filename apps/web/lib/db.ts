@@ -1,12 +1,12 @@
 import { Prisma, type Post } from "@/generated/prisma/client"
-import type { NodeVaultPayload, TreeType } from "@/interchange"
+import type { NoodleBinPayload, TreeType } from "@/interchange"
 import { ensureSchema } from "@/lib/prisma"
 import type { StoredPost } from "@/lib/posts"
 import { buildSearchText } from "@/lib/search"
 import { env } from "@/env"
 
 export function usesPostgres(): boolean {
-  return Boolean(env.DATABASE_URL) && !env.NODEVAULT_DATA_DIR
+  return Boolean(env.DATABASE_URL) && !env.NOODLEBIN_DATA_DIR
 }
 
 function withSearch(post: StoredPost): StoredPost {
@@ -21,7 +21,7 @@ function fromRow(row: Post): StoredPost {
     author_name: row.authorName,
     author_slug: row.authorSlug,
     description: row.description,
-    tree: (row.tree as NodeVaultPayload | null) ?? null,
+    tree: (row.tree as NoodleBinPayload | null) ?? null,
     tree_type: row.treeType as TreeType,
     blender_version_string: row.blenderVersionString,
     cover_url: row.coverUrl,
@@ -107,4 +107,9 @@ export async function pgUpdate(post: StoredPost): Promise<void> {
   const { slug, createdAt, ...rest } = data
   void createdAt
   await prisma.post.update({ where: { slug }, data: rest })
+}
+
+export async function pgDelete(slug: string): Promise<void> {
+  const prisma = await ensureSchema()
+  await prisma.post.delete({ where: { slug } })
 }
