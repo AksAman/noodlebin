@@ -15,9 +15,9 @@
  * Fields the rules do not touch are not type-checked here.
  */
 
-import { NodeVaultError } from "./errors";
+import { NoodleBinError } from "./errors";
 import { FORMAT, FORMAT_VERSION, TREE_TYPES } from "./types";
-import type { NodeVaultPayload } from "./types";
+import type { NoodleBinPayload } from "./types";
 
 type Rec = Record<string, unknown>;
 
@@ -40,8 +40,8 @@ function isPair(value: unknown): value is [number, number] {
   );
 }
 
-function malformed(message: string, path: string): NodeVaultError {
-  return new NodeVaultError("malformed", `${message} (${path})`, path);
+function malformed(message: string, path: string): NoodleBinError {
+  return new NoodleBinError("malformed", `${message} (${path})`, path);
 }
 
 function requireRecord(value: unknown, path: string): Rec {
@@ -99,7 +99,7 @@ function validateTree(tree: Rec, treePath: string, treeIds: Set<string>): void {
     const id = requireString(node["id"], `${nodePath}.id`);
     requireString(node["bl_idname"], `${nodePath}.bl_idname`);
     if (index.has(id)) {
-      throw new NodeVaultError(
+      throw new NoodleBinError(
         "duplicate_node_id",
         `Node id "${id}" appears more than once in tree "${treeId}".`,
         `${nodePath}.id`,
@@ -126,7 +126,7 @@ function validateTree(tree: Rec, treePath: string, treeIds: Set<string>): void {
 
     const parentId = optionalIdRef(node["parent_id"], `${nodePath}.parent_id`);
     if (parentId !== null && !index.has(parentId)) {
-      throw new NodeVaultError(
+      throw new NoodleBinError(
         "dangling_parent",
         `Node "${id}" in tree "${treeId}" has parent_id "${parentId}", which is not a node in that tree.`,
         `${nodePath}.parent_id`,
@@ -141,7 +141,7 @@ function validateTree(tree: Rec, treePath: string, treeIds: Set<string>): void {
       groupTreeId !== null &&
       (!treeIds.has(groupTreeId) || groupTreeId === treeId)
     ) {
-      throw new NodeVaultError(
+      throw new NoodleBinError(
         "dangling_group",
         `Node "${id}" in tree "${treeId}" has group_tree_id "${groupTreeId}", which is not another tree in this payload.`,
         `${nodePath}.group_tree_id`,
@@ -153,7 +153,7 @@ function validateTree(tree: Rec, treePath: string, treeIds: Set<string>): void {
       `${nodePath}.zone_pair_id`,
     );
     if (zonePairId !== null && !index.has(zonePairId)) {
-      throw new NodeVaultError(
+      throw new NoodleBinError(
         "dangling_zone_pair",
         `Node "${id}" in tree "${treeId}" has zone_pair_id "${zonePairId}", which is not a node in that tree.`,
         `${nodePath}.zone_pair_id`,
@@ -174,7 +174,7 @@ function validateTree(tree: Rec, treePath: string, treeIds: Set<string>): void {
       ["to_node", toNode],
     ] as const) {
       if (!index.has(nodeId)) {
-        throw new NodeVaultError(
+        throw new NoodleBinError(
           "dangling_link_node",
           `Link "${linkId}" in tree "${treeId}" refers to ${field} "${nodeId}", which is not a node in that tree.`,
           `${linkPath}.${field}`,
@@ -197,14 +197,14 @@ function validateTree(tree: Rec, treePath: string, treeIds: Set<string>): void {
     );
 
     if (!index.get(fromNode)!.outputs.has(fromIdent)) {
-      throw new NodeVaultError(
+      throw new NoodleBinError(
         "dangling_link_socket",
         `Link "${linkId}" in tree "${treeId}" starts at output "${fromIdent}", which node "${fromNode}" does not have.`,
         `${linkPath}.from_socket.identifier`,
       );
     }
     if (!index.get(toNode)!.inputs.has(toIdent)) {
-      throw new NodeVaultError(
+      throw new NoodleBinError(
         "dangling_link_socket",
         `Link "${linkId}" in tree "${treeId}" ends at input "${toIdent}", which node "${toNode}" does not have.`,
         `${linkPath}.to_socket.identifier`,
@@ -214,16 +214,16 @@ function validateTree(tree: Rec, treePath: string, treeIds: Set<string>): void {
 }
 
 /**
- * Throw a `NodeVaultError` when `value` is not an acceptable payload.
- * On return, `value` is a `NodeVaultPayload` (unknown keys may also be present).
+ * Throw a `NoodleBinError` when `value` is not an acceptable payload.
+ * On return, `value` is a `NoodleBinPayload` (unknown keys may also be present).
  */
 export function validatePayload(
   value: unknown,
-): asserts value is NodeVaultPayload {
+): asserts value is NoodleBinPayload {
   const payload = requireRecord(value, "$");
 
   if (payload["format"] !== FORMAT) {
-    throw new NodeVaultError(
+    throw new NoodleBinError(
       "bad_format",
       `Expected format "${FORMAT}", found ${JSON.stringify(payload["format"])}.`,
       "$.format",
@@ -231,7 +231,7 @@ export function validatePayload(
   }
 
   if (payload["format_version"] !== FORMAT_VERSION) {
-    throw new NodeVaultError(
+    throw new NoodleBinError(
       "bad_format_version",
       `Unsupported format_version ${JSON.stringify(payload["format_version"])}. This build reads ${FORMAT_VERSION}.`,
       "$.format_version",
@@ -243,7 +243,7 @@ export function validatePayload(
     typeof treeType !== "string" ||
     !(TREE_TYPES as readonly string[]).includes(treeType)
   ) {
-    throw new NodeVaultError(
+    throw new NoodleBinError(
       "bad_tree_type",
       `Unsupported tree_type ${JSON.stringify(treeType)}. Expected one of ${TREE_TYPES.join(", ")}.`,
       "$.tree_type",
@@ -256,7 +256,7 @@ export function validatePayload(
     version.length !== 3 ||
     !version.every(isNonNegativeInt)
   ) {
-    throw new NodeVaultError(
+    throw new NoodleBinError(
       "bad_blender_version",
       `blender_version must be three non-negative integers, found ${JSON.stringify(version)}.`,
       "$.blender_version",
@@ -293,7 +293,7 @@ export function validatePayload(
     requireString(tree["name"], `${treePath}.name`);
     const isRoot = requireBoolean(tree["is_root"], `${treePath}.is_root`);
     if (treeIds.has(id)) {
-      throw new NodeVaultError(
+      throw new NoodleBinError(
         "duplicate_tree_id",
         `Tree id "${id}" appears more than once.`,
         `${treePath}.id`,
@@ -307,14 +307,14 @@ export function validatePayload(
   });
 
   if (rootCount !== 1) {
-    throw new NodeVaultError(
+    throw new NoodleBinError(
       "bad_root",
       `Exactly one tree must have is_root true, found ${rootCount}.`,
       "$.trees",
     );
   }
   if (!rootHasRootId) {
-    throw new NodeVaultError(
+    throw new NoodleBinError(
       "bad_root",
       `The root tree must have id "root".`,
       "$.trees",
@@ -327,12 +327,12 @@ export function validatePayload(
 }
 
 /** `validatePayload` as a predicate. */
-export function isValidPayload(value: unknown): value is NodeVaultPayload {
+export function isValidPayload(value: unknown): value is NoodleBinPayload {
   try {
     validatePayload(value);
     return true;
   } catch (err) {
-    if (err instanceof NodeVaultError) return false;
+    if (err instanceof NoodleBinError) return false;
     throw err;
   }
 }

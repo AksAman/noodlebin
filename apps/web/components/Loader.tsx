@@ -1,11 +1,11 @@
 import { cn } from "@/lib/ui"
 import type { CSSProperties } from "react"
 
-const NOODLE_SIZE = { sm: "h-3 w-[21px]", md: "h-4 w-7", lg: "h-7 w-[49px]" } as const
+const NOODLE_SIZE = { sm: "h-3 w-[25px]", md: "h-4 w-[34px]", lg: "h-7 w-[60px]" } as const
 
 /**
- * The NodeVault mark as a loader: the link draws from the output socket to the input socket,
- * the input lights up when it lands, then the link lets go and it starts over.
+ * The noodlebin mark as a loader: the noodle draws from the output socket and drops
+ * into the bin on the right, which lights up when it lands, then lets go and starts over.
  * `mono` paints everything in currentColor, for use on filled buttons.
  */
 export function Noodle({
@@ -17,10 +17,12 @@ export function Noodle({
   mono?: boolean
   className?: string | undefined
 }) {
+  const binColor = mono ? "currentColor" : "var(--tree-geometry)"
   return (
-    <svg viewBox="0 0 28 16" aria-hidden="true" className={cn("noodle shrink-0 overflow-visible", NOODLE_SIZE[size], className)}>
+    <svg viewBox="0 0 34 16" aria-hidden="true" className={cn("noodle shrink-0 overflow-visible", NOODLE_SIZE[size], className)}>
+      {/* noodle link */}
       <path
-        d="M5 4.5C14 4.5 14 11.5 23 11.5"
+        d="M4.5 4.5C13 4.5 15 11.5 23 11.5"
         style={{ "--len": 20 } as CSSProperties}
         fill="none"
         stroke={mono ? "currentColor" : "var(--tree-shader)"}
@@ -28,8 +30,11 @@ export function Noodle({
         strokeLinecap="round"
         className="noodle-link"
       />
+      {/* output socket */}
       <circle cx="4.5" cy="4.5" r="3" fill={mono ? "currentColor" : "var(--accent)"} className="noodle-out" />
-      <circle cx="23.5" cy="11.5" r="3" fill={mono ? "currentColor" : "var(--tree-geometry)"} className="noodle-in" />
+      {/* bin — lights up like the old input socket */}
+      <rect x="21" y="9.5" width="6" height="5" fill="none" stroke={binColor} strokeWidth="1.5" strokeLinejoin="round" className="noodle-in" />
+      <line x1="20" y1="9.5" x2="28" y2="9.5" stroke={binColor} strokeWidth="1.5" strokeLinecap="round" className="noodle-in" />
     </svg>
   )
 }

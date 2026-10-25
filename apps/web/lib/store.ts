@@ -1,7 +1,7 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { env } from "@/env";
 import { dirname, join, resolve } from "node:path";
-import type { NodeVaultPayload } from "@/interchange";
+import type { NoodleBinPayload } from "@/interchange";
 import { revalidateTag, unstable_cache } from "next/cache";
 import {
   pgDelete,
@@ -20,7 +20,7 @@ import {
   filterPosts,
   posts as seedPosts,
   type StoredPost,
-  type VaultPost,
+  type NoodleBinPost,
 } from "@/lib/posts";
 import {
   hashEditToken,
@@ -41,7 +41,7 @@ type DiskShape = { posts: StoredPost[] };
 const writeChain = new Map<string, Promise<unknown>>();
 
 export function dataDir(): string {
-  const fromEnv = env.NODEVAULT_DATA_DIR;
+  const fromEnv = env.NOODLEBIN_DATA_DIR;
   if (fromEnv) return resolve(fromEnv);
   return join(process.cwd(), ".data");
 }
@@ -50,7 +50,7 @@ function catalogPath(dir: string): string {
   return join(dir, "posts.json");
 }
 
-function publicOf(post: StoredPost): VaultPost {
+function publicOf(post: StoredPost): NoodleBinPost {
   return {
     slug: post.slug,
     title: post.title,
@@ -143,11 +143,11 @@ async function ensureAzureReads(posts: StoredPost[]): Promise<void> {
   await ensurePublicReads();
 }
 
-async function loadPublicPosts(dir: string): Promise<VaultPost[]> {
+async function loadPublicPosts(dir: string): Promise<NoodleBinPost[]> {
   const rows = await listStored(dir);
   await ensureAzureReads(rows);
   const stored = rows.map(publicOf);
-  const bySlug = new Map<string, VaultPost>();
+  const bySlug = new Map<string, NoodleBinPost>();
   for (const post of seedPosts) bySlug.set(post.slug, post);
   for (const post of stored) bySlug.set(post.slug, post);
   return [...bySlug.values()].filter((post) => post.visibility !== "unlisted");
@@ -155,10 +155,10 @@ async function loadPublicPosts(dir: string): Promise<VaultPost[]> {
 
 const cachedPublicPosts = unstable_cache(loadPublicPosts, ["public-posts"], {
   tags: [POSTS_TAG],
-  revalidate: env.NODEVAULT_POSTS_CACHE_TTL_SECONDS,
+  revalidate: env.NOODLEBIN_POSTS_CACHE_TTL_SECONDS,
 });
 
-export async function allPublicPosts(dir = dataDir()): Promise<VaultPost[]> {
+export async function allPublicPosts(dir = dataDir()): Promise<NoodleBinPost[]> {
   try {
     return await cachedPublicPosts(dir);
   } catch (err) {
@@ -190,7 +190,7 @@ export function invalidatePostLists(): void {
 export async function getPublicPost(
   slug: string,
   dir = dataDir(),
-): Promise<VaultPost | undefined> {
+): Promise<NoodleBinPost | undefined> {
   if (!isSafeSlug(slug)) return undefined;
   const stored = await getStoredPost(slug, dir);
   if (stored) {
@@ -316,7 +316,7 @@ async function buildStored(
 export async function createStoredPost(
   input: NewPostInput,
   dir = dataDir(),
-): Promise<{ post: VaultPost; edit_token: string; url: string }> {
+): Promise<{ post: NoodleBinPost; edit_token: string; url: string }> {
   const run = async () => {
     const slug = uniqueSlug(slugify(input.title), await takenSlugs(dir));
     const token = newEditToken();
@@ -331,14 +331,14 @@ export async function patchStoredPost(
   slug: string,
   token: string,
   patch: {
-    tree?: NodeVaultPayload | null;
+    tree?: NoodleBinPayload | null;
     cover?: NewPostInput["files"]["cover"];
     video?: NewPostInput["files"]["video"];
     blend?: NewPostInput["files"]["blend"];
   } & PostLinks,
   dir = dataDir(),
-): Promise<{ post: VaultPost } | SharingError> {
-  const run = async (): Promise<{ post: VaultPost } | SharingError> => {
+): Promise<{ post: NoodleBinPost } | SharingError> {
+  const run = async (): Promise<{ post: NoodleBinPost } | SharingError> => {
     if (!isSafeSlug(slug))
       return { ok: false, status: 404, error: "Post not found." };
     const current = await getStoredPost(slug, dir);
@@ -457,8 +457,8 @@ export async function updateOwnedPost(
   userId: string,
   patch: OwnedPostUpdate,
   dir = dataDir(),
-): Promise<{ post: VaultPost } | SharingError> {
-  const run = async (): Promise<{ post: VaultPost } | SharingError> => {
+): Promise<{ post: NoodleBinPost } | SharingError> {
+  const run = async (): Promise<{ post: NoodleBinPost } | SharingError> => {
     const current = isSafeSlug(slug) ? await getStoredPost(slug, dir) : undefined;
     const refused = refuseUnlessOwner(slug, userId, current, "edited");
     if (refused || !current) return refused ?? { ok: false, status: 404, error: "Post not found." };
@@ -517,7 +517,7 @@ export async function authorGallery(
   authorSlug: string,
   includeUnlisted: boolean,
   dir = dataDir(),
-): Promise<VaultPost[]> {
+): Promise<NoodleBinPost[]> {
   if (!includeUnlisted) return filterPosts(await allPublicPosts(dir), { author: authorSlug });
   const rows = await listStored(dir);
   await ensureAzureReads(rows);

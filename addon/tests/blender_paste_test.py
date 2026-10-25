@@ -83,7 +83,7 @@ def test_shader_links_and_ramp():
 
 
 def test_fixture_ramp():
-    text = (FIXTURES / "three-stop-ramp.nodevault.json").read_text(encoding="utf-8")
+    text = (FIXTURES / "three-stop-ramp.noodlebin.json").read_text(encoding="utf-8")
     payload = parse_clipboard_text(text)
     dst = shader_tree()
     result = paste_payload(dst, payload, cursor=(10, 20), editor_tree_type="ShaderNodeTree")
@@ -120,7 +120,7 @@ def test_existing_group_untouched():
     marker = original.nodes.new("ShaderNodeValue")
     marker.label = "keep-me"
     before_count = len(original.nodes)
-    text = (FIXTURES / "group-inner.nodevault.json").read_text(encoding="utf-8")
+    text = (FIXTURES / "group-inner.noodlebin.json").read_text(encoding="utf-8")
     payload = parse_clipboard_text(text)
     dst = shader_tree()
     result = paste_payload(dst, payload, cursor=(0, 0), editor_tree_type="ShaderNodeTree")
@@ -172,7 +172,7 @@ def test_frame_parent_roundtrip():
 
 
 def test_paste_replace_clears_existing():
-    text = (FIXTURES / "three-stop-ramp.nodevault.json").read_text(encoding="utf-8")
+    text = (FIXTURES / "three-stop-ramp.noodlebin.json").read_text(encoding="utf-8")
     payload = parse_clipboard_text(text)
     dst = shader_tree()
     leftover = dst.nodes.new("ShaderNodeRGB")
@@ -215,12 +215,12 @@ def test_register_paste_operator():
     from addon import register, unregister
 
     register()
-    assert hasattr(bpy.types, "NODEVAULT_OT_paste_nodes")
-    op = bpy.types.NODEVAULT_OT_paste_nodes
+    assert hasattr(bpy.types, "NOODLEBIN_OT_paste_nodes")
+    op = bpy.types.NOODLEBIN_OT_paste_nodes
     assert "UNDO" in op.bl_options
-    assert hasattr(bpy.types, "NODEVAULT_OT_reload")
-    assert hasattr(bpy.types, "NODEVAULT_OT_copy_all_nodes")
-    assert hasattr(bpy.types, "NODEVAULT_OT_paste_replace_nodes")
+    assert hasattr(bpy.types, "NOODLEBIN_OT_reload")
+    assert hasattr(bpy.types, "NOODLEBIN_OT_copy_all_nodes")
+    assert hasattr(bpy.types, "NOODLEBIN_OT_paste_replace_nodes")
     unregister()
     return "paste operator registered with UNDO"
 

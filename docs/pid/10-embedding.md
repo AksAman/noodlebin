@@ -12,7 +12,7 @@ Two mounts are supported.
 
 `/embed/:slug` renders the post's payload. The post must already exist. The frame is 100% of the host width and 480 pixels tall unless the host sets a height.
 
-The frame shows the graph and a thin bar: tree type, Blender version, and a link labeled "Open in NodeVault" to `/p/:slug`. It does not show the upload form, the author grid, or edit controls.
+The frame shows the graph and a thin bar: tree type, Blender version, and a link labeled "Open in noodlebin" to `/p/:slug`. It does not show the upload form, the author grid, or edit controls.
 
 Copy inside the frame is off unless the query `copy=1` is present. When it is on, the Copy button follows the copy-from-browser PID. The default is off so a blog embed does not write the clipboard on a casual click.
 
@@ -20,7 +20,7 @@ Copy inside the frame is off unless the query `copy=1` is present. When it is on
 
 For a payload the host already has, with no post:
 
-The host page includes `embed.js` from the NodeVault origin and calls `NodeVault.mount` with a CSS selector and a `source` string. `source` is the clipboard text (the `nodevault.tree` JSON) or an already parsed tree object.
+The host page includes `embed.js` from the noodlebin origin and calls `noodlebin.mount` with a CSS selector and a `source` string. `source` is the clipboard text (the `noodlebin.tree` JSON) or an already parsed tree object.
 
 `mount` validates with the same rules as the paste page and mounts `packages/node-view` into the element.
 
@@ -35,7 +35,7 @@ The host page includes `embed.js` from the NodeVault origin and calls `NodeVault
 
 `mount` returns an object with `unmount`. `unmount` removes the canvas and its listeners. A second `mount` on the same element unmounts the previous view first.
 
-The script does not read the host page's cookies and does not post the payload to NodeVault's API. Catalog JSON loads from the NodeVault origin. When the host content-security policy blocks that fetch, `mount` draws the neutral fallback from the catalog PID and sets the element's `data-nodevault-catalog` attribute to `missing`.
+The script does not read the host page's cookies and does not post the payload to noodlebin's API. Catalog JSON loads from the noodlebin origin. When the host content-security policy blocks that fetch, `mount` draws the neutral fallback from the catalog PID and sets the element's `data-noodlebin-catalog` attribute to `missing`.
 
 ## Sizing
 
@@ -50,8 +50,8 @@ The visualizer fits the graph once on mount, and again when the element width ch
 
 ## Acceptance
 
-- An iframe of a fixture post shows the same nodes and wires as the paste page for that payload, plus the Open in NodeVault link.
+- An iframe of a fixture post shows the same nodes and wires as the paste page for that payload, plus the Open in noodlebin link.
 - `copy=1` on that iframe copies text that Blender's paste operator accepts.
 - Without `copy=1`, the iframe has no Copy button.
-- `NodeVault.mount` on a fixture draws the graph, and `unmount` leaves the element empty.
+- `noodlebin.mount` on a fixture draws the graph, and `unmount` leaves the element empty.
 - A payload with a bad `format_version` shows the version error inside the element and does not mount a canvas.

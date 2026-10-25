@@ -29,7 +29,7 @@ export function parseCatalogJson(text: string, path = "<catalog>"): Catalog {
     throw new Error(`Invalid catalog JSON at ${path}: ${detail}`)
   }
   if (!isCatalog(value)) {
-    throw new Error(`Not a NodeVault catalog: ${path}`)
+    throw new Error(`Not a NoodleBin catalog: ${path}`)
   }
   return value
 }

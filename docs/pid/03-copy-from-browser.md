@@ -1,6 +1,6 @@
 # PID — Copy from the browser
 
-Primary. The graph on screen goes back to the clipboard as a NodeVault payload Blender can paste. This is the reverse direction of paste-in-the-browser.
+Primary. The graph on screen goes back to the clipboard as a noodlebin payload Blender can paste. This is the reverse direction of paste-in-the-browser.
 
 ## When it is available
 

@@ -17,7 +17,7 @@ export function proxy(request: NextRequest) {
   }
   if (request.nextUrl.pathname.startsWith("/embed/")) {
     const requestHeaders = new Headers(request.headers)
-    requestHeaders.set("x-nodevault-embed", "1")
+    requestHeaders.set("x-noodlebin-embed", "1")
     return NextResponse.next({ request: { headers: requestHeaders } })
   }
   // Cookie presence only. /account still validates the session before rendering.

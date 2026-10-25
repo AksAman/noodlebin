@@ -2,6 +2,7 @@
 
 import { capture } from "@/lib/analytics"
 import { Kbd, useModKey } from "@/components/Keys"
+import { BRAND_NAME } from "@/lib/brand"
 import type { ReactNode } from "react"
 
 export function AddonDownload({ className, href, children }: { className: string; href: string; children: ReactNode }) {
@@ -19,7 +20,7 @@ export function AddonSteps() {
       title: "Install",
       body: (
         <>
-          Open Edit › Preferences › Get Extensions, search for NodeVault, and install it. Blender offers newer versions
+          Open Edit › Preferences › Get Extensions, search for {BRAND_NAME}, and install it. Blender offers newer versions
           from that same repository. A zip from GitHub is only a manual install.
         </>
       ),
@@ -28,7 +29,7 @@ export function AddonSteps() {
       title: "Copy out",
       body: (
         <>
-          Select nodes in any node editor and press <Kbd>{`${mod} ⇧ C`}</Kbd>. Paste them on NodeVault to view or share.
+          Select nodes in any node editor and press <Kbd>{`${mod} ⇧ C`}</Kbd>. Drop them into {BRAND_NAME} to view or share.
         </>
       ),
     },
@@ -36,7 +37,7 @@ export function AddonSteps() {
       title: "Paste in",
       body: (
         <>
-          Hit Copy for Blender on any graph, then press <Kbd>{`${mod} ⇧ V`}</Kbd> in the matching editor. The NodeVault tab in
+          Hit Copy for Blender on any graph, then press <Kbd>{`${mod} ⇧ V`}</Kbd> in the matching editor. The {BRAND_NAME} tab in
           the sidebar (<Kbd>N</Kbd>) has the same actions.
         </>
       ),

@@ -10,14 +10,14 @@
       },
     },
     "apps/web": {
-      "name": "@nodevault/web",
+      "name": "@noodlebin/web",
       "version": "0.1.0",
       "dependencies": {
         "@azure/storage-blob": "^12.34.0",
         "@better-auth/infra": "^0.4.20",
-        "@nodevault/catalog": "workspace:*",
-        "@nodevault/interchange": "workspace:*",
-        "@nodevault/node-view": "workspace:*",
+        "@noodlebin/catalog": "workspace:*",
+        "@noodlebin/interchange": "workspace:*",
+        "@noodlebin/node-view": "workspace:*",
         "@prisma/adapter-pg": "^7.10.1",
         "@prisma/client": "^7.10.1",
         "@t3-oss/env-nextjs": "^0.13.11",
@@ -49,22 +49,22 @@
       },
     },
     "packages/catalog": {
-      "name": "@nodevault/catalog",
+      "name": "@noodlebin/catalog",
       "version": "0.1.0",
       "dependencies": {
-        "@nodevault/interchange": "workspace:*",
+        "@noodlebin/interchange": "workspace:*",
       },
     },
     "packages/interchange": {
-      "name": "@nodevault/interchange",
+      "name": "@noodlebin/interchange",
       "version": "0.1.0",
     },
     "packages/node-view": {
-      "name": "@nodevault/node-view",
+      "name": "@noodlebin/node-view",
       "version": "0.1.0",
       "dependencies": {
-        "@nodevault/catalog": "workspace:*",
-        "@nodevault/interchange": "workspace:*",
+        "@noodlebin/catalog": "workspace:*",
+        "@noodlebin/interchange": "workspace:*",
         "@xyflow/react": "^12.8.2",
         "react": "^19.3.1",
         "react-dom": "^19.3.1",
@@ -228,13 +228,13 @@
 
     "@nodable/entities": ["@nodable/entities@3.1.0", "", {}, "sha512-LsS/DjHr+uDM647Gru/cA8+J3a3HfhttwCKLyuoyN7yXTFCxKBtSgMQBvrW9yNPa2/zDRUNuGPaH5QUFoa4arQ=="],
 
-    "@nodevault/catalog": ["@nodevault/catalog@workspace:packages/catalog"],
+    "@noodlebin/catalog": ["@noodlebin/catalog@workspace:packages/catalog"],
 
-    "@nodevault/interchange": ["@nodevault/interchange@workspace:packages/interchange"],
+    "@noodlebin/interchange": ["@noodlebin/interchange@workspace:packages/interchange"],
 
-    "@nodevault/node-view": ["@nodevault/node-view@workspace:packages/node-view"],
+    "@noodlebin/node-view": ["@noodlebin/node-view@workspace:packages/node-view"],
 
-    "@nodevault/web": ["@nodevault/web@workspace:apps/web"],
+    "@noodlebin/web": ["@noodlebin/web@workspace:apps/web"],
 
     "@opentelemetry/semantic-conventions": ["@opentelemetry/semantic-conventions@1.43.0", "", {}, "sha512-eSYWTm620tTk45EKSedaUL8MFYI8hW164hIXsgIHyxu3VobUB3fFCu5t0hQby6OoWRPsG1KkKUG2M5UadiLiVg=="],
 

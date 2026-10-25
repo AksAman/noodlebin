@@ -1,11 +1,11 @@
-import type { NodeVaultPayload } from "@/interchange"
+import type { NoodleBinPayload } from "@/interchange"
 
 export type SearchablePost = {
   title: string
   description: string | null
   author_name: string
   tags: string[]
-  tree: NodeVaultPayload | null
+  tree: NoodleBinPayload | null
 }
 
 /** Text stored once at publish time and matched by gallery search. */

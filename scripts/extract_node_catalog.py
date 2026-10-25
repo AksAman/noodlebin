@@ -1,4 +1,4 @@
-"""Extract a NodeVault catalog from the running Blender binary.
+"""Extract a noodlebin catalog from the running Blender binary.
 
 Release command (from v2/, against that version's blender):
 
@@ -54,7 +54,7 @@ except ImportError as exc:  # pragma: no cover - exercised only under Blender
     ) from exc
 
 
-THROWAY_PREFIX = "_nodevault_catalog"
+THROWAY_PREFIX = "_noodlebin_catalog"
 KNOWN_WIDGET_STRUCTS = frozenset(
     {
         "ColorRamp",
@@ -767,7 +767,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     args = argv
     if "--" in args:
         args = args[args.index("--") + 1 :]
-    parser = argparse.ArgumentParser(description="Extract a NodeVault node catalog from this Blender.")
+    parser = argparse.ArgumentParser(description="Extract a noodlebin node catalog from this Blender.")
     parser.add_argument(
         "--out",
         default=str(ROOT / "catalog" / "versions"),

@@ -1,9 +1,9 @@
 {
-  "name": "@nodevault/node-view",
+  "name": "@noodlebin/node-view",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Read-only node graph for a nodevault.tree plus a catalog.",
+  "description": "Read-only node graph for a noodlebin.tree plus a catalog.",
   "exports": {
     ".": "./src/index.ts",
     "./styles.css": "./src/styles.css"
@@ -13,8 +13,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@nodevault/catalog": "workspace:*",
-    "@nodevault/interchange": "workspace:*",
+    "@noodlebin/catalog": "workspace:*",
+    "@noodlebin/interchange": "workspace:*",
     "@xyflow/react": "^12.8.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"

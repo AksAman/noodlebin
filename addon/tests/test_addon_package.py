@@ -12,7 +12,7 @@ SCRIPT = ROOT / "scripts" / "build_addon.py"
 
 
 def _load_build_addon():
-    spec = importlib.util.spec_from_file_location("nodevault_build_addon", SCRIPT)
+    spec = importlib.util.spec_from_file_location("noodlebin_build_addon", SCRIPT)
     assert spec and spec.loader
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -36,7 +36,7 @@ class VendorCatalogsTest(unittest.TestCase):
     def test_zip_name_follows_manifest_version(self):
         build = _load_build_addon()
         self.assertEqual(build.manifest_version(), "0.1.0")
-        self.assertEqual(build.DIST.joinpath("nodevault-0.1.0.zip").name, f"nodevault-{build.manifest_version()}.zip")
+        self.assertEqual(build.DIST.joinpath("noodlebin-0.1.0.zip").name, f"noodlebin-{build.manifest_version()}.zip")
 
     def test_missing_source_raises(self):
         build = _load_build_addon()

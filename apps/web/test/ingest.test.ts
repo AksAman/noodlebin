@@ -2,11 +2,11 @@ import { describe, expect, test } from "bun:test"
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { loadCatalogDirectory } from "@/catalog/load"
-import { parseNodeVaultText } from "@/interchange"
+import { parseNoodleBinText } from "@/interchange"
 import { ingestText, serializeCopy } from "@/lib/ingest"
 
 const root = join(import.meta.dir, "../../..")
-const fixturePath = join(root, "fixtures/handwritten/worked-example-shader.nodevault.json")
+const fixturePath = join(root, "fixtures/handwritten/worked-example-shader.noodlebin.json")
 
 function sortJson(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(sortJson)
@@ -28,7 +28,7 @@ describe("ingestText", () => {
     if (!result.ok) return
     expect(result.payload.trees[0]?.nodes).toHaveLength(2)
     const ramp = ingestText(
-      readFileSync(join(root, "fixtures/handwritten/three-stop-ramp.nodevault.json"), "utf8"),
+      readFileSync(join(root, "fixtures/handwritten/three-stop-ramp.noodlebin.json"), "utf8"),
       catalogs,
     )
     expect(ramp.ok).toBe(true)
@@ -42,8 +42,8 @@ describe("ingestText", () => {
     const result = ingestText("hello", catalogs)
     expect(result.ok).toBe(false)
     if (result.ok) return
-    expect(result.error.code).toBe("not_nodevault")
-    expect(result.error.message).toContain("not a NodeVault node tree")
+    expect(result.error.code).toBe("not_noodlebin")
+    expect(result.error.message).toContain("not a NoodleBin node tree")
   })
 
   test("format_version 99 is a version error", async () => {
@@ -58,7 +58,7 @@ describe("ingestText", () => {
 
   test("broken JSON that looks like a payload reports bad_json", async () => {
     const catalogs = await loadCatalogDirectory(join(root, "catalog/versions"))
-    const result = ingestText('{ "format": "nodevault.tree", ', catalogs)
+    const result = ingestText('{ "format": "noodlebin.tree", ', catalogs)
     expect(result.ok).toBe(false)
     if (result.ok) return
     expect(result.error.code).toBe("bad_json")
@@ -73,7 +73,7 @@ describe("ingestText", () => {
     if (!result.ok) return
     const copy = serializeCopy(result.payload)
     expect(copy).toContain('"extra_note"')
-    const again = parseNodeVaultText(copy)
+    const again = parseNoodleBinText(copy)
     expect(sortJson(again)).toEqual(sortJson(result.payload))
   })
 })

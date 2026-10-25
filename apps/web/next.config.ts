@@ -7,7 +7,7 @@ const repo = resolve(appDir, "../..")
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["@prisma/client", "pg", "@azure/storage-blob"],
-  transpilePackages: ["@nodevault/node-view", "@nodevault/catalog", "@nodevault/interchange"],
+  transpilePackages: ["@noodlebin/node-view", "@noodlebin/catalog", "@noodlebin/interchange"],
   turbopack: {
     root: repo,
   },

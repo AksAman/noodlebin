@@ -6,6 +6,6 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5435/nodevault",
+    url: process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5435/noodlebin",
   },
 })

@@ -3,6 +3,7 @@ import { getRequestSession } from "@/lib/auth"
 import { profileByHandle } from "@/lib/profile"
 import { authorGallery } from "@/lib/store"
 import { docShell, page } from "@/lib/ui"
+import { BRAND_NAME } from "@/lib/brand"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -14,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const [profile, list] = await Promise.all([profileByHandle(slug), authorGallery(slug, false)])
   if (!profile && list.length === 0) return { title: "Not found" }
   const name = profile?.name ?? list[0]?.author_name ?? `@${slug}`
-  return { title: `${name} · NodeVault` }
+  return { title: `${name} · ${BRAND_NAME}` }
 }
 
 export default async function AuthorRoute({ params }: { params: Promise<{ slug: string }> }) {

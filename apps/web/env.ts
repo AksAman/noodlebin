@@ -8,8 +8,8 @@ function createAppEnv() {
       DATABASE_URL: z.string().min(1).optional(),
       BLOB_READ_WRITE_TOKEN: z.string().min(1).optional(),
       PUBLISH_SECRET: z.string().min(1).optional(),
-      NODEVAULT_DATA_DIR: z.string().min(1).optional(),
-      NODEVAULT_POSTS_CACHE_TTL_SECONDS: z.coerce
+      NOODLEBIN_DATA_DIR: z.string().min(1).optional(),
+      NOODLEBIN_POSTS_CACHE_TTL_SECONDS: z.coerce
         .number()
         .int()
         .positive()
@@ -40,9 +40,9 @@ function createAppEnv() {
       DATABASE_URL: process.env.DATABASE_URL,
       BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN,
       PUBLISH_SECRET: process.env.PUBLISH_SECRET,
-      NODEVAULT_DATA_DIR: process.env.NODEVAULT_DATA_DIR,
-      NODEVAULT_POSTS_CACHE_TTL_SECONDS:
-        process.env.NODEVAULT_POSTS_CACHE_TTL_SECONDS,
+      NOODLEBIN_DATA_DIR: process.env.NOODLEBIN_DATA_DIR,
+      NOODLEBIN_POSTS_CACHE_TTL_SECONDS:
+        process.env.NOODLEBIN_POSTS_CACHE_TTL_SECONDS,
       BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
       BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
       VERCEL: process.env.VERCEL,

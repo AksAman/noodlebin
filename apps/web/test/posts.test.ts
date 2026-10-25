@@ -7,11 +7,11 @@ describe("static posts", () => {
     for (const post of posts) {
       expect(post.tree).not.toBeNull();
       if (!post.tree) continue;
-      expect(post.tree.format).toBe("nodevault.tree");
+      expect(post.tree.format).toBe("noodlebin.tree");
       expect(post.tree.trees.length).toBeGreaterThan(0);
       expect(postBySlug(post.slug)?.title).toBe(post.title);
     }
-    expect(postsByAuthor("nodevault")).toHaveLength(1);
+    expect(postsByAuthor("noodlebin")).toHaveLength(1);
     expect(postBySlug("missing")).toBeUndefined();
   });
 });

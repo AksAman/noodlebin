@@ -1,4 +1,4 @@
-import { parseNodeVaultText } from "@/interchange"
+import { parseNoodleBinText } from "@/interchange"
 import { treeTypeLabel } from "@/lib/ingest"
 import { filterPosts } from "@/lib/posts"
 import { requireDurableStore, requirePublishAccess } from "@/lib/publish"
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   const form = await request.formData()
   const denied = requirePublishAccess(request, form) ?? requireDurableStore()
   if (denied) return fail(denied.status, denied.error)
-  const parsed = await parseCreateForm(form, parseNodeVaultText)
+  const parsed = await parseCreateForm(form, parseNoodleBinText)
   if (isSharingError(parsed)) return fail(parsed.status, parsed.error)
   const created = await createStoredPost(parsed, dataDir())
   return NextResponse.json(

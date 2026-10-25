@@ -1,9 +1,9 @@
 {
-  "name": "@nodevault/catalog",
+  "name": "@noodlebin/catalog",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Load a NodeVault catalog by Blender version and join it to a payload node.",
+  "description": "Load a NoodleBin catalog by Blender version and join it to a payload node.",
   "exports": {
     ".": "./src/index.ts",
     "./load": "./src/load.ts"
@@ -13,6 +13,6 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@nodevault/interchange": "workspace:*"
+    "@noodlebin/interchange": "workspace:*"
   }
 }

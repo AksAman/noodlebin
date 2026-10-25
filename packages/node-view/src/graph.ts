@@ -1,6 +1,6 @@
-import type { Catalog } from "@nodevault/catalog"
-import { socketColor, widgetId } from "@nodevault/catalog"
-import type { NodeVaultTree } from "@nodevault/interchange"
+import type { Catalog } from "@noodlebin/catalog"
+import { socketColor, widgetId } from "@noodlebin/catalog"
+import type { NoodleBinTree } from "@noodlebin/interchange"
 import type { Edge, Node } from "@xyflow/react"
 import { cssThemeColor } from "./color"
 import {
@@ -18,7 +18,7 @@ function asKind(raw: string): NvKind {
   return "generic"
 }
 
-function zoneBoxes(tree: NodeVaultTree, catalog: Catalog | null): Node<NvNodeData>[] {
+function zoneBoxes(tree: NoodleBinTree, catalog: Catalog | null): Node<NvNodeData>[] {
   const byId = new Map(tree.nodes.map((n) => [n.id, n]))
   const seen = new Set<string>()
   const boxes: Node<NvNodeData>[] = []
@@ -80,10 +80,10 @@ function zoneBoxes(tree: NodeVaultTree, catalog: Catalog | null): Node<NvNodeDat
 }
 
 export function treeToFlow(
-  tree: NodeVaultTree,
+  tree: NoodleBinTree,
   catalog: Catalog | null,
   blenderVersion: string,
-  trees: readonly NodeVaultTree[],
+  trees: readonly NoodleBinTree[],
 ): { nodes: Node<NvNodeData>[]; edges: Edge[] } {
   const zones = zoneBoxes(tree, catalog).map((n) => ({
     ...n,

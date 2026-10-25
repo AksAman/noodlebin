@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { GET as getPost, PATCH } from "@/app/api/posts/[slug]/route";
 import { GET, POST } from "@/app/api/posts/route";
-import { parseNodeVaultText } from "@/interchange";
+import { parseNoodleBinText } from "@/interchange";
 import { publishPost } from "@/lib/publishPost";
 import {
   hashEditToken,
@@ -29,20 +29,20 @@ const png = Buffer.from(
 
 const fixturePath = join(
   import.meta.dir,
-  "../../../fixtures/handwritten/three-stop-ramp.nodevault.json",
+  "../../../fixtures/handwritten/three-stop-ramp.noodlebin.json",
 );
 
 const dirs: string[] = [];
 
 function tempDir(): string {
-  const dir = mkdtempSync(join(tmpdir(), "nodevault-share-"));
+  const dir = mkdtempSync(join(tmpdir(), "noodlebin-share-"));
   dirs.push(dir);
-  process.env["NODEVAULT_DATA_DIR"] = dir;
+  process.env["NOODLEBIN_DATA_DIR"] = dir;
   return dir;
 }
 
 afterEach(() => {
-  delete process.env["NODEVAULT_DATA_DIR"];
+  delete process.env["NOODLEBIN_DATA_DIR"];
   delete process.env["PUBLISH_SECRET"];
   delete process.env["VERCEL"];
   for (const dir of dirs.splice(0))
@@ -156,7 +156,7 @@ describe("posts API", () => {
         blender_version_string: string;
       };
     };
-    const payload = parseNodeVaultText(readFileSync(fixturePath, "utf8"));
+    const payload = parseNoodleBinText(readFileSync(fixturePath, "utf8"));
     expect(body.post.tree_type).toBe(payload.tree_type);
     expect(body.post.blender_version_string).toBe(
       payload.blender_version_string,
@@ -181,7 +181,7 @@ describe("posts API", () => {
     const patch = new FormData();
     patch.set(
       "tree",
-      new File([readFileSync(fixturePath)], "three-stop-ramp.nodevault.json", {
+      new File([readFileSync(fixturePath)], "three-stop-ramp.noodlebin.json", {
         type: "application/json",
       }),
     );
@@ -197,9 +197,9 @@ describe("posts API", () => {
     const body = (await res.json()) as {
       post: { tree: { format: string }; blender_version_string: string };
     };
-    expect(body.post.tree.format).toBe("nodevault.tree");
+    expect(body.post.tree.format).toBe("noodlebin.tree");
     expect(body.post.blender_version_string).toBe(
-      parseNodeVaultText(readFileSync(fixturePath, "utf8"))
+      parseNoodleBinText(readFileSync(fixturePath, "utf8"))
         .blender_version_string,
     );
   });
@@ -531,11 +531,11 @@ describe("posts API", () => {
 
 const rampPath = join(
   import.meta.dir,
-  "../../../fixtures/handwritten/three-stop-ramp.nodevault.json",
+  "../../../fixtures/handwritten/three-stop-ramp.noodlebin.json",
 );
 const shaderPath = join(
   import.meta.dir,
-  "../../../fixtures/handwritten/worked-example-shader.nodevault.json",
+  "../../../fixtures/handwritten/worked-example-shader.noodlebin.json",
 );
 
 async function makeOwned(userId: string | null, title = "Owned graph") {
@@ -546,7 +546,7 @@ async function makeOwned(userId: string | null, title = "Owned graph") {
   form.set("blender_version_string", "5.1.0");
   form.set("cover", coverFile());
   form.set("tree_text", readFileSync(rampPath, "utf8"));
-  const parsed = await parseCreateForm(form, parseNodeVaultText);
+  const parsed = await parseCreateForm(form, parseNoodleBinText);
   if (isSharingError(parsed)) throw new Error(parsed.error);
   parsed.user_id = userId;
   parsed.author_slug = userId ? "aman" : parsed.author_slug;
@@ -557,7 +557,7 @@ describe("owned posts", () => {
   test("the owner can rename, unlist, and replace the graph without changing the slug", async () => {
     tempDir();
     const created = await makeOwned("user-1");
-    const replacement = parseNodeVaultText(readFileSync(shaderPath, "utf8"));
+    const replacement = parseNoodleBinText(readFileSync(shaderPath, "utf8"));
     const updated = await updateOwnedPost(created.post.slug, "user-1", {
       title: "Renamed graph",
       description: "A note",

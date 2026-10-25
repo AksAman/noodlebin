@@ -7,14 +7,15 @@ import { NodeView } from "@/node-view"
 import { capture } from "@/lib/analytics"
 import { serializeCopy, treeTypeLabel } from "@/lib/ingest"
 import type { Catalog } from "@/catalog"
-import type { VaultPost } from "@/lib/posts"
-import type { NodeVaultPayload } from "@/interchange"
+import type { NoodleBinPost } from "@/lib/posts"
+import type { NoodleBinPayload } from "@/interchange"
 import { Kbd, useModKey } from "@/components/Keys"
 import { PayloadFallback } from "@/components/PayloadFallback"
 import { PostOwnerActions } from "@/components/PostOwnerActions"
 import { SharePost } from "@/components/SharePost"
 import { PostEmbeds, XGlyph } from "@/components/PostEmbeds"
 import { ShaderCover } from "@/components/ShaderCover"
+import { BRAND_NAME } from "@/lib/brand"
 import { creator } from "@/lib/creator"
 import { btnAccent, btnGhost, canvas, cn, notice as noticeClass, treeDotClass, treeEditorName } from "@/lib/ui"
 import Link from "next/link"
@@ -27,8 +28,8 @@ export function PostGraph({
   notice,
   canManage = false,
 }: {
-  post: VaultPost
-  payload: NodeVaultPayload
+  post: NoodleBinPost
+  payload: NoodleBinPayload
   catalog: Catalog | null
   notice: string | null
   canManage?: boolean
@@ -142,7 +143,7 @@ export function PostGraph({
             In the {treeEditorName(post.tree_type)}, press <Kbd>{`${mod} ⇧ V`}</Kbd> to drop the nodes at your cursor.
           </p>
           <p className="m-0 text-[13px] leading-relaxed text-subtle">
-            Pasting needs the NodeVault add-on.{" "}
+            Pasting needs the {BRAND_NAME} add-on.{" "}
             <Link className="text-accent-fg underline-offset-4 hover:underline" href="/addon">
               Get it here
             </Link>
@@ -164,7 +165,7 @@ export function PostGraph({
           className="group mt-auto flex items-center gap-2 border-t border-line pt-5 text-[12px] text-subtle no-underline transition-colors duration-150 hover:text-fg"
         >
           <XGlyph className="size-3.5" />
-          NodeVault is made by <span className="font-medium text-muted group-hover:text-fg">@{creator.handle}</span>
+          {BRAND_NAME} is made by <span className="font-medium text-muted group-hover:text-fg">@{creator.handle}</span>
         </a>
       </aside>
 

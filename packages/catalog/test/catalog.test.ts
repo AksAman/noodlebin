@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
-import type { NodeVaultNode } from "@nodevault/interchange"
+import type { NoodleBinNode } from "@noodlebin/interchange"
 import {
   MISSING_THEME_HEADER,
   UNKNOWN_NODE_HEADER,
@@ -100,7 +100,7 @@ function stubCatalog(version: [number, number, number], extra: Partial<Catalog> 
   }
 }
 
-function payloadNode(bl_idname: string, extra: Partial<NodeVaultNode> = {}): NodeVaultNode {
+function payloadNode(bl_idname: string, extra: Partial<NoodleBinNode> = {}): NoodleBinNode {
   return {
     id: "n1",
     bl_idname,
@@ -223,7 +223,7 @@ describe("loadCatalogDirectory", () => {
   })
 
   test("reads every catalog.json one level down, ignores junk", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "nodevault-cats-"))
+    const dir = await mkdtemp(join(tmpdir(), "noodlebin-cats-"))
     await mkdir(join(dir, "5.0.1"))
     await mkdir(join(dir, "5.1.0"))
     await mkdir(join(dir, "not-a-catalog"))
@@ -239,7 +239,7 @@ describe("loadCatalogDirectory", () => {
   })
 
   test("parseCatalogJson rejects random JSON", () => {
-    expect(() => parseCatalogJson("{}")).toThrow(/Not a NodeVault catalog/)
+    expect(() => parseCatalogJson("{}")).toThrow(/Not a NoodleBin catalog/)
     expect(() => parseCatalogJson("not json")).toThrow(/Invalid catalog JSON/)
   })
 })

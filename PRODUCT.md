@@ -2,7 +2,7 @@
 
 ## Register
 
-brand
+brand: **noodlebin** (always lowercase)
 
 ## Users
 
@@ -10,11 +10,23 @@ Blender artists who build shader, geometry-node, and compositor graphs. They arr
 
 ## Product Purpose
 
-NodeVault turns a Blender node selection into something you can paste into a web page, look at, share as a link, and paste back into Blender with values, links, frames, and groups intact. Success is a stranger opening a post, pressing Copy, and having the exact graph in their own file seconds later. The gallery exists to make that moment happen more often.
+noodlebin turns a Blender node selection into something you can paste into a web page, look at, share as a link, and paste back into Blender with values, links, frames, and groups intact. Success is a stranger opening a post, pressing Copy, and having the exact graph in their own file seconds later. The gallery exists to make that moment happen more often.
+
+"Noodle" is Blender's own word for the bezier link between two node sockets. A noodlebin is where you keep them — a gallery of sharable graphs you can pull from and paste straight into your scene.
 
 ## Brand Personality
 
 Curated, exacting, tactile. The work is the hero, the way an image-first collection site (Cosmos) lets the pictures speak; the chrome around it has the quiet precision of Linear or Vercel. Confident without being loud. Speaks to artists as peers who know Blender, never explains what a node is.
+
+The name has one quiet pun — "noodle" in Blender means a connector link, not food. Use it that way: a wink, not a gimmick. No food imagery, no cartoon styling, no emoji.
+
+## Voice Rule: "noodle"
+
+"Noodle" in copy always means a Blender node link. Use it as a nod to artists who already know the term; never lean on a food metaphor. Examples of use:
+
+- "Pull a noodle from the bin." (hero headline)
+- "Drop them into noodlebin to view or share." (add-on instructions)
+- The animated mark in the UI literally draws a noodle into a bin.
 
 ## Anti-references
 
@@ -22,6 +34,7 @@ Curated, exacting, tactile. The work is the hero, the way an image-first collect
 - Neon or cyberpunk "creative coding" styling.
 - Bland default gray dev tooling with no point of view.
 - Cluttered asset marketplaces (Gumroad, Blender Market): prices, badges, ratings, busy tiles.
+- Food/pasta visual metaphors. The name is a Blender term, not a culinary one.
 
 ## Design Principles
 
@@ -34,4 +47,3 @@ Curated, exacting, tactile. The work is the hero, the way an image-first collect
 ## Accessibility & Inclusion
 
 WCAG 2.2 AA. Full keyboard navigation with visible focus. Respect `prefers-reduced-motion` and `prefers-color-scheme`; users can override the theme (light, dark, system). Never rely on node or tree-type color alone to carry meaning; pair it with a text label.
-

@@ -106,7 +106,7 @@ def main() -> int:
     parser.add_argument(
         "--output",
         type=Path,
-        default=DIST / f"nodevault-{manifest_version()}.zip",
+        default=DIST / f"noodlebin-{manifest_version()}.zip",
     )
     ns = parser.parse_args()
     copied = vendor_catalogs(CATALOG_SRC, CATALOG_DST)

@@ -189,8 +189,8 @@ def test_register():
     from addon import register, unregister
 
     register()
-    assert hasattr(bpy.types, "NODEVAULT_OT_copy_nodes")
-    assert hasattr(bpy.types, "NODEVAULT_PT_panel")
+    assert hasattr(bpy.types, "NOODLEBIN_OT_copy_nodes")
+    assert hasattr(bpy.types, "NOODLEBIN_PT_panel")
     unregister()
     return "register/unregister"
 

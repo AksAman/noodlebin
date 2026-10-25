@@ -1,12 +1,13 @@
 import { AddonDownload, AddonSteps } from "@/components/AddonSteps"
 import { addon } from "@/lib/addon"
+import { BRAND_NAME } from "@/lib/brand"
 import { btnAccent, cn, docShell, page } from "@/lib/ui"
 import type { Metadata } from "next"
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Get the Blender add-on · NodeVault",
-  description: "Install the NodeVault add-on to copy node trees out of Blender and paste them back in.",
+  title: `Get the Blender add-on · ${BRAND_NAME}`,
+  description: `Install the ${BRAND_NAME} add-on to copy node trees out of Blender and paste them back in.`,
 }
 
 export default function AddonRoute() {
@@ -17,7 +18,7 @@ export default function AddonRoute() {
           Get the Blender add-on.
         </h1>
         <p className="mt-5 max-w-[52ch] text-[17px] leading-relaxed text-muted">
-          NodeVault is two halves: this site, and a small add-on that copies node trees out of Blender and pastes them back in
+          {BRAND_NAME} is two halves: this site, and a small add-on that copies node trees out of Blender and pastes them back in
           with their values, links, frames, and groups. Works in Blender {addon.minBlender} and newer.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -25,7 +26,7 @@ export default function AddonRoute() {
             Install from Blender Extensions
           </AddonDownload>
           <span className="text-[13px] text-subtle">
-            Search for NodeVault in Get Extensions. That install is the one Blender updates.
+            Search for {BRAND_NAME} in Get Extensions. That install is the one Blender updates.
           </span>
         </div>
         <p className="mt-4 text-[13px] text-subtle">

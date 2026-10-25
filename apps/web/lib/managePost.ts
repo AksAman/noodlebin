@@ -1,6 +1,6 @@
 "use server"
 
-import { parseNodeVaultText } from "@/interchange"
+import { parseNoodleBinText } from "@/interchange"
 import { sessionAuthor } from "@/lib/auth"
 import { requireDurableStore } from "@/lib/publish"
 import { isSharingError, parseUpdateForm } from "@/lib/sharing"
@@ -19,7 +19,7 @@ export async function updatePost(form: FormData): Promise<{ ok: true } | { error
   const session = await sessionAuthor()
   if (!session) return { error: "Sign in to edit this post." }
   const slug = String(form.get("slug") ?? "").trim()
-  const parsed = await parseUpdateForm(form, parseNodeVaultText)
+  const parsed = await parseUpdateForm(form, parseNoodleBinText)
   if (isSharingError(parsed)) return { error: parsed.error }
   const result = await updateOwnedPost(slug, session.id, parsed, dataDir())
   if (isSharingError(result)) return { error: result.error }

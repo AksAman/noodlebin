@@ -1,12 +1,13 @@
 "use client"
 
 import { capture } from "@/lib/analytics"
+import { BRAND_NAME } from "@/lib/brand"
 import { Dialog } from "@/components/Dialog"
 import { btn, cn, field } from "@/lib/ui"
 import { useEffect, useState } from "react"
 
 function embedSnippet(origin: string, slug: string): string {
-  return `<iframe src="${origin}/embed/${slug}" width="100%" height="480" style="border:0" title="NodeVault graph"></iframe>`
+  return `<iframe src="${origin}/embed/${slug}" width="100%" height="480" style="border:0" title="${BRAND_NAME} graph"></iframe>`
 }
 
 export function SharePost({ slug }: { slug: string }) {

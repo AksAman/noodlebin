@@ -3,45 +3,45 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import {
-  NodeVaultError,
+  NoodleBinError,
   canonicalJson,
   canonicalize,
-  looksLikeNodeVault,
-  parseNodeVaultText,
-  safeParseNodeVaultText,
+  looksLikeNoodleBin,
+  parseNoodleBinText,
+  safeParseNoodleBinText,
   validatePayload,
 } from "../src/index";
-import type { NodeVaultPayload } from "../src/index";
+import type { NoodleBinPayload } from "../src/index";
 
 const FIXTURE_PATH = join(
   import.meta.dir,
-  "../../../fixtures/handwritten/worked-example-shader.nodevault.json",
+  "../../../fixtures/handwritten/worked-example-shader.noodlebin.json",
 );
 const FIXTURE_TEXT = readFileSync(FIXTURE_PATH, "utf8");
 
 /** A fresh deep copy of the parsed fixture so tests can mutate it. */
-function fixture(): NodeVaultPayload {
-  return parseNodeVaultText(FIXTURE_TEXT);
+function fixture(): NoodleBinPayload {
+  return parseNoodleBinText(FIXTURE_TEXT);
 }
 
 /** Parse a mutated payload object through the full text path. */
-function parseObject(obj: unknown): NodeVaultPayload {
-  return parseNodeVaultText(JSON.stringify(obj));
+function parseObject(obj: unknown): NoodleBinPayload {
+  return parseNoodleBinText(JSON.stringify(obj));
 }
 
 function expectError(
   fn: () => unknown,
-  code: NodeVaultError["code"],
+  code: NoodleBinError["code"],
   messagePart?: string,
-): NodeVaultError {
+): NoodleBinError {
   let caught: unknown;
   try {
     fn();
   } catch (err) {
     caught = err;
   }
-  expect(caught).toBeInstanceOf(NodeVaultError);
-  const error = caught as NodeVaultError;
+  expect(caught).toBeInstanceOf(NoodleBinError);
+  const error = caught as NoodleBinError;
   expect(error.code).toBe(code);
   if (messagePart) expect(error.message).toContain(messagePart);
   return error;
@@ -54,68 +54,68 @@ describe("text", () => {
 
   test("tolerates CRLF line endings", () => {
     const text = FIXTURE_TEXT.replace(/\n/g, "\r\n");
-    expect(parseNodeVaultText(text).origin.node_count).toBe(2);
+    expect(parseNoodleBinText(text).origin.node_count).toBe(2);
   });
 
   test("tolerates surrounding whitespace and a BOM", () => {
-    expect(parseNodeVaultText(`\n\n  ${FIXTURE_TEXT}  \n`).trees.length).toBe(1);
-    expect(parseNodeVaultText(`\uFEFF${FIXTURE_TEXT}`).trees.length).toBe(1);
+    expect(parseNoodleBinText(`\n\n  ${FIXTURE_TEXT}  \n`).trees.length).toBe(1);
+    expect(parseNoodleBinText(`\uFEFF${FIXTURE_TEXT}`).trees.length).toBe(1);
   });
 
   test("accepts a missing trailing newline", () => {
-    expect(parseNodeVaultText(FIXTURE_TEXT.trimEnd()).trees.length).toBe(1);
+    expect(parseNoodleBinText(FIXTURE_TEXT.trimEnd()).trees.length).toBe(1);
   });
 
   test("a legacy magic line is not accepted", () => {
     expectError(
-      () => parseNodeVaultText(`nodevault 1\n${FIXTURE_TEXT}`),
-      "not_nodevault",
+      () => parseNoodleBinText(`noodlebin 1\n${FIXTURE_TEXT}`),
+      "not_noodlebin",
     );
   });
 
   test("rejects ordinary text", () => {
     expectError(
-      () => parseNodeVaultText("hello world"),
-      "not_nodevault",
-      "Clipboard is not a NodeVault node tree",
+      () => parseNoodleBinText("hello world"),
+      "not_noodlebin",
+      "Clipboard is not a NoodleBin node tree",
     );
   });
 
   test("rejects bare JSON that is not a node tree", () => {
     expectError(
-      () => parseNodeVaultText('{"format": "something.else"}'),
-      "not_nodevault",
+      () => parseNoodleBinText('{"format": "something.else"}'),
+      "not_noodlebin",
     );
-    expectError(() => parseNodeVaultText("[1, 2, 3]"), "not_nodevault");
+    expectError(() => parseNoodleBinText("[1, 2, 3]"), "not_noodlebin");
   });
 
   test("names broken JSON when the text was clearly meant to be a node tree", () => {
     const truncated = FIXTURE_TEXT.slice(0, FIXTURE_TEXT.length / 2);
-    expectError(() => parseNodeVaultText(truncated), "bad_json", "not valid JSON");
+    expectError(() => parseNoodleBinText(truncated), "bad_json", "not valid JSON");
     // Broken JSON that never mentions the format is just not a node tree.
-    expectError(() => parseNodeVaultText("{ not json"), "not_nodevault");
+    expectError(() => parseNoodleBinText("{ not json"), "not_noodlebin");
   });
 
   test("safeParse returns the error instead of throwing", () => {
-    const result = safeParseNodeVaultText("nope");
+    const result = safeParseNoodleBinText("nope");
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.error.code).toBe("not_nodevault");
-    const good = safeParseNodeVaultText(FIXTURE_TEXT);
+    if (!result.ok) expect(result.error.code).toBe("not_noodlebin");
+    const good = safeParseNoodleBinText(FIXTURE_TEXT);
     expect(good.ok).toBe(true);
   });
 
-  test("looksLikeNodeVault is a cheap pre-check", () => {
-    expect(looksLikeNodeVault(FIXTURE_TEXT)).toBe(true);
-    expect(looksLikeNodeVault(`  \uFEFF${FIXTURE_TEXT}`)).toBe(true);
-    expect(looksLikeNodeVault("some text")).toBe(false);
-    expect(looksLikeNodeVault('{"a": 1}')).toBe(false);
+  test("looksLikeNoodleBin is a cheap pre-check", () => {
+    expect(looksLikeNoodleBin(FIXTURE_TEXT)).toBe(true);
+    expect(looksLikeNoodleBin(`  \uFEFF${FIXTURE_TEXT}`)).toBe(true);
+    expect(looksLikeNoodleBin("some text")).toBe(false);
+    expect(looksLikeNoodleBin('{"a": 1}')).toBe(false);
   });
 });
 
 describe("validation", () => {
   test("accepts the worked example", () => {
     const payload = fixture();
-    expect(payload.format).toBe("nodevault.tree");
+    expect(payload.format).toBe("noodlebin.tree");
     expect(payload.format_version).toBe(1);
     expect(payload.blender_version).toEqual([5, 0, 1]);
     expect(payload.trees[0]!.nodes.map((n) => n.bl_idname)).toEqual([
@@ -127,11 +127,11 @@ describe("validation", () => {
 
   test("rejects a wrong format string", () => {
     const p = fixture() as unknown as Record<string, unknown>;
-    p["format"] = "nodevault.other";
+    p["format"] = "noodlebin.other";
     // At the text boundary a foreign format is simply not a node tree.
-    expectError(() => parseObject(p), "not_nodevault");
+    expectError(() => parseObject(p), "not_noodlebin");
     // The validator itself names the field.
-    expectError(() => validatePayload(p), "bad_format", "nodevault.other");
+    expectError(() => validatePayload(p), "bad_format", "noodlebin.other");
   });
 
   test("rejects format_version 99 with a version error", () => {
@@ -303,7 +303,7 @@ describe("canonical serialization", () => {
     socket["x_socket_extra"] = true;
 
     const text = canonicalJson(p);
-    const reparsed = parseNodeVaultText(text) as unknown as Record<
+    const reparsed = parseNoodleBinText(text) as unknown as Record<
       string,
       unknown
     >;
@@ -393,7 +393,7 @@ describe("canonical serialization", () => {
     expect(out).not.toBe(original);
     expect(out).toEqual(original);
     // Round trip through text and back: values equal, key order ignored by toEqual.
-    expect(parseNodeVaultText(canonicalJson(original))).toEqual(original);
+    expect(parseNoodleBinText(canonicalJson(original))).toEqual(original);
   });
 
   test("numbers stay numbers", () => {
@@ -403,7 +403,7 @@ describe("canonical serialization", () => {
     const text = canonicalJson(p);
     expect(text).toContain('"default_value": 0.000001');
     expect(text).toContain('"width": 1e+21');
-    const back = parseNodeVaultText(text);
+    const back = parseNoodleBinText(text);
     expect(back.trees[0]!.nodes[0]!.sockets.inputs[0]!.default_value).toBe(
       0.000001,
     );

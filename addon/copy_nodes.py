@@ -41,10 +41,10 @@ def _native_copy() -> str | None:
         return str(exc).split("\n")[0][:200] or "Blender copy cancelled"
 
 
-class NODEVAULT_OT_copy_nodes(Operator):
-    bl_idname = "nodevault.copy_nodes"
+class NOODLEBIN_OT_copy_nodes(Operator):
+    bl_idname = "noodlebin.copy_nodes"
     bl_label = "Copy Nodes"
-    bl_description = "Copy selected nodes as NodeVault JSON on the system clipboard"
+    bl_description = "Copy selected nodes as noodlebin JSON on the system clipboard"
     bl_options = {"REGISTER"}
 
     @classmethod
@@ -74,10 +74,10 @@ class NODEVAULT_OT_copy_nodes(Operator):
         return _write_clipboard(self, context, text)
 
 
-class NODEVAULT_OT_copy_all_nodes(Operator):
-    bl_idname = "nodevault.copy_all_nodes"
+class NOODLEBIN_OT_copy_all_nodes(Operator):
+    bl_idname = "noodlebin.copy_all_nodes"
     bl_label = "Copy All Nodes"
-    bl_description = "Copy every node in this tree as NodeVault JSON on the system clipboard"
+    bl_description = "Copy every node in this tree as noodlebin JSON on the system clipboard"
     bl_options = {"REGISTER"}
 
     @classmethod
@@ -112,13 +112,13 @@ class NODEVAULT_OT_copy_all_nodes(Operator):
         return _write_clipboard(self, context, text)
 
 
-class NODEVAULT_OT_save_nodes(Operator):
-    bl_idname = "nodevault.save_nodes"
+class NOODLEBIN_OT_save_nodes(Operator):
+    bl_idname = "noodlebin.save_nodes"
     bl_label = "Save Nodes"
-    bl_description = "Save selected nodes as a .nodevault.json file"
+    bl_description = "Save selected nodes as a .noodlebin.json file"
     bl_options = {"REGISTER"}
-    filename_ext = ".nodevault.json"
-    filter_glob: bpy.props.StringProperty(default="*.nodevault.json;*.json", options={"HIDDEN"})
+    filename_ext = ".noodlebin.json"
+    filter_glob: bpy.props.StringProperty(default="*.noodlebin.json;*.json", options={"HIDDEN"})
     filepath: bpy.props.StringProperty(subtype="FILE_PATH")
 
     @classmethod
@@ -130,7 +130,7 @@ class NODEVAULT_OT_save_nodes(Operator):
 
     def invoke(self, context, event):
         if not self.filepath:
-            self.filepath = "nodes.nodevault.json"
+            self.filepath = "nodes.noodlebin.json"
         context.window_manager.fileselect_add(self)
         return {"RUNNING_MODAL"}
 
@@ -150,4 +150,4 @@ class NODEVAULT_OT_save_nodes(Operator):
         return {"FINISHED"}
 
 
-classes = (NODEVAULT_OT_copy_nodes, NODEVAULT_OT_copy_all_nodes, NODEVAULT_OT_save_nodes)
+classes = (NOODLEBIN_OT_copy_nodes, NOODLEBIN_OT_copy_all_nodes, NOODLEBIN_OT_save_nodes)

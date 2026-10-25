@@ -2,6 +2,7 @@
 
 import { XGlyph } from "@/components/PostEmbeds"
 import { Mark } from "@/components/SiteNav"
+import { BRAND_NAME } from "@/lib/brand"
 import { creator } from "@/lib/creator"
 import { cn } from "@/lib/ui"
 import Link from "next/link"
@@ -16,19 +17,19 @@ import {
   type Ref,
 } from "react"
 
-type NodeId = "vault" | "creator"
+type NodeId = "bin" | "creator"
 type Vec = { x: number; y: number }
 type Body = { pos: Vec; vel: Vec; tilt: number }
 type Wire = { d: string; x1: number; y1: number; x2: number; y2: number }
 
-const IDS: NodeId[] = ["vault", "creator"]
+const IDS: NodeId[] = ["bin", "creator"]
 /** Per-16ms velocity retained after friction, and energy kept on a wall bounce. */
 const FRICTION = 0.94
 const BOUNCE = 0.55
 const EDGE = 10
 
 const rest = (): Record<NodeId, Body> => ({
-  vault: { pos: { x: 0, y: 0 }, vel: { x: 0, y: 0 }, tilt: 0 },
+  bin: { pos: { x: 0, y: 0 }, vel: { x: 0, y: 0 }, tilt: 0 },
   creator: { pos: { x: 0, y: 0 }, vel: { x: 0, y: 0 }, tilt: 0 },
 })
 
@@ -67,7 +68,7 @@ function NodeHeader({ tint, children }: { tint: string; children: ReactNode }) {
 
 export function SiteFooter() {
   const stage = useRef<HTMLDivElement>(null)
-  const nodes = useRef<Record<NodeId, HTMLDivElement | null>>({ vault: null, creator: null })
+  const nodes = useRef<Record<NodeId, HTMLDivElement | null>>({ bin: null, creator: null })
   const outSocket = useRef<HTMLSpanElement>(null)
   const inSocket = useRef<HTMLSpanElement>(null)
   const bodies = useRef(rest())
@@ -357,12 +358,12 @@ export function SiteFooter() {
           ) : null}
 
           {draggable(
-            "vault",
+            "bin",
             "max-w-[280px] self-start",
             <>
               <NodeHeader tint="bg-[color-mix(in_oklab,var(--accent)_30%,var(--surface))]">
                 <Mark />
-                <span className="font-display text-[15px] font-semibold tracking-[-0.01em]">NodeVault</span>
+                <span className="font-display text-[15px] font-semibold tracking-[-0.01em]">{BRAND_NAME}</span>
               </NodeHeader>
               <div className="flex flex-col gap-3 px-3.5 py-3.5 text-[13px]">
                 <p className="m-0 leading-relaxed text-muted">Copy nodes out of Blender, share a link, paste them back in.</p>
@@ -422,8 +423,8 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-8 flex flex-col gap-2 text-[12px] text-subtle sm:flex-row sm:justify-between">
-          <p className="m-0 tabular-nums">© {year} NodeVault</p>
-          <p className="m-0">Blender is a trademark of the Blender Foundation. NodeVault is an independent project.</p>
+          <p className="m-0 tabular-nums">© {year} {BRAND_NAME}</p>
+          <p className="m-0">Blender is a trademark of the Blender Foundation. {BRAND_NAME} is an independent project.</p>
         </div>
       </div>
     </footer>

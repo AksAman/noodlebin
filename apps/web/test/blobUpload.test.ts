@@ -28,16 +28,16 @@ describe("blob upload tokens", () => {
     const previousAccount = process.env.AZURE_STORAGE_ACCOUNT
     const previousContainer = process.env.AZURE_STORAGE_CONTAINER
     const previousCdn = process.env.AZURE_CDN_BASE_URL
-    process.env.AZURE_STORAGE_ACCOUNT = "nodevault"
+    process.env.AZURE_STORAGE_ACCOUNT = "noodlebin"
     process.env.AZURE_STORAGE_CONTAINER = "media"
     delete process.env.AZURE_CDN_BASE_URL
     try {
       expect(azurePublicUrl(`azure:${cover}`)).toBe(
-        "https://nodevault.blob.core.windows.net/media/covers/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee.png",
+        "https://noodlebin.blob.core.windows.net/media/covers/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee.png",
       )
-      process.env.AZURE_CDN_BASE_URL = "https://nodevault.azurefd.net/"
+      process.env.AZURE_CDN_BASE_URL = "https://noodlebin.azurefd.net/"
       expect(azurePublicUrl(`azure:${cover}`)).toBe(
-        "https://nodevault.azurefd.net/media/covers/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee.png",
+        "https://noodlebin.azurefd.net/media/covers/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee.png",
       )
       expect(azurePublicUrl("azure:covers/../secret.png")).toBeNull()
     } finally {

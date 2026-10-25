@@ -6,7 +6,7 @@ Primary. This is the middle of the core loop: the clipboard becomes a graph on a
 
 The first web surface is a single route, `/`. It has two states.
 
-**Empty.** A large paste target fills the viewport. The text reads: "Copy nodes in Blender with NodeVault, then paste here." A secondary control opens a `.nodevault.json` file. There is no account form, no upload progress, and no gallery on this route.
+**Empty.** A large paste target fills the viewport. The text reads: "Copy nodes in Blender with noodlebin, then paste here." A secondary control opens a `.noodlebin.json` file. There is no account form, no upload progress, and no gallery on this route.
 
 **Filled.** The graph visualizer occupies the viewport. A bar across the top shows:
 
@@ -16,7 +16,7 @@ The first web surface is a single route, `/`. It has two states.
 - A Copy button, specified in the copy-from-browser PID.
 - A Clear control that returns to the empty state and drops the in-memory payload.
 
-The page title is `NodeVault`.
+The page title is `noodlebin`.
 
 Nothing is sent to a server when the user pastes. The payload stays in memory. Refreshing the page returns to the empty state. Persistence, links, and accounts are the sharing PID.
 
@@ -25,11 +25,11 @@ Nothing is sent to a server when the user pastes. The payload stays in memory. R
 Listen for the `paste` event on the document while this route is mounted.
 
 1. Read `event.clipboardData.getData("text/plain")`.
-2. If the trimmed text starts with `{` and contains `nodevault.tree`, parse it as JSON and validate it with the interchange PID's rules.
+2. If the trimmed text starts with `{` and contains `noodlebin.tree`, parse it as JSON and validate it with the interchange PID's rules.
 3. If that text fails to parse, show the broken-JSON error from the parser rather than the not-a-node-tree message.
-4. Any other clipboard text, while the paste target or the canvas is focused, shows "Clipboard is not a NodeVault node tree." A paste whose event target is an input or textarea is left to the browser.
+4. Any other clipboard text, while the paste target or the canvas is focused, shows "Clipboard is not a noodlebin node tree." A paste whose event target is an input or textarea is left to the browser.
 
-Dropping a `.nodevault.json` or `.json` file on the page uses the same parser.
+Dropping a `.noodlebin.json` or `.json` file on the page uses the same parser.
 
 On success, prevent the browser's default paste.
 

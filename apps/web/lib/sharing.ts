@@ -1,5 +1,5 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto"
-import { TREE_TYPES, type NodeVaultPayload, type TreeType } from "@/interchange"
+import { TREE_TYPES, type NoodleBinPayload, type TreeType } from "@/interchange"
 import { parseSocialPost, parseYouTube } from "@/lib/embeds"
 import { checkShaderSource } from "@/lib/shaderCover"
 import { sniffBlend, sniffCover, sniffMp4 } from "@/lib/sniff"
@@ -45,7 +45,7 @@ export type NewPostInput = {
   author_name: string
   author_slug: string | null
   description: string | null
-  tree: NodeVaultPayload | null
+  tree: NoodleBinPayload | null
   tree_type: TreeType
   blender_version_string: string
   nodevember_day: number | null
@@ -235,8 +235,8 @@ export async function readBlend(file: File | null): Promise<StoredFile | Sharing
 export async function readPayload(
   file: File | null,
   textField: string | null,
-  parse: (text: string) => NodeVaultPayload,
-): Promise<NodeVaultPayload | null | SharingError> {
+  parse: (text: string) => NoodleBinPayload,
+): Promise<NoodleBinPayload | null | SharingError> {
   let text = textField?.trim() ? textField : null
   const payloadMax = requestUploadMax(PAYLOAD_MAX)
   if (file && file.size > 0) {
@@ -249,14 +249,14 @@ export async function readPayload(
   try {
     return parse(text)
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Payload is not a NodeVault node tree."
+    const message = err instanceof Error ? err.message : "Payload is not a NoodleBin node tree."
     return { ok: false, status: 400, error: message }
   }
 }
 
 export async function parseCreateForm(
   form: FormData,
-  parsePayload: (text: string) => NodeVaultPayload,
+  parsePayload: (text: string) => NoodleBinPayload,
 ): Promise<NewPostInput | SharingError> {
   const title = String(form.get("title") ?? "").trim()
   const typedName = String(form.get("author_name") ?? "").trim()
@@ -347,7 +347,7 @@ export type OwnedPostUpdate = {
   tweet_url?: string | null
   cover_shader?: string | null
   /** Set only when the form includes a replacement tree. Absent keeps the current graph. */
-  tree?: NodeVaultPayload
+  tree?: NoodleBinPayload
   files: {
     cover?: StoredFile
     video?: StoredFile
@@ -358,7 +358,7 @@ export type OwnedPostUpdate = {
 /** Edit form for a post the signed-in author already owns. Cover and tree are optional. */
 export async function parseUpdateForm(
   form: FormData,
-  parsePayload: (text: string) => NodeVaultPayload,
+  parsePayload: (text: string) => NoodleBinPayload,
 ): Promise<OwnedPostUpdate | SharingError> {
   const title = String(form.get("title") ?? "").trim()
   if (!title) return { ok: false, status: 400, error: "Title is required." }
@@ -384,7 +384,7 @@ export async function parseUpdateForm(
   const treeField = form.get("tree")
   const treeFile = treeField instanceof File && treeField.size > 0 ? treeField : null
   const treeText = treeFile ? "" : String(form.get("tree_text") ?? "")
-  let tree: NodeVaultPayload | undefined
+  let tree: NoodleBinPayload | undefined
   if (treeFile || treeText.trim()) {
     const parsed = await readPayload(treeFile, treeText || null, parsePayload)
     if (isSharingError(parsed)) return parsed

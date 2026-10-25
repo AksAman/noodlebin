@@ -165,7 +165,7 @@ export function PostOwnerActions({ post }: { post: EditablePost }) {
                   className={cn(field, "min-h-28 resize-y font-mono text-[12px] leading-relaxed")}
                   name="tree_text"
                   spellCheck={false}
-                  placeholder="Paste a nodevault.tree payload. Leave this empty to keep the current graph."
+                  placeholder="Paste a noodlebin.tree payload. Leave this empty to keep the current graph."
                 />
               </label>
               {error ? <p role="alert" className={cn(errorBox, "m-0")}>{error}</p> : null}

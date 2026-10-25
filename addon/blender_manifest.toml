@@ -1,13 +1,13 @@
 schema_version = "1.0.0"
-id = "nodevault"
+id = "noodlebin"
 version = "0.1.0"
-name = "NodeVault"
+name = "noodlebin"
 tagline = "Copy nodes to the browser and paste them back"
 maintainer = "AksAman"
 type = "add-on"
 blender_version_min = "5.0.0"
 license = ["SPDX:GPL-3.0-or-later"]
-website = "https://www.nodevault.art"
+website = "https://www.noodlebin.art"
 copyright = ["2026 AksAman"]
 tags = ["Node"]
 

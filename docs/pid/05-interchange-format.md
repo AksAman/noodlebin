@@ -12,15 +12,15 @@ The system clipboard holds one UTF-8 JSON object and nothing else:
 
 There is no magic line or other prefix. The object identifies itself through `format` and `format_version`. Parsers tolerate surrounding whitespace, `\r\n` line endings, and a leading UTF-8 byte order mark, and accept a missing trailing newline. Parsers reject a `format_version` other than `1`, including `2`, until a migration exists.
 
-A file saved from the browser uses the extension `.nodevault.json` and contains the same text. Because the text is plain JSON, any JSON validator or editor accepts it as is.
+A file saved from the browser uses the extension `.noodlebin.json` and contains the same text. Because the text is plain JSON, any JSON validator or editor accepts it as is.
 
-Recognition: a parser first checks that the text, after trimming, starts with `{` and contains `nodevault.tree`. Other clipboard text is not a node tree and is not parsed. Text that passes that check but fails to parse is reported as broken JSON, so a user who pasted a truncated payload hears that rather than "not a node tree".
+Recognition: a parser first checks that the text, after trimming, starts with `{` and contains `noodlebin.tree`. Other clipboard text is not a node tree and is not parsed. Text that passes that check but fails to parse is reported as broken JSON, so a user who pasted a truncated payload hears that rather than "not a node tree".
 
 The JSON object:
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `format` | string | yes | Always `nodevault.tree`. |
+| `format` | string | yes | Always `noodlebin.tree`. |
 | `format_version` | number | yes | Always `1` for this PID. |
 | `blender_version` | `[major, minor, patch]` | yes | `bpy.app.version` at copy time. |
 | `blender_version_string` | string | yes | `bpy.app.version_string`, display only. |
@@ -253,7 +253,7 @@ A noise texture feeding the roughness of a Principled BSDF. Floats in the real p
 
 ```json
 {
-  "format": "nodevault.tree",
+  "format": "noodlebin.tree",
   "format_version": 1,
   "blender_version": [5, 0, 1],
   "blender_version_string": "5.0.1",
@@ -377,7 +377,7 @@ Before the browser puts the payload back on the clipboard, it parses the JSON an
 
 A payload is acceptable when:
 
-- `format` is `nodevault.tree` and `format_version` is `1`.
+- `format` is `noodlebin.tree` and `format_version` is `1`.
 - `tree_type` is one of the three supported strings.
 - Exactly one tree has `is_root` true and `id` `root`.
 - Every `parent_id`, `group_tree_id`, `zone_pair_id`, and link endpoint refers to an id that exists in the same tree (groups: `group_tree_id` refers to another tree in `trees`).

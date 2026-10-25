@@ -6,7 +6,7 @@
  * patch. If no catalog shares major.minor, the graph draws without one.
  */
 
-import type { BlenderVersion } from "@nodevault/interchange"
+import type { BlenderVersion } from "@noodlebin/interchange"
 import type { Catalog } from "./types"
 
 export type CatalogMatch = "exact" | "nearest_patch" | "missing"

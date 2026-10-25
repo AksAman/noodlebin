@@ -2,9 +2,10 @@
 
 import { InlineLoader } from "@/components/Loader";
 import { capture } from "@/lib/analytics";
+import { BRAND_NAME } from "@/lib/brand";
 import { publishPost } from "@/lib/publishPost";
 import { serializeCopy, treeTypeLabel } from "@/lib/ingest";
-import type { NodeVaultPayload } from "@/interchange";
+import type { NoodleBinPayload } from "@/interchange";
 import { Dialog } from "@/components/Dialog";
 import { MarkdownField } from "@/components/MarkdownField";
 import { SignInButtons } from "@/components/SignInButtons";
@@ -218,7 +219,7 @@ type Created = { url: string };
 function embedSnippet(path: string): string {
   const origin = typeof window === "undefined" ? "" : window.location.origin;
   const slug = path.split("/").filter(Boolean).pop() ?? "";
-  return `<iframe src="${origin}/embed/${slug}" width="100%" height="480" style="border:0" title="NodeVault graph"></iframe>`;
+  return `<iframe src="${origin}/embed/${slug}" width="100%" height="480" style="border:0" title="${BRAND_NAME} graph"></iframe>`;
 }
 
 const label = "flex flex-col gap-2 text-[13px] font-medium text-fg";
@@ -228,7 +229,7 @@ export function ShareSheet({
   onClose,
   restored = null,
 }: {
-  payload: NodeVaultPayload;
+  payload: NoodleBinPayload;
   onClose: (publishedUrl?: string) => void;
   restored?: ShareDraft | null;
 }) {

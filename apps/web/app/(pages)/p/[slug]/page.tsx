@@ -9,6 +9,7 @@ import { SharePost } from "@/components/SharePost"
 import { resolveCatalog } from "@/catalog"
 import { shippedCatalogs } from "@/lib/catalogs"
 import { treeTypeLabel } from "@/lib/ingest"
+import { BRAND_NAME } from "@/lib/brand"
 import { markdownPlain } from "@/lib/markdownText"
 import { getRequestSession } from "@/lib/auth"
 import { getPublicPost, getStoredPost } from "@/lib/store"
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params
   const post = await getPublicPost(slug)
   if (!post) return { title: "Not found" }
-  const title = `${post.title} · NodeVault`
+  const title = `${post.title} · ${BRAND_NAME}`
   const image = post.card_url ?? `/p/${post.slug}/opengraph-image`
   const description = post.description ? markdownPlain(post.description) || undefined : undefined
   return {
