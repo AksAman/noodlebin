@@ -75,7 +75,7 @@ class TextTests(ErrorAssertions):
         self.assert_error(
             lambda: parse_clipboard_text("hello world"),
             "not_noodlebin",
-            "Clipboard is not a NoodleBin node tree",
+            "Clipboard is not a noodlebin node tree",
         )
 
     def test_bare_json_other_format(self):

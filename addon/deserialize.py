@@ -6,6 +6,7 @@ Used by Paste (``paste_nodes.py``). No ``bpy`` and no UI imports.
 Error codes match ``packages/interchange/src/errors.ts`` so both ends of the
 loop name the same failure the same way.
 """
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
 

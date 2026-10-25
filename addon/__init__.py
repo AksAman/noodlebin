@@ -6,6 +6,7 @@ register(), so they do not need bpy.
 Disable/enable (or the N-panel Reload) re-executes submodules. A symlink
 alone does not, because Python keeps the old module objects in sys.modules.
 """
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
 

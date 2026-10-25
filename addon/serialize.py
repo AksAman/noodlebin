@@ -10,6 +10,7 @@ byte: known keys in PID order, unknown keys after them in their original order,
 ``properties`` and ``widgets`` left in the order Blender reported, 2-space
 indent, ``JSON.stringify`` number formatting, trailing newline.
 """
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
 
