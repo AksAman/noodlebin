@@ -32,10 +32,12 @@ export function SiteNav() {
   const pathname = usePathname();
   const { data: session } = useServerSession();
   const handle = session?.user.handle;
+  const onOwnProfile = Boolean(handle) && (pathname === `/@${handle}` || pathname === `/author/${handle}`);
   const onGallery =
-    pathname === "/" ||
-    pathname.startsWith("/@") ||
-    pathname.startsWith("/author");
+    !onOwnProfile &&
+    (pathname === "/" ||
+      pathname.startsWith("/@") ||
+      pathname.startsWith("/author"));
   const items = [
     { href: "/", label: "Gallery", active: onGallery },
     { href: "/paste", label: "Paste", active: pathname === "/paste" },
@@ -76,13 +78,11 @@ export function SiteNav() {
             <Link
               className={cn(
                 "min-w-0 max-w-[6.5rem] truncate no-underline sm:max-w-[10rem] md:max-w-[14rem]",
-                pathname === "/account"
-                  ? "text-fg"
-                  : "text-muted hover:text-fg",
+                onOwnProfile ? "text-fg" : "text-muted hover:text-fg",
               )}
-              href="/account"
+              href={`/@${handle}`}
               title={`@${handle}`}
-              aria-current={pathname === "/account" ? "page" : undefined}
+              aria-current={onOwnProfile ? "page" : undefined}
             >
               @{handle}
             </Link>

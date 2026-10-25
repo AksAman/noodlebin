@@ -65,7 +65,7 @@ export default async function PostRoute({ params }: { params: Promise<{ slug: st
               {treeTypeLabel(post.tree_type)} · Blender {post.blender_version_string}
             </p>
             {post.description ? <MarkdownNote className="note-markdown mt-5 max-w-[60ch]" source={post.description} /> : null}
-            <div className="mt-6 flex flex-col items-start gap-3">
+            <div className="mt-6 flex flex-wrap items-center gap-2">
               <SharePost slug={post.slug} />
               {canManage ? <PostOwnerActions post={post} /> : null}
             </div>

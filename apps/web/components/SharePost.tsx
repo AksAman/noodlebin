@@ -3,6 +3,7 @@
 import { capture } from "@/lib/analytics"
 import { BRAND_NAME } from "@/lib/brand"
 import { Dialog } from "@/components/Dialog"
+import { ShareIcon } from "@/components/Icons"
 import { btn, cn, field } from "@/lib/ui"
 import { useEffect, useState } from "react"
 
@@ -43,6 +44,7 @@ export function SharePost({ slug }: { slug: string }) {
   return (
     <>
       <button type="button" className={btn} onClick={() => setOpen(true)}>
+        <ShareIcon />
         Share
       </button>
       {open ? (

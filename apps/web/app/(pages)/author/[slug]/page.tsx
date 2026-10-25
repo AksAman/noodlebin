@@ -1,4 +1,5 @@
 import { CoverGrid } from "@/components/CoverGrid"
+import { ProfileOwnerActions } from "@/components/ProfileOwnerActions"
 import { getRequestSession } from "@/lib/auth"
 import { profileByHandle } from "@/lib/profile"
 import { authorGallery } from "@/lib/store"
@@ -52,6 +53,7 @@ export default async function AuthorRoute({ params }: { params: Promise<{ slug: 
               {list.length} graph{list.length === 1 ? "" : "s"}
             </p>
           </div>
+          {isOwner && profile ? <ProfileOwnerActions handle={profile.handle} /> : null}
         </header>
         {list.length > 0 ? (
           <div className="pt-10">

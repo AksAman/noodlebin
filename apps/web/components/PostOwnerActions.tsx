@@ -1,7 +1,9 @@
 "use client"
 
 import { Dialog } from "@/components/Dialog"
+import { EditIcon, TrashIcon } from "@/components/Icons"
 import { MarkdownField } from "@/components/MarkdownField"
+import { ReplaceGraphField } from "@/components/ReplaceGraphField"
 import { TagPills } from "@/components/TagPills"
 import { deletePost, updatePost } from "@/lib/managePost"
 import { putBlob } from "@/lib/putBlob"
@@ -95,14 +97,18 @@ export function PostOwnerActions({ post }: { post: EditablePost }) {
 
   return (
     <>
-      <div className="flex flex-wrap gap-2">
-        <button type="button" className={btn} onClick={() => { setError(null); setEditing(true) }}>
-          Edit
-        </button>
-        <button type="button" className={btn} onClick={() => { setError(null); setConfirming(true) }}>
-          Delete
-        </button>
-      </div>
+      <button type="button" className={btn} onClick={() => { setError(null); setEditing(true) }}>
+        <EditIcon />
+        Edit
+      </button>
+      <button
+        type="button"
+        className={cn(btn, "hover:border-danger-fg hover:text-danger-fg")}
+        onClick={() => { setError(null); setConfirming(true) }}
+      >
+        <TrashIcon />
+        Delete
+      </button>
       {editing ? (
         <Dialog title="Edit this post" subtitle="The link stays the same." onClose={() => setEditing(false)} wide>
           <form className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => void onEdit(event)}>
@@ -159,15 +165,7 @@ export function PostOwnerActions({ post }: { post: EditablePost }) {
                 Replace blend <span className="font-normal text-subtle">(optional)</span>
                 <input className="text-[13px] font-normal text-muted" name="blend" type="file" accept=".blend" />
               </label>
-              <label className={label}>
-                Replace graph <span className="font-normal text-subtle">(optional)</span>
-                <textarea
-                  className={cn(field, "min-h-28 resize-y font-mono text-[12px] leading-relaxed")}
-                  name="tree_text"
-                  spellCheck={false}
-                  placeholder="Paste a noodlebin.tree payload. Leave this empty to keep the current graph."
-                />
-              </label>
+              <ReplaceGraphField />
               {error ? <p role="alert" className={cn(errorBox, "m-0")}>{error}</p> : null}
             </div>
             <div className="flex justify-end gap-2 border-t border-line px-5 py-4">

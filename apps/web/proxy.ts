@@ -20,7 +20,7 @@ export function proxy(request: NextRequest) {
     requestHeaders.set("x-noodlebin-embed", "1")
     return NextResponse.next({ request: { headers: requestHeaders } })
   }
-  // Cookie presence only. /account still validates the session before rendering.
+  // Cookie presence only. /account validates the session, then redirects to the profile.
   if (request.nextUrl.pathname === "/account" && !getSessionCookie(request)) {
     return NextResponse.redirect(new URL("/sign-in", request.url))
   }

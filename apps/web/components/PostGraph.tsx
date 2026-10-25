@@ -154,8 +154,10 @@ export function PostGraph({
               Download {post.blend_filename ?? "graph.blend"}
             </a>
           ) : null}
-          <SharePost slug={post.slug} />
-          {canManage ? <PostOwnerActions post={post} /> : null}
+          <div className="flex gap-2 [&>button]:flex-1">
+            <SharePost slug={post.slug} />
+            {canManage ? <PostOwnerActions post={post} /> : null}
+          </div>
         </div>
 
         <a
