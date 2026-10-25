@@ -9,7 +9,7 @@ blender_version_min = "5.0.0"
 license = ["SPDX:GPL-3.0-or-later"]
 website = "https://www.noodlebin.art"
 copyright = ["2026 AksAman"]
-tags = ["Node"]
+tags = ["Node", "User Interface", "Import-Export"]
 
 [permissions]
 clipboard = "Copy and paste node trees as text"
