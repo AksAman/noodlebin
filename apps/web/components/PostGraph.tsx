@@ -79,7 +79,7 @@ export function PostGraph({
           <ShaderCover
             source={post.cover_shader}
             poster={post.cover_url}
-            className={cn("rounded-lg ring-1 ring-line", post.cover_url ? "max-h-56 md:max-h-72" : "aspect-[4/3]")}
+            className="aspect-video max-h-72 shrink-0 rounded-lg ring-1 ring-line"
           />
         ) : post.cover_url ? (
           <CoverMedia url={post.cover_url} className="block max-h-56 w-full rounded-lg object-cover ring-1 ring-line md:max-h-72" />

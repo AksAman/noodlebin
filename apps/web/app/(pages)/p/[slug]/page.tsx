@@ -80,7 +80,7 @@ export default async function PostRoute({ params }: { params: Promise<{ slug: st
               <ShaderCover
                 source={post.cover_shader}
                 poster={post.cover_url}
-                className={cn("rounded-lg ring-1 ring-line", !post.cover_url && "aspect-[4/3]")}
+                className="aspect-video shrink-0 rounded-lg ring-1 ring-line"
               />
             ) : post.cover_url ? (
               <CoverMedia url={post.cover_url} className="block w-full rounded-lg ring-1 ring-line" />

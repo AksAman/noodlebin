@@ -25,7 +25,7 @@ export function CoverGrid({ posts, showAuthor = true }: { posts: NoodleBinPost[]
                 {post.cover_video && post.cover_url ? (
                   <CoverMedia url={post.cover_url} video className="block aspect-video w-full object-cover" />
                 ) : post.cover_shader ? (
-                  <ShaderCover source={post.cover_shader} poster={post.cover_url} className={post.cover_url ? undefined : "aspect-[4/3]"} />
+                  <ShaderCover source={post.cover_shader} poster={post.cover_url} className="aspect-video" />
                 ) : post.cover_url ? (
                   <CoverMedia url={post.cover_url} className="block h-auto w-full" />
                 ) : post.tree ? (

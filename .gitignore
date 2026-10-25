@@ -316,3 +316,4 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+listing-media/*
