@@ -4,6 +4,7 @@ Owned by docs/pid/01-copy-from-blender.md. Uses ``bpy``. Call from the
 Copy operator or from ``blender --background --python`` tests. Canonical
 JSON emission stays in serialize.py (no bpy).
 """
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
 

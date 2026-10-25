@@ -1,4 +1,5 @@
 """Copy operator. Capture algorithm is capture.py; this is the bpy operator."""
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
 

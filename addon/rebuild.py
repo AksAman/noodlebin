@@ -2,6 +2,7 @@
 
 Owned by docs/pid/04-paste-in-blender.md. Uses bpy. The operator is paste_nodes.py.
 """
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
 
