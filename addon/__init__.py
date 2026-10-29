@@ -1,42 +1,42 @@
-"""NoodleBin Blender extension. Register is the only bpy import at load time.
+"""noodlebin Blender extension.
 
 Plain python3 tests import serialize/deserialize as submodules without calling
 register(), so they do not need bpy.
-
-Disable/enable (or the N-panel Reload) re-executes submodules. A symlink
-alone does not, because Python keeps the old module objects in sys.modules.
 """
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
 
-addon_keymaps = []
+# ---------------------------------------------------------------------------
+# Reload support — must live at module level so Blender's "Reload Scripts"
+# picks it up.  On first load "bpy" is not yet in this module's namespace;
+# on a subsequent reload it is, so we re-import each submodule.
+# See: https://developer.blender.org/docs/handbook/extensions/addon_dev_setup/#reloading-scripts
+# ---------------------------------------------------------------------------
+if "bpy" in locals():
+    from importlib import reload as _reload
+    _reload(serialize)    # noqa: F821
+    _reload(deserialize)  # noqa: F821
+    _reload(capture)      # noqa: F821
+    _reload(rebuild)      # noqa: F821
+    _reload(copy_nodes)   # noqa: F821
+    _reload(paste_nodes)  # noqa: F821
+    _reload(panel)        # noqa: F821
+    del _reload
 
-_SUBMODULES = (
-    "serialize",
-    "deserialize",
-    "capture",
-    "rebuild",
-    "copy_nodes",
-    "paste_nodes",
-    "panel",
-)
+# Guard lets the plain-Python unit tests import submodules without Blender.
+try:
+    import bpy  # noqa: E402
+    from . import serialize, deserialize, capture, rebuild, copy_nodes, paste_nodes, panel  # noqa: E402, F401
+except ImportError:
+    bpy = None  # type: ignore[assignment]
+
+addon_keymaps: list = []
 
 
-def reload_modules():
-    import importlib
-
-    for name in _SUBMODULES:
-        mod = importlib.import_module(f".{name}", __package__)
-        importlib.reload(mod)
-
-
-def register():
-    import bpy
-
-    reload_modules()
-    from . import copy_nodes, panel, paste_nodes
-
+def register() -> None:
+    if bpy is None:
+        return
     for cls in (*copy_nodes.classes, *paste_nodes.classes, *panel.classes):
         bpy.utils.register_class(cls)
     bpy.types.NODE_HT_header.append(panel.draw_header_menu)
@@ -63,11 +63,9 @@ def register():
             addon_keymaps.append((km, kmi))
 
 
-def unregister():
-    import bpy
-
-    from . import copy_nodes, panel, paste_nodes
-
+def unregister() -> None:
+    if bpy is None:
+        return
     for km, kmi in addon_keymaps:
         try:
             km.keymap_items.remove(kmi)

@@ -6,7 +6,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import bpy
-from bpy.types import Menu, Operator, Panel
+from bpy.types import Menu, Panel
 
 from .capture import load_affects_map
 from .rebuild import last_skips
@@ -54,27 +54,6 @@ def draw_header_menu(self, context):
     self.layout.menu("NOODLEBIN_MT_menu")
 
 
-def _reload_after_operator():
-    import importlib
-
-    root = importlib.import_module(__package__)
-    root.unregister()
-    root.register()
-    return None
-
-
-class NOODLEBIN_OT_reload(Operator):
-    bl_idname = "noodlebin.reload"
-    bl_label = "Reload Add-on"
-    bl_description = "Re-read noodlebin Python from disk"
-    bl_options = {"INTERNAL"}
-
-    def execute(self, context):
-        # Unregistering this operator while execute() is running crashes Blender.
-        bpy.app.timers.register(_reload_after_operator, first_interval=0.01)
-        return {"FINISHED"}
-
-
 class NOODLEBIN_PT_panel(Panel):
     bl_label = "noodlebin"
     bl_idname = "NOODLEBIN_PT_panel"
@@ -94,7 +73,6 @@ class NOODLEBIN_PT_panel(Panel):
         layout.operator("noodlebin.paste_nodes")
         layout.operator("noodlebin.paste_replace_nodes")
         layout.operator("noodlebin.save_nodes")
-        layout.operator("noodlebin.reload")
 
         if last_skips:
             box = layout.box()
@@ -112,4 +90,4 @@ class NOODLEBIN_PT_panel(Panel):
             )
 
 
-classes = (NOODLEBIN_MT_menu, NOODLEBIN_OT_reload, NOODLEBIN_PT_panel)
+classes = (NOODLEBIN_MT_menu, NOODLEBIN_PT_panel)
