@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "noodlebin"
-version = "0.1.0"
+version = "0.1.1"
 name = "noodlebin"
 tagline = "Copy nodes to the browser and paste them back"
 maintainer = "AksAman"
