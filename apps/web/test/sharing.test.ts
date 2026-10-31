@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { GET as getPost, PATCH } from "@/app/api/posts/[slug]/route";
@@ -19,6 +19,7 @@ import {
   createStoredPost,
   deleteOwnedPost,
   getPublicPost,
+  readMediaFile,
   updateOwnedPost,
 } from "@/lib/store";
 
@@ -642,5 +643,22 @@ describe("owned posts", () => {
     tempDir();
     const fixture = await deleteOwnedPost("homepage-background", "user-1");
     expect(isSharingError(fixture) && fixture.status).toBe(403);
+  });
+});
+
+describe("cover media type", () => {
+  test("PNG bytes stored under a .jpg name are served as PNG", async () => {
+    const dir = tempDir();
+    const created = await makeOwned("user-1");
+    const postsPath = join(dir, "posts.json");
+    const data = JSON.parse(readFileSync(postsPath, "utf8")) as { posts: { cover_file: string }[] };
+    const entry = data.posts[0]!;
+    const renamed = entry.cover_file.replace(/\.png$/, ".jpg");
+    expect(renamed).not.toBe(entry.cover_file);
+    renameSync(join(dir, entry.cover_file), join(dir, renamed));
+    entry.cover_file = renamed;
+    writeFileSync(postsPath, JSON.stringify(data));
+    const cover = await readMediaFile(created.post.slug, "cover", dir);
+    expect(cover?.type).toBe("image/png");
   });
 });

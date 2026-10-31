@@ -15,7 +15,7 @@ import {
 } from "@/lib/db";
 import { AZURE_STORED_PREFIX } from "@/lib/blobUpload";
 import { isSafeSlug, mediaUrl, readMediaBytes, writeMedia } from "@/lib/media";
-import { isMp4Name } from "@/lib/sniff";
+import { isMp4Name, sniffCover } from "@/lib/sniff";
 import { buildSearchText } from "@/lib/search";
 import {
   filterPosts,
@@ -586,7 +586,7 @@ export async function readMediaFile(
   if (!bytes) return null;
   if (kind === "cover") {
     const ext = rel.split(".").pop()?.split("?")[0];
-    const type =
+    const byExt =
       ext === "jpg" || ext === "jpeg"
         ? "image/jpeg"
         : ext === "webp"
@@ -594,6 +594,9 @@ export async function readMediaFile(
           : ext === "gif"
             ? "image/gif"
             : "image/png";
+    // Uploads can be named .jpg while holding PNG bytes. Trust the bytes over the name.
+    const sniffed = sniffCover(bytes)?.type;
+    const type = sniffed?.startsWith("image/") ? sniffed : byExt;
     return {
       bytes,
       type,
