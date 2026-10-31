@@ -8,6 +8,7 @@ import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand"
 import { pasteBootScript } from "@/lib/pasteSession"
 import { themeBootScript } from "@/lib/theme"
 import { Funnel_Display, Funnel_Sans, Geist_Mono } from "next/font/google"
+import type { Metadata } from "next"
 import type { ReactNode } from "react"
 import { headers } from "next/headers"
 import "./globals.css"
@@ -18,10 +19,24 @@ const display = Funnel_Display({ subsets: ["latin"], variable: "--font-funnel-di
 const sans = Funnel_Sans({ subsets: ["latin"], variable: "--font-funnel-sans", display: "swap" })
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" })
 
-export const metadata = {
+const SITE_TITLE = `${BRAND_NAME} · Share Blender node trees as links`
+const SITE_DESCRIPTION = `${BRAND_TAGLINE}. Share Shader, Geometry Nodes, and Compositor node trees as links.`
+
+export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin()),
-  title: BRAND_NAME,
-  description: BRAND_TAGLINE,
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: BRAND_NAME,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
