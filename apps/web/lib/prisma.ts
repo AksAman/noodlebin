@@ -1,6 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg"
 import { PrismaClient } from "@/generated/prisma/client"
 import { env } from "@/env"
+import { normalizeDatabaseUrl } from "@/lib/dbUrl"
 import { schemaStatements } from "@/lib/schemaSql"
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient; schema?: Promise<void> }
@@ -10,7 +11,7 @@ export function getPrisma(): PrismaClient {
   if (!url) throw new Error("DATABASE_URL is not set.")
   if (!globalForPrisma.prisma) {
     globalForPrisma.prisma = new PrismaClient({
-      adapter: new PrismaPg({ connectionString: url }),
+      adapter: new PrismaPg({ connectionString: normalizeDatabaseUrl(url) }),
     })
   }
   return globalForPrisma.prisma
