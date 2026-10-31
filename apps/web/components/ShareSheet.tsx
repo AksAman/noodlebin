@@ -21,6 +21,7 @@ import { clearPasteSession } from "@/lib/pasteSession";
 import { clearShareDraft, writeShareDraft, type ShareDraft } from "@/lib/shareDraft";
 import { putBlob } from "@/lib/putBlob";
 import { addTag, tagToken } from "@/lib/tags";
+import { useTagSuggestions } from "@/lib/useTagSuggestions";
 import { fitCoverFile } from "@/lib/shrinkCover";
 import {
   btnAccent,
@@ -260,6 +261,7 @@ export function ShareSheet({
   const mod = useModKey();
   const { data: session } = useServerSession();
   const handle = session?.user.handle;
+  const tagSuggestions = useTagSuggestions();
 
   useEffect(() => {
     if (signInOpen) return;
@@ -706,9 +708,9 @@ export function ShareSheet({
               Tags <span className="font-normal text-subtle">(optional)</span>
             </span>
             <input type="hidden" name="tags" value={tags.join(",")} />
-            <TagPills tags={tags} onChange={setTags} />
+            <TagPills tags={tags} onChange={setTags} suggestions={tagSuggestions} />
             <span className="text-[12px] font-normal text-subtle">
-              Press Enter to add a tag.
+              Press Enter to add a tag. Existing tags are suggested as you type.
             </span>
           </div>
           <label className={label}>

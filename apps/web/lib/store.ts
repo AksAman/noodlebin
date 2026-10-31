@@ -9,6 +9,7 @@ import {
   pgInsert,
   pgList,
   pgSlugs,
+  pgTagCounts,
   pgUpdate,
   usesPostgres,
 } from "@/lib/db";
@@ -183,6 +184,45 @@ export function invalidatePostLists(): void {
       err.message.includes("static generation store missing")
     )
       return;
+    throw err;
+  }
+}
+
+async function loadTagCounts(dir: string): Promise<string[]> {
+  if (usesPostgres()) {
+    const rows = await pgTagCounts();
+    return rows.map((r) => r.tag);
+  }
+  // Disk dev store: count in memory.
+  const posts = await readDisk(dir);
+  const counts = new Map<string, number>();
+  for (const post of posts) {
+    if (post.visibility === "unlisted") continue;
+    for (const tag of post.tags ?? []) {
+      counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    }
+  }
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([tag]) => tag);
+}
+
+const cachedTagCounts = unstable_cache(loadTagCounts, ["tag-counts"], {
+  tags: [POSTS_TAG],
+  revalidate: env.NOODLEBIN_POSTS_CACHE_TTL_SECONDS,
+});
+
+export async function listTagCounts(dir = dataDir()): Promise<string[]> {
+  try {
+    return await cachedTagCounts(dir);
+  } catch (err) {
+    // Bun tests run outside a Next.js server — fall back to uncached.
+    if (
+      err instanceof Error &&
+      err.message.startsWith("Invariant: incrementalCache missing")
+    ) {
+      return loadTagCounts(dir);
+    }
     throw err;
   }
 }

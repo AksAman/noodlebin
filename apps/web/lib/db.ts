@@ -113,3 +113,16 @@ export async function pgDelete(slug: string): Promise<void> {
   const prisma = await ensureSchema()
   await prisma.post.delete({ where: { slug } })
 }
+
+export async function pgTagCounts(limit = 200): Promise<{ tag: string; count: number }[]> {
+  const prisma = await ensureSchema()
+  const rows = await prisma.$queryRaw<{ tag: string; count: number }[]>`
+    SELECT tag, count(*)::int AS count
+    FROM posts, unnest(tags) AS tag
+    WHERE visibility = 'public'
+    GROUP BY tag
+    ORDER BY count DESC, tag
+    LIMIT ${limit}
+  `
+  return rows
+}

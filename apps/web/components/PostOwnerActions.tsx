@@ -8,6 +8,7 @@ import { TagPills } from "@/components/TagPills"
 import { deletePost, updatePost } from "@/lib/managePost"
 import { putBlob } from "@/lib/putBlob"
 import type { Visibility } from "@/lib/posts"
+import { useTagSuggestions } from "@/lib/useTagSuggestions"
 import { btn, btnAccent, cn, errorBox, field } from "@/lib/ui"
 import { useRouter } from "next/navigation"
 import { useState, type FormEvent } from "react"
@@ -48,6 +49,7 @@ export function PostOwnerActions({ post }: { post: EditablePost }) {
   const [error, setError] = useState<string | null>(null)
   const [tags, setTags] = useState(post.tags)
   const [visibility, setVisibility] = useState<Visibility>(post.visibility)
+  const tagSuggestions = useTagSuggestions()
 
   async function onEdit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -127,7 +129,7 @@ export function PostOwnerActions({ post }: { post: EditablePost }) {
                 <span>
                   Tags <span className="font-normal text-subtle">(optional)</span>
                 </span>
-                <TagPills tags={tags} onChange={setTags} />
+                <TagPills tags={tags} onChange={setTags} suggestions={tagSuggestions} />
               </div>
               <label className={label}>
                 Visibility
