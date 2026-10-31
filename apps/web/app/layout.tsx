@@ -1,26 +1,39 @@
-import { BootScript } from "@/components/BootScript"
-import { SessionProvider } from "@/components/SessionProvider"
-import { SiteFooter } from "@/components/SiteFooter"
-import { SiteNav } from "@/components/SiteNav"
-import { getRequestSession } from "@/lib/auth"
-import { siteOrigin } from "@/lib/site"
-import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand"
-import { pasteBootScript } from "@/lib/pasteSession"
-import { themeBootScript } from "@/lib/theme"
-import { Funnel_Display, Funnel_Sans, Geist_Mono } from "next/font/google"
-import type { Metadata } from "next"
-import type { ReactNode } from "react"
-import { headers } from "next/headers"
-import "./globals.css"
-import "@xyflow/react/dist/style.css"
-import "@/node-view/styles.css"
+import { BootScript } from "@/components/BootScript";
+import { SessionProvider } from "@/components/SessionProvider";
+import { SiteFooter } from "@/components/SiteFooter";
+import { SiteNav } from "@/components/SiteNav";
+import { getRequestSession } from "@/lib/auth";
+import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
+import { pasteBootScript } from "@/lib/pasteSession";
+import { siteOrigin } from "@/lib/site";
+import { themeBootScript } from "@/lib/theme";
+import "@/node-view/styles.css";
+import { Analytics } from "@vercel/analytics/next";
+import "@xyflow/react/dist/style.css";
+import type { Metadata } from "next";
+import { Funnel_Display, Funnel_Sans, Geist_Mono } from "next/font/google";
+import { headers } from "next/headers";
+import type { ReactNode } from "react";
+import "./globals.css";
 
-const display = Funnel_Display({ subsets: ["latin"], variable: "--font-funnel-display", display: "swap" })
-const sans = Funnel_Sans({ subsets: ["latin"], variable: "--font-funnel-sans", display: "swap" })
-const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" })
+const display = Funnel_Display({
+  subsets: ["latin"],
+  variable: "--font-funnel-display",
+  display: "swap",
+});
+const sans = Funnel_Sans({
+  subsets: ["latin"],
+  variable: "--font-funnel-sans",
+  display: "swap",
+});
+const mono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
+  display: "swap",
+});
 
-const SITE_TITLE = `${BRAND_NAME} · Share Blender node trees as links`
-const SITE_DESCRIPTION = `${BRAND_TAGLINE}. Share Shader, Geometry Nodes, and Compositor node trees as links.`
+const SITE_TITLE = `${BRAND_NAME} · Share Blender node trees as links`;
+const SITE_DESCRIPTION = `${BRAND_TAGLINE}. Share Shader, Geometry Nodes, and Compositor node trees as links.`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin()),
@@ -37,14 +50,22 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
   },
-}
+};
 
-export default async function RootLayout({ children }: { children: ReactNode }) {
-  const headerList = await headers()
-  const embed = headerList.get("x-noodlebin-embed") === "1"
-  const session = embed ? null : await getRequestSession()
+export default async function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const headerList = await headers();
+  const embed = headerList.get("x-noodlebin-embed") === "1";
+  const session = embed ? null : await getRequestSession();
   return (
-    <html lang="en" className={`h-full ${display.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`h-full ${display.variable} ${sans.variable} ${mono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <BootScript html={themeBootScript} />
         <BootScript html={pasteBootScript} />
@@ -55,7 +76,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           {children}
           {embed ? null : <SiteFooter />}
         </SessionProvider>
+        <Analytics />
       </body>
     </html>
-  )
+  );
 }
