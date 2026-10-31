@@ -4,11 +4,13 @@ import { dataDir, getPublicPost, readMediaFile } from "@/lib/store"
 import { ImageResponse } from "next/og"
 
 export const runtime = "nodejs"
-export const alt = BRAND_NAME
-export const size = { width: 1200, height: 630 }
-export const contentType = "image/png"
+export const dynamic = "force-dynamic"
 
-export default async function OpengraphImage({ params }: { params: Promise<{ slug: string }> }) {
+const size = { width: 1200, height: 630 }
+
+// An explicit route handler, not the opengraph-image file convention: that convention serves
+// dynamic segments at a hashed URL, but card_url and the page metadata use this plain path.
+export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const post = await getPublicPost(slug, dataDir())
   if (!post) {
