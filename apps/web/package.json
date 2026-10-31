@@ -22,6 +22,7 @@
     "@tailwindcss/postcss": "^4.3.3",
     "@uiw/react-markdown-preview": "^5.2.1",
     "@uiw/react-md-editor": "^4.1.2",
+    "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.8.2",
     "@xyflow/react": "^12.8.2",
     "better-auth": "^1.7.10",
